@@ -1,0 +1,91 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 02: marginal scholia. Isolates sidenotes, catchword, folio.
+% Geometry gives a broad outer margin; marginpar holds the gloss.
+\documentclass[11pt,twoside]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+
+\definecolor{parchment}{HTML}{F4EBDD}
+\definecolor{ink}{HTML}{231F1A}
+\definecolor{glossink}{HTML}{5A4A3A}
+\pagecolor{parchment}
+\color{ink}
+\geometry{
+  a4paper,
+  top=28mm, bottom=32mm,
+  inner=25mm, outer=52mm,
+  marginparwidth=34mm, marginparsep=6mm
+}
+\setlength{\parindent}{1.1em}
+\setlength{\parskip}{0pt}
+\pagestyle{plain}
+
+% A gloss in the margin: small, ragged, in a quieter ink.
+\newcommand{\gloss}[1]{\marginpar{\footnotesize\raggedright\color{glossink}#1}}
+
+% Catchword: first word of the next page, set alone at the foot.
+\newcommand{\catchword}[1]{%
+  \vfill
+  \begin{flushright}
+    {\small\textit{#1}}\par
+    {\scriptsize\textls[80]{\textsc{catchword}}}
+  \end{flushright}
+}
+
+\begin{document}
+
+\begin{center}
+  {\Large\textls[70]{\textsc{Of Pendulums}}}\par
+  \vspace{0.3em}
+  {\small\textit{with the gloss of a later reader}}
+\end{center}
+
+\vspace{1em}
+
+A heavy ball hung by a thread, and drawn aside from the vertical,
+returns and passes beyond it.\gloss{The isochrony holds only for small
+arcs; at wide excursions the period lengthens.} For small excursions the
+time of one swing depends upon the length alone, and not upon the weight
+nor the width of the arc.
+
+The length is reckoned from the point of suspension to the centre of the
+ball.\gloss{Measure to the centre, not to the top of the ball; the thread
+itself is taken as without weight.} A change of a finger's breadth in a
+line of three feet sensibly alters the going of a clock.
+
+Whence the pendulum serves to divide the day into equal parts, and to
+try the figure of the earth.\gloss{Huygens, \textit{Horologium}, 1673;
+Richter's Cayenne retardation, 1672.} What is here set down of one ball
+holds of every ball, provided the thread be fine and the arc narrow.
+
+\catchword{Of falling}
+
+\vfill
+\begin{center}
+  {\footnotesize\textit{--- 7 ---}}
+\end{center}
+
+\end{document}

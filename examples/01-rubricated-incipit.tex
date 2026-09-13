@@ -1,0 +1,90 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 01: two-colour rubrication. One mechanism per control:
+% red initial, red pilcrows, red running head. Remove any one to judge it.
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{lettrine}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+% EB Garamond when available (e.g. TeX Live full), else TeX Gyre Pagella,
+% which ships with minimal TeX Live installs incl. this lab machine.
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+
+\definecolor{parchment}{HTML}{F5EDDC}
+\definecolor{ink}{HTML}{241F19}
+\definecolor{rubric}{HTML}{9E2B25}
+\pagecolor{parchment}
+\color{ink}
+\geometry{a5paper,top=20mm,bottom=22mm,left=22mm,right=22mm}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0pt}
+
+% Red pilcrow as a section marker inside running prose.
+\newcommand{\rubricp}{\textcolor{rubric}{\P}\ }
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small\textls[90]{\textcolor{rubric}{\textsc{Of the Loadstone}}}}
+\fancyfoot[C]{\small\textit{1}}
+\renewcommand{\headrulewidth}{0.35pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\begin{document}
+
+\begin{center}
+  {\small\textls[130]{\textsc{A Short Treatise}}}\par
+  \vspace{0.3em}
+  {\Large\textit{Of the Loadstone}}\par
+  \vspace{0.3em}
+  {\footnotesize\textcolor{rubric}{Rubricated after the manner of the early presses}}
+\end{center}
+
+\vspace{0.8em}
+
+% lettrine supplies the dropped initial; colour is the only rubrication here.
+\lettrine[lines=3,loversize=0.08,findent=0.35em,nindent=0em]
+  {\textcolor{rubric}{W}}{hen} the stone is hung by a thread and left to
+settle, it turns its one end toward the north. This virtue is not spent by
+use, for after a hundred trials the direction is the same as at the first.
+
+\rubricp The trial is best made in a closed room, the air being still, the
+iron being kept at a distance. Note the bearing before any cause is
+assigned; conjecture follows observation, not the reverse.
+
+\rubricp A second stone, floated upon a chip of wood in still water, obeys
+the same rule. The agreement of the thread and the water is the whole of
+the proof that the effect lies in the stone and not in the suspension.
+
+\vspace{1em}
+\begin{center}
+  \textcolor{rubric}{\rule{0.3\linewidth}{0.45pt}}
+\end{center}
+
+\footnotesize\noindent
+Three controls only: a red three-line initial via \texttt{lettrine}, red
+pilcrows marking breaths in the argument, and a red running head with a
+hair rule. Body ink, paper, and measure are unchanged from a plain page.
+
+\end{document}
