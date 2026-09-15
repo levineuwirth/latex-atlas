@@ -210,15 +210,44 @@ it needs beyond the TeX distribution it writes itself, as 08 writes its
 
 <!-- lab:end -->
 
+## The style
+
+`sty/atlas.sty` is the graduation: the treatments plates 04, 07 and 08
+share, plus what a whole document needs and a single plate never shows
+(a title leaf printed once, running heads, folios). It dresses an
+existing `article` or `amsart` manuscript without editing its body: load
+it last in the preamble and name the manuscript's theorem environments
+to the apparatus —
+
+```latex
+\usepackage{atlas}                      % or [plain] for white paper
+\AtlasProposition{theorem}{Theorem}[theorem]
+\AtlasProposition{lemma}{Lemma}[theorem]
+\AtlasDefinition{definition}{Definition}[theorem]
+\AtlasScholium{remark}{Remark}[theorem]
+```
+
+— then `TEXINPUTS=path/to/latex-atlas/sty: lualatex` twice. The bracket
+names the counter the environment steps. A manuscript's `[T1]{fontenc}`
+and `amssymb` lines come out (unicode-math has the symbols). The header
+of the file says what it sets; `HANDOFF.md` records what dressing the
+first real preprint taught it.
+
+`bound/treatise.tex` gathers 07, 04 and 08 into one PDF with pdfpages,
+as printed: the proof that made the seams visible and the style
+necessary.
+
 ## Toward website preprints
 
-Kept as a standalone lab for now. When a treatment proves itself here,
-it graduates to a shared `.sty` for preprints exported to
-`levineuwirth.org` (sources live in `~/Repos/research/meyniel`, export
-via `make export`). What the lab suggests so far: the gloss, the
-apparatus of 04, the front matter of 07, the reference list of 08, and
-the monochrome discipline of 03 and 05 are candidates; the frame, the lettering, 07's fleurons and
-imprint, and everything in 06 are costume, and stay here. No vault (`~/universum`) material enters this repo.
+The style above is the path. When a treatment proves itself in the lab,
+it moves into `sty/atlas.sty`; preprints for `levineuwirth.org` (sources
+in `~/Repos/research/meyniel`, export via `make export`) are dressed by
+loading it, on a copy, with their bodies untouched. What the lab has
+graduated so far: the gloss's page geometry, the apparatus of 04, the
+front matter of 07, the head and measure of 08, the monochrome discipline
+of 03 and 05. The frame, the lettering, 07's fleurons and imprint, and
+everything in 06 are costume, and stay here. No vault (`~/universum`)
+material enters this repo, and no manuscript text does either.
 
 ## License
 

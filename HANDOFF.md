@@ -10,14 +10,19 @@ do next.
 
 ## Where it stands
 
-`main` at `520b085` (plate 08) or the handoff commit after it, remote
-`ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`, not
-pushed this session. Tree clean. Eight plates, 59 PDFs from
-`./build.sh --ablate` in ~2 min sequential or **16 s with `-j`** on the
-16-core machine; every preview byte-reproducible from a clean build
-(verified 2026-09-15 after 08:
-`rm -rf build && ./build.sh -j --ablate && ./preview.sh && ./gallery.sh`
-left all 59 PNGs identical and the tree clean).
+`main` at the commit that adds `sty/atlas.sty` v0 and `bound/treatise.tex`
+(after `70307c3`, the 08 review fixes), remote
+`ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
+clean. Eight plates, 59 PDFs from `./build.sh --ablate` in ~2 min
+sequential or **16 s with `-j`**; every preview byte-reproducible from a
+clean build (last verified 2026-09-16 by the reviewing session).
+
+**The graduation has begun.** `sty/atlas.sty` v0 dressed a real
+manuscript — `~/Repos/research/meyniel/paper/branch-capture-paper.tex`,
+`amsart`, 12 pages — with nine lines injected into its preamble and its
+body untouched; the result is in `build/branch-capture-dressed.pdf`
+(gitignored: no manuscript text enters this repo). See "The style" below
+for the recipe and what the manuscript found.
 
 | plate | register | controls |
 |---|---|---|
@@ -372,31 +377,135 @@ discovered by grep exactly as controls are:
   spec's `[overwrite]` alone: `nowarn` only silences "file exists,
   overwriting" on the second and third pass.
 
+## The bound proof
+
+`bound/treatise.tex` gathers 07, 04 and 08 as printed (pdfpages; build
+the plates first, then `lualatex -output-directory=build bound/treatise.tex`).
+Turned on 2026-09-16, it showed that the *design* coheres without a
+shared file — one stock, one text block, one voice for every head,
+matched faces — and that every seam is an artefact of the plates standing
+alone: the title set three times (04 and 08 restate it), no folios, no
+running heads, the lab stamp on every page, and the numbering fork (04's
+Problem is Prop. III, the Table's and 08's is Prop. VI). That list is
+exactly what a shared style produces once, which is why the graduation
+moved to the front of the queue. The fleuron band appears on 07 only; a
+book would want the tailpiece on 08 too.
+
+## The style: `sty/atlas.sty` v0
+
+Lifted from the common preamble of 04/07/08, plus what the bound proof
+said was missing. Load it **last** in the preamble, after the manuscript's
+`\newtheorem`s and after hyperref; then name the manuscript's theorem
+environments to the apparatus. Options: `plain` (white/black, for arXiv
+and print — tested), `rareligatures` (default off, per 07).
+
+What it sets: EB Garamond + Garamond-Math (Pagella pair fallback),
+old-style figures, the 04/07/08 stock and ink, their A4 geometry, spaced
+small-capital section heads (subsections display-style, italic), a title
+leaf after 07 (title in spaced capitals, "by", address, date, double rule,
+then *The Argument* in place of the abstract — boxed as `amsart` boxes the
+abstract, so the source order abstract-before-`\maketitle` is kept), the
+apparatus of 04 (centred head, attribution beneath, italic statement,
+*Demonstration*, Q.E.D.), run-in definitions and remarks, a running head
+under a hair rule, a centred folio, and 08's *The Authorities* head and
+small type for whatever list the manuscript sets. Not in v0: 08's
+biblatex `.bbx`/`.cbx` (this manuscript hand-sets its bibliography, so
+only the head and size are dressed), rubrication, the lab controls.
+
+**The recipe** (what was done to `branch-capture-paper.tex`, on a copy in
+scratch — never in the research repo):
+
+```sh
+cp ~/Repos/research/meyniel/paper/branch-capture-paper.tex work.tex
+# 1. remove \usepackage[T1]{fontenc}
+# 2. amsmath,amssymb,amsthm -> amsmath,amsthm   (unicode-math has the symbols)
+# 3. before \begin{document}:
+#    \usepackage{atlas}
+#    \AtlasProposition{theorem}{Theorem}[theorem]
+#    \AtlasProposition{lemma}{Lemma}[theorem]
+#    \AtlasProposition{proposition}{Proposition}[theorem]
+#    \AtlasProposition{corollary}{Corollary}[theorem]
+#    \AtlasProposition{question}{Question}[theorem]
+#    \AtlasDefinition{definition}{Definition}[theorem]
+#    \AtlasScholium{remark}{Remark}[theorem]
+#    \AtlasScholium{remark*}{Remark}
+TEXINPUTS=~/Repos/personal/latex-atlas/sty: lualatex work.tex   # twice
+```
+
+The bracket is the counter the environment steps (the shared one for
+`[theorem]`-style sharing); without it the environment is unnumbered.
+Output: 13 pages A4 against the original's 12 letter, zero warnings,
+every number and cross-reference identical to the `amsart` build.
+
+**What the manuscript found that eight plates could not.** Each is fixed
+in v0 and each is a gotcha for anything built on the same pieces:
+
+- `\refstepcounter` inside `\centerline` (or `\textls`) sets
+  `\@currentlabel` locally; the counter advances but `\label` records the
+  enclosing section. "Lemmas 2 and 2 give" was the tell. Step the counter
+  before the head, outside every box and group. The plates never
+  `\label`ed anything.
+- A run-in subsection directly before a theorem is deferred by
+  `\everypar` into the statement's first line. Subsections are
+  display-style for that reason.
+- `\lsstyle` in a `\@startsection` style argument swallows `amsart`'s
+  `\enspace` after the section number, and is redundant: `tracking=true`
+  already letterspaces the `sc` shape at the `\SetTracking` amount.
+- A manuscript's hand-placed `\\` in `\title` was set for its own class;
+  in spaced capitals the title is let to flow. `center` redefines `\\`, so
+  the neutralising `\def` must sit inside it, at the title.
+- `\label` on the line after `\begin{theorem}` leaves a stray space
+  unless the head ends in vertical mode with `\@afterindentfalse
+  \@afterheading`, as a section head does; `\noindent\ignorespaces` is not
+  enough because `\@esphack` re-arms `\ignorespaces` only after glue.
+- `amsart` repeats the addresses after the references
+  (`\@setaddresses`); the title leaf has already given them.
+- **Captions are content.** Renaming *Remark* to *Scholium* in the dress
+  broke line 552, which says "Remark~\ref{...}". A style takes the
+  manuscript's captions as given; the period word is the author's
+  decision in the source. 04 may say Scholium because 04 is the source.
+
+**To judge, not yet judged:** the reading experience — 13 pages of 11 pt
+EB Garamond on parchment is a denser, quieter page than `amsart`'s.
+Whether that is right for a preprint is the author's call. The `plain`
+edition exists for the other answer.
+
 ## Outstanding, in rough order
 
-Ideas raised and agreed worth trying. Items 0 and 1 of the previous list
-(build.sh, the bibliography) are done; the rest are lab material until
-the graduation.
+The graduation is the main line now; the lab continues beside it in
+both registers.
 
-1. **Colophon and errata slip** — fonts/engine/date/git hash (needs
-   `--shell-escape` or a build-time `\def`; decide which), and an errata
-   slip as revision notes. Rhymes with the site's colophon page and with
-   07's imprint; keep the two distinct (imprint = title leaf, colophon =
+1. **Read the dressed preprint** (`build/branch-capture-dressed.pdf`,
+   rebuild with the recipe) and decide the register questions the style
+   cannot: page density, parchment vs `plain` for the website, whether
+   Remark stays Remark in the sources.
+2. **A second manuscript.** The other three in `~/Repos/research/meyniel/
+   paper/` are longer (1500–2600 lines) and may carry figures, tables and
+   `align` blocks the first did not; each will find something v0 missed,
+   as the first found seven things. Same recipe, same rule: a copy in
+   scratch, nothing in the research repo, nothing of theirs committed here.
+3. **08's biblatex style into the `.sty`** as `atlas.bbx`/`atlas.cbx`
+   with the dress moved in from 08's preamble — the first manuscript
+   whose bibliography is a `.bib` will want it. Then `\cite` in a dressed
+   manuscript can become name-and-year without touching its body.
+4. **Colophon and errata slip** — now the treatise's last leaf after 08 as
+   much as a lab plate: fonts/engine/date/git hash (needs `--shell-escape`
+   or a build-time `\def`; decide which), an errata slip as revision
+   notes. Keep distinct from 07's imprint (imprint = title leaf, colophon =
    last leaf).
-2. **Fold-out plate** — a landscape leaf for a wide table, "Plate II, to
-   face p. 12". Period convention with a modern use.
-3. **Marginal figures** — small graph drawings in the scholia margin, the
-   natural sequel to 02 + 05 for a graph-theory paper.
-4. **Screen vs print edition** from one source (parchment on a display,
-   white for print/arXiv). Probably the first real `.sty` option.
-5. **The `.sty` graduation** itself — `\usepackage[rubric,scholia,plain]{atlas}`
-   or similar. 04 + 07 + 08 now give a complete treatise skeleton (front
-   matter, apparatus, authorities), so it could be tried. The tokens that
-   survive ablation across plates (paper, ink, rubric) become the
-   package's tokens; 08's bbx/cbx become `atlas.bbx`/`atlas.cbx` with
-   the dress moved in, and 04's attributions become cites.
-6. **CSS counterparts for the Hakyll site** so an HTML preprint matches
-   its PDF. Separate repo when it happens.
+5. **Fold-out plate** — a landscape leaf for a wide table; the longer
+   manuscripts may need it.
+6. **Marginal figures** — small graph drawings in the scholia margin, the
+   natural sequel to 02 + 05.
+7. **Should the `.sty` carry lab controls** so a dressed preprint can be
+   ablated? Cheap to add (the block is eight lines) and it would let the
+   register questions in 1 be answered by looking rather than arguing.
+8. **CSS counterparts for the Hakyll site.** Separate repo when it happens.
+
+The `treatise.tex` sample document proposed after the bound proof (04
+grown to its six propositions) is no longer needed: a real preprint is
+the sample now. 04, 07 and 08 stay as lab plates; the numbering fork
+between them stands, documented in 07's note.
 
 The site export path is unchanged: sources in `~/Repos/research/meyniel`,
 `make export` to `levineuwirth.org`. No `~/universum` material enters
@@ -409,6 +518,4 @@ before they were set.
 ## Open questions
 
 - Track this file, or gitignore it as the Forgejo notes are? It is written
-  to be tracked, and has been, three times.
-- Does the `.sty` want the lab controls too (so a preprint can be ablated),
-  or is that lab-only machinery?
+  to be tracked, and has been, four times.

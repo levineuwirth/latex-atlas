@@ -1,0 +1,16 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas: a bound proof. The three leaves of the treatise (07 front
+% matter, 04 propositions, 08 authorities) gathered as printed, so the
+% book can be turned and its seams seen. Nothing is re-set: each plate is
+% included as its own PDF. Build the plates first, then from the root:
+%   lualatex -output-directory=build bound/treatise.tex
+\documentclass{article}
+\usepackage[a4paper]{geometry}
+\usepackage{pdfpages}
+\pagestyle{empty}
+\begin{document}
+\includepdf[pages=-]{build/07-front-matter.pdf}
+\includepdf[pages=-]{build/04-propositions.pdf}
+\includepdf[pages=-]{build/08-bibliography.pdf}
+\end{document}
