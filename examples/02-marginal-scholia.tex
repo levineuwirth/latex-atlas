@@ -1,7 +1,8 @@
 %!TEX program = lualatex
 % SPDX-License-Identifier: CC-BY-SA-4.0
-% latex-atlas 02: marginal scholia. Isolates sidenotes, catchword, folio.
-% Geometry gives a broad outer margin; marginpar holds the gloss.
+% latex-atlas 02: marginal scholia. Isolates the gloss in the margin (against
+% its modern default, the footnote), the broad outer margin that makes room
+% for it, the catchword, and the folio.
 \documentclass[11pt,twoside]{article}
 
 \usepackage{iftex}
@@ -9,6 +10,31 @@
   \PackageError{latex-atlas}{This example requires LuaLaTeX}
     {Run lualatex, not pdflatex.}
 \fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
 
 \usepackage{fontspec}
 \usepackage{xcolor}
@@ -29,32 +55,65 @@
 }
 
 % Paper tint is per-example tuning for this wide-margin page, not a shared
-% token yet; the three examples deliberately differ slightly (see README).
-\definecolor{parchment}{HTML}{F4EBDD}
-\definecolor{ink}{HTML}{231F1A}
-\definecolor{glossink}{HTML}{5A4A3A}
+% token yet; the examples deliberately differ slightly (see README).
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F4EBDD}
+  \definecolor{ink}{HTML}{231F1A}
+  \definecolor{glossink}{HTML}{5A4A3A}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+  \definecolor{glossink}{HTML}{000000}
+}
 \pagecolor{parchment}
 \color{ink}
-\geometry{
-  a4paper,
-  top=28mm, bottom=32mm,
-  inner=25mm, outer=52mm,
-  marginparwidth=34mm, marginparsep=6mm
+
+% A broad outer margin with room for a gloss column, or the symmetric page
+% of an article, whose margin column is what the gloss must then fit into.
+\atlascontrol{margin}{
+  \geometry{
+    a4paper,
+    top=28mm, bottom=32mm,
+    inner=25mm, outer=52mm,
+    marginparwidth=34mm, marginparsep=6mm
+  }
+}{
+  \geometry{
+    a4paper,
+    top=28mm, bottom=32mm,
+    left=30mm, right=30mm,
+    marginparwidth=20mm, marginparsep=4mm
+  }
 }
 \setlength{\parindent}{1.1em}
 \setlength{\parskip}{0pt}
-\pagestyle{plain}
 
-% A gloss in the margin: small, ragged, in a quieter ink.
-\newcommand{\gloss}[1]{\marginpar{\footnotesize\raggedright\color{glossink}#1}}
+% A gloss in the margin: small, ragged, in a quieter ink. The modern default
+% moves the same words to a footnote.
+\atlascontrol{gloss}{
+  \newcommand{\gloss}[1]{\marginpar{\footnotesize\raggedright\color{glossink}#1}}
+}{
+  \newcommand{\gloss}[1]{\footnote{#1}}
+}
 
 % Catchword: first word of the next page, set alone at the foot.
-\newcommand{\catchword}[1]{%
-  \vfill
-  \begin{flushright}
-    {\small\textit{#1}}\par
-    {\scriptsize\textls[80]{\textsc{catchword}}}
-  \end{flushright}
+\atlascontrol{catchword}{
+  \newcommand{\catchword}[1]{%
+    \begin{flushright}
+      {\small\textit{#1}}\par
+      {\scriptsize\textls[80]{\textsc{catchword}}}
+    \end{flushright}}
+}{
+  \newcommand{\catchword}[1]{}
+}
+
+% Folio: a bracketed old-style number in the foot, or the class's page number.
+\atlascontrol{folio}{
+  \pagestyle{empty}
+  \newcommand{\folio}[1]{\vspace{1em}\begin{center}{\footnotesize\itshape --- #1 ---}\end{center}}
+}{
+  \pagestyle{plain}
+  \newcommand{\folio}[1]{}
 }
 
 \begin{document}
@@ -83,11 +142,17 @@ try the figure of the earth.\gloss{Huygens, \textit{Horologium}, 1673;
 Richter's Cayenne retardation, 1672.} What is here set down of one ball
 holds of every ball, provided the thread be fine and the arc narrow.
 
-\catchword{Of falling}
+\vspace{2em}
+\footnotesize\noindent
+The gloss stands beside the sentence it answers, in a quieter ink, and
+the page is cut to give it room; the catchword and the folio are the
+period's own navigation.
+
+\medskip\noindent\itshape\atlasstamp
+\normalfont\normalsize
 
 \vfill
-\begin{center}
-  {\footnotesize\textit{--- 7 ---}}
-\end{center}
+\catchword{Of falling}
+\folio{7}
 
 \end{document}

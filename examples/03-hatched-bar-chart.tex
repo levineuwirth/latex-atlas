@@ -2,6 +2,8 @@
 % SPDX-License-Identifier: CC-BY-SA-4.0
 % latex-atlas 03: monochrome data chart. Bars differ by hatch angle and
 % density, never by colour fill; values also appear as figures in a table.
+% The hatch is tested against grey fills, the table against its absence,
+% and the table's lining tabular figures against the text's old-style ones.
 \documentclass[11pt]{article}
 
 \usepackage{iftex}
@@ -9,6 +11,31 @@
   \PackageError{latex-atlas}{This example requires LuaLaTeX}
     {Run lualatex, not pdflatex.}
 \fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
 
 \usepackage{fontspec}
 \usepackage{xcolor}
@@ -20,27 +47,58 @@
 \defaultfontfeatures{Renderer=HarfBuzz}
 \IfFontExistsTF{EB Garamond}{
   \setmainfont{EB Garamond}[Numbers={OldStyle,Proportional}]
-  \newfontfamily\tablefont{EB Garamond}[Numbers={Lining,Tabular}]
+  \newfontfamily\liningfont{EB Garamond}[Numbers={Lining,Tabular}]
 }{
   \setmainfont{TeX Gyre Pagella}[Numbers={OldStyle,Proportional}]
-  \newfontfamily\tablefont{TeX Gyre Pagella}[Numbers={Lining,Tabular}]
+  \newfontfamily\liningfont{TeX Gyre Pagella}[Numbers={Lining,Tabular}]
 }
 
 % Paper tint is per-example tuning for this chart plate, not a shared
-% token yet; the three examples deliberately differ slightly (see README).
-\definecolor{chartpaper}{HTML}{F4EAD8}
-\definecolor{ink}{HTML}{25201B}
+% token yet; the examples deliberately differ slightly (see README).
+\atlascontrol{paper}{
+  \definecolor{chartpaper}{HTML}{F4EAD8}
+  \definecolor{ink}{HTML}{25201B}
+}{
+  \definecolor{chartpaper}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+}
 \pagecolor{chartpaper}
 \color{ink}
 \geometry{a4paper,top=20mm,bottom=20mm,left=24mm,right=24mm}
 \pagestyle{empty}
 
-\tikzset{
-  bar/.style={draw=ink,line width=0.55pt},
-  hatchA/.style={pattern={Lines[angle=45,distance=3pt,line width=0.35pt]},pattern color=ink},
-  hatchB/.style={pattern={Lines[angle=-45,distance=3pt,line width=0.35pt]},pattern color=ink},
-  hatchC/.style={pattern={Lines[angle=90,distance=2.6pt,line width=0.3pt]},pattern color=ink},
-  hatchD/.style={pattern={Hatch[distance=3.2pt,line width=0.25pt]},pattern color=ink}
+% Series carried by hatch angle and density, or by the grey ramp a plotting
+% library hands out by default.
+\tikzset{bar/.style={draw=ink,line width=0.55pt}}
+\atlascontrol{hatch}{
+  \tikzset{
+    hatchA/.style={pattern={Lines[angle=45,distance=3pt,line width=0.35pt]},pattern color=ink},
+    hatchB/.style={pattern={Lines[angle=-45,distance=3pt,line width=0.35pt]},pattern color=ink},
+    hatchC/.style={pattern={Lines[angle=90,distance=2.6pt,line width=0.3pt]},pattern color=ink},
+    hatchD/.style={pattern={Hatch[distance=3.2pt,line width=0.25pt]},pattern color=ink}
+  }
+}{
+  \tikzset{
+    hatchA/.style={fill=ink!20},
+    hatchB/.style={fill=ink!40},
+    hatchC/.style={fill=ink!60},
+    hatchD/.style={fill=ink!80}
+  }
+}
+
+% The record: every plotted number repeated in a table, or nothing.
+\atlascontrol{table}{
+  \newcommand{\record}[1]{\begin{center}#1\end{center}}
+}{
+  \newcommand{\record}[1]{}
+}
+
+% Table figures: lining and tabular, so columns align, or the text face's
+% old-style proportional figures.
+\atlascontrol{lining}{
+  \newcommand{\tablefont}{\liningfont}
+}{
+  \newcommand{\tablefont}{}
 }
 
 \begin{document}
@@ -73,7 +131,7 @@
     \draw[bar,hatchC] (\x+1.0,0) rectangle +(0.42,{5.0+0.35*\g});
     \draw[bar,hatchD] (\x+1.5,0) rectangle +(0.42,{2.4+0.4*\g});
   }
-  % Legend: hatch swatches, no colour.
+  % Legend: swatches in the same styles as the bars.
   \foreach \i/\sty/\lab in {
     0/hatchA/North pit, 1/hatchB/South pit,
     2/hatchC/East pit, 3/hatchD/West pit} {
@@ -87,7 +145,7 @@
 
 \vspace{1em}
 
-\begin{center}
+\record{%
 \tablefont\small
 \begin{tabular}{@{}lrrrrr@{}}
 \textsc{Year} & \textsc{North} & \textsc{South} & \textsc{East} & \textsc{West} & \textsc{Total}\\
@@ -97,8 +155,7 @@
 1871 & 510 & 410 & 570 & 320 & 1810\\
 1872 & 560 & 455 & 605 & 360 & 1980\\
 1873 & 610 & 500 & 640 & 400 & 2150\\
-\end{tabular}
-\end{center}
+\end{tabular}}
 
 \vspace{0.8em}
 \footnotesize\noindent
@@ -106,5 +163,7 @@ Hatch angle carries the series, bar height the value, figures the record.
 No grey fill is used, so the plate survives monochrome reproduction; the
 table repeats every plotted number for the reader who measures with a
 rule rather than an eye.
+
+\medskip\noindent\itshape\atlasstamp
 
 \end{document}

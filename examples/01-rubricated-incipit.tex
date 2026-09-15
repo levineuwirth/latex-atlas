@@ -1,7 +1,8 @@
 %!TEX program = lualatex
 % SPDX-License-Identifier: CC-BY-SA-4.0
-% latex-atlas 01: two-colour rubrication. One mechanism per control:
-% red initial, red pilcrows, red running head. Remove any one to judge it.
+% latex-atlas 01: two-colour rubrication. The colour is one control and each
+% device that carries it (initial, pilcrows, running head) is another, so the
+% lab can show a black lettrine, a red page without one, and so on.
 \documentclass[11pt]{article}
 
 \usepackage{iftex}
@@ -9,6 +10,31 @@
   \PackageError{latex-atlas}{This example requires LuaLaTeX}
     {Run lualatex, not pdflatex.}
 \fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
 
 \usepackage{fontspec}
 \usepackage{xcolor}
@@ -33,25 +59,54 @@
 }
 
 % Paper tint is per-example tuning for this A5 treatise page, not a shared
-% token yet; the three examples deliberately differ slightly (see README).
-\definecolor{parchment}{HTML}{F5EDDC}
-\definecolor{ink}{HTML}{241F19}
-\definecolor{rubric}{HTML}{9E2B25}
+% token yet; the examples deliberately differ slightly (see README). The
+% control swaps the token values, so everything downstream stays unchanged.
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F5EDDC}
+  \definecolor{ink}{HTML}{241F19}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+}
+% The second colour. Without it every rubricated device stays, in ink.
+\atlascontrol{rubric}{
+  \definecolor{rubric}{HTML}{9E2B25}
+}{
+  \colorlet{rubric}{ink}
+}
 \pagecolor{parchment}
 \color{ink}
 \geometry{a5paper,top=20mm,bottom=22mm,left=22mm,right=22mm}
 \setlength{\parindent}{1em}
 \setlength{\parskip}{0pt}
 
-% Red pilcrow as a section marker inside running prose.
-\newcommand{\rubricp}{\textcolor{rubric}{\P}\ }
+% Pilcrow as a section marker inside running prose; the modern default is
+% the paragraph indent alone.
+\atlascontrol{pilcrow}{
+  \newcommand{\rubricp}{\textcolor{rubric}{\P}\ }
+}{
+  \newcommand{\rubricp}{}
+}
 
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[C]{\small\textls[90]{\textcolor{rubric}{\textsc{Of the Loadstone}}}}
-\fancyfoot[C]{\small\textit{1}}
-\renewcommand{\headrulewidth}{0.35pt}
-\renewcommand{\footrulewidth}{0pt}
+% Dropped three-line initial via lettrine, or an ordinary first line.
+\atlascontrol{initial}{
+  \newcommand{\incipit}[2]{\lettrine[lines=3,loversize=0.08,findent=0.35em,nindent=0em]{\textcolor{rubric}{#1}}{#2}}
+}{
+  \newcommand{\incipit}[2]{\noindent #1#2}
+}
+
+% Running head in spaced small capitals under a hair rule, or the article
+% class's plain page style.
+\atlascontrol{runhead}{
+  \pagestyle{fancy}
+  \fancyhf{}
+  \fancyhead[C]{\small\textls[90]{\textcolor{rubric}{\textsc{Of the Loadstone}}}}
+  \fancyfoot[C]{\small\textit{1}}
+  \renewcommand{\headrulewidth}{0.35pt}
+  \renewcommand{\footrulewidth}{0pt}
+}{
+  \pagestyle{plain}
+}
 
 \begin{document}
 
@@ -65,9 +120,7 @@
 
 \vspace{0.8em}
 
-% lettrine supplies the dropped initial; colour is the only rubrication here.
-\lettrine[lines=3,loversize=0.08,findent=0.35em,nindent=0em]
-  {\textcolor{rubric}{W}}{hen} the stone is hung by a thread and left to
+\incipit{W}{hen} the stone is hung by a thread and left to
 settle, it turns its one end toward the north. This virtue is not spent by
 use, for after a hundred trials the direction is the same as at the first.
 
@@ -85,8 +138,10 @@ the proof that the effect lies in the stone and not in the suspension.
 \end{center}
 
 \footnotesize\noindent
-Three controls only: a red three-line initial via \texttt{lettrine}, red
-pilcrows marking breaths in the argument, and a red running head with a
-hair rule. Body ink, paper, and measure are unchanged from a plain page.
+One colour and three devices to carry it: a three-line initial via
+\texttt{lettrine}, pilcrows marking breaths in the argument, and a running
+head with a hair rule. Body ink and measure are unchanged from a plain page.
+
+\medskip\noindent\itshape\atlasstamp
 
 \end{document}
