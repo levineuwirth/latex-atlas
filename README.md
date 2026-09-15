@@ -55,10 +55,10 @@ how that question gets decided.
 Requirements: LuaLaTeX (TeX Live 2026), `fontspec`, `unicode-math`,
 `amsthm`, `geometry`, `microtype`, `xcolor`, `tikz` (+ `calc`,
 `patterns.meta`), `pgfornament`, `fancyhdr`, `lettrine`, `luacode`.
-EB Garamond and Garamond-Math if present, else TeX Gyre Pagella and
-Pagella Math (this machine has only the latter; CI/full TeX Live gets the
-former). Previews need poppler's `pdftoppm`; they are byte-reproducible
-from a clean build, so a rebuild leaves the tree clean.
+EB Garamond and Garamond-Math if present (`texlive-fontsextra`), else
+TeX Gyre Pagella and Pagella Math; the committed previews are the
+Garamond renderings. Previews need poppler's `pdftoppm`; they are
+byte-reproducible from a clean build, so a rebuild leaves the tree clean.
 
 ## The lab
 

@@ -129,13 +129,13 @@ luatexbase.add_to_callback("post_linebreak_filter", impress, "atlas.impress")
 \end{luacode*}
 
 % Baseline scatter, in points; or type that sits level.
-\atlascontrol{jitter}{\directlua{atlas.jitter = 0.28}}{}
+\atlascontrol{jitter}{\directlua{atlas.jitter = 0.24}}{}
 
 % Ink squash: a uniform stroke on every glyph; or the outline as cut.
-\atlascontrol{inkspread}{\directlua{atlas.inkspread = 0.09}}{}
+\atlascontrol{inkspread}{\directlua{atlas.inkspread = 0.06}}{}
 
 % Uneven inking: the squash varies from line to line; or every line alike.
-\atlascontrol{inking}{\directlua{atlas.inking = 0.07}}{}
+\atlascontrol{inking}{\directlua{atlas.inking = 0.04}}{}
 
 % The sheet, drawn in the shipout background (origin top-left, y downward).
 % Laid paper: fine laid lines and chain lines at a hand's breadth.

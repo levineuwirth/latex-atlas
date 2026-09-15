@@ -104,18 +104,18 @@
     \IfValueT{#1}{\nobreak\vspace{.1em}\centerline{\footnotesize\itshape #1}}%
     \nobreak\vspace{.3em}\noindent\ignorespaces}
   \NewDocumentEnvironment{Definition}{}
-    {\prophead{Definitions.}\upshape}{\par}
+    {\prophead{Definitions.}\upshape\ignorespaces}{\par}
   \NewDocumentEnvironment{Theorem}{o}
     {\refstepcounter{proposition}\refstepcounter{theoremkind}%
-     \prophead[#1]{Proposition \Roman{proposition}.\quad Theorem \Roman{theoremkind}.}\itshape}
+     \prophead[#1]{Proposition \Roman{proposition}.\quad Theorem \Roman{theoremkind}.}\itshape\ignorespaces}
     {\par}
   \NewDocumentEnvironment{Lemma}{o}
     {\refstepcounter{proposition}\refstepcounter{lemmakind}%
-     \prophead[#1]{Proposition \Roman{proposition}.\quad Lemma \Roman{lemmakind}.}\itshape}
+     \prophead[#1]{Proposition \Roman{proposition}.\quad Lemma \Roman{lemmakind}.}\itshape\ignorespaces}
     {\par}
   \NewDocumentEnvironment{Problem}{o}
     {\refstepcounter{proposition}\refstepcounter{problemkind}%
-     \prophead[#1]{Proposition \Roman{proposition}.\quad Problem \Roman{problemkind}.}\itshape}
+     \prophead[#1]{Proposition \Roman{proposition}.\quad Problem \Roman{problemkind}.}\itshape\ignorespaces}
     {\par}
   \NewDocumentEnvironment{Corollary}{}
     {\par\addvspace{.5em}\noindent\textsc{Cor.}\ \ignorespaces}{\par}
