@@ -1,0 +1,311 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% atlas-grand.sty: the grand edition. Loads atlas.sty and lays every costume
+% device the lab has over a running manuscript, at once, to see where the
+% limit is. Load it in place of atlas (it loads atlas itself), last in the
+% preamble; name the theorem environments with \AtlasProposition etc. as for
+% atlas; add \AtEndDocument{\AtlasColophon} if a colophon leaf is wanted.
+%
+% Over atlas it sets: a second colour (rubric) for heads, running head and
+% initials; a broad outer margin with the propositions' names glossed in it
+% (02); a dropped three-line initial at the first paragraph after every
+% section head (01); a title leaf of its own, framed with corner pieces
+% (05), with The Argument, a Table of the Propositions read from the .aux
+% with real pages (what 07 could not do), fleurons and the imprint (07);
+% roman section numerals; a fleuron before every section; the hand press
+% (06): baseline scatter and ink squash on text lines, laid paper and
+% foxing beneath every page; and a colophon leaf naming the faces, the
+% engine, the sources and their revision. Two passes for the Table.
+%
+% Options: plain and rareligatures pass through to atlas. Nothing here is
+% meant for a preprint one would post; that is what atlas is for.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{atlas-grand}[2026/09/16 latex-atlas: the grand edition]
+
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{atlas}}
+\ProcessOptions\relax
+\RequirePackage{atlas}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{pgfornament}
+\RequirePackage{lettrine}
+\RequirePackage{luacode}
+
+% --- the second colour ---------------------------------------------------------
+\ifatlas@plain
+  \definecolor{rubric}{HTML}{000000}
+  \definecolor{glossink}{HTML}{000000}
+  \definecolor{foxing}{HTML}{FFFFFF}
+\else
+  \definecolor{rubric}{HTML}{9E2B25}
+  \definecolor{glossink}{HTML}{5A4A3A}
+  \definecolor{foxing}{HTML}{8A5A2B}
+\fi
+
+% --- the page: 02's broad outer margin, twoside ----------------------------------
+\geometry{a4paper,twoside,top=30mm,bottom=32mm,inner=26mm,outer=54mm,
+  marginparwidth=36mm,marginparsep=6mm,headheight=14pt,headsep=8mm}
+
+% --- heads in rubric; section numerals roman ----------------------------------------
+\RenewDocumentCommand{\atlas@head}{o m}{%
+  \par\addvspace{1.1em plus .3em}%
+  \centerline{\small\textcolor{rubric}{\textls[120]{\textsc{#2}}}}%
+  % The note goes to the margin, as a gloss (02), rather than beneath.
+  \IfValueT{#1}{\marginpar{\footnotesize\raggedright\itshape\color{glossink}#1}}%
+  \nobreak\vspace{.3em}%
+  \@afterindentfalse\@afterheading}
+\def\section{\@startsection{section}{1}%
+  \z@{1.4em\@plus .5em}{.7em}%
+  {\normalfont\small\centering\scshape\color{rubric}}}
+\renewcommand{\thesection}{\Roman{section}}
+\fancyhead[C]{\small\textcolor{rubric}{\textls[90]{\textsc{\shorttitle}}}}
+
+% --- a fleuron before every section ---------------------------------------------
+\newcommand{\atlas@fleuron}{%
+  \par\addvspace{1.2em}\centerline{\pgfornament[width=18mm,color=rubric]{71}}\par}
+% \section and \subsection are wrapped rather than hooked: a cmd/.../after
+% hook on a \@startsection command fires before the argument is read.
+\let\atlas@grand@section\section
+\RenewDocumentCommand{\section}{s o m}{%
+  \everypar{}%
+  \ifnum\value{section}>0 \atlas@fleuron\fi
+  \IfBooleanTF{#1}{\atlas@grand@section*{#3}}
+    {\IfValueTF{#2}{\atlas@grand@section[#2]{#3}}{\atlas@grand@section{#3}}}%
+  \global\atlas@initialpendingtrue\atlas@arminitial}
+\let\atlas@grand@subsection\subsection
+\RenewDocumentCommand{\subsection}{s o m}{%
+  \everypar{}%
+  \IfBooleanTF{#1}{\atlas@grand@subsection*{#3}}
+    {\IfValueTF{#2}{\atlas@grand@subsection[#2]{#3}}{\atlas@grand@subsection{#3}}}%
+  \ifatlas@initialpending\atlas@arminitial\fi}
+
+% --- a dropped initial after every section head (01) ---------------------------
+% Armed by the section hook; a subsection head that follows re-arms it; it
+% fires at the next paragraph whose first token is a letter, and grabs the
+% first word. Anything else (a \label, an environment) disarms it quietly.
+\newif\ifatlas@initialpending
+\newcommand{\atlas@arminitial}{%
+  \everypar{\everypar{}%
+    \if@nobreak\@nobreakfalse\clubpenalty\@M{\setbox\z@\lastbox}\fi
+    \atlas@initial@try}}
+% The peek must run after this conditional's \fi is gone, or it sees the \fi.
+\def\atlas@initial@try{%
+  \ifatlas@initialpending\expandafter\atlas@initial@peek\fi}
+\def\atlas@initial@peek{\futurelet\atlas@next\atlas@initial@check}
+\def\atlas@initial@check{%
+  \ifx\atlas@next\label
+    \expandafter\atlas@initial@skiplabel
+  \else
+    \ifcat\noexpand\atlas@next a%
+      \global\atlas@initialpendingfalse
+      \expandafter\expandafter\expandafter\atlas@initial@grab
+    \else
+      \global\atlas@initialpendingfalse
+    \fi
+  \fi}
+% A paragraph that opens with \label{...} still gets its initial.
+\def\atlas@initial@skiplabel\label#1{\label{#1}\atlas@initial@try}
+\def\atlas@initial@grab#1#2 {%
+  \lettrine[lines=3,loversize=0.08,findent=0.35em,nindent=0em]{\textcolor{rubric}{#1}}{#2} }
+
+% --- the Table of the Propositions, from the .aux ------------------------------------
+% Every apparatus environment writes one line; the second pass prints them
+% with real pages. Statements cannot be captured, so the table gives the
+% kind, the number and the name the manuscript gave.
+\newtoks\atlas@proptoks
+\newif\ifatlas@hastable
+\newcommand{\atlas@tableline}[3]{%
+  \global\atlas@hastabletrue
+  \global\atlas@proptoks\expandafter{\the\atlas@proptoks\atlas@tableentry{#1}{#2}{#3}}}
+\newcommand{\atlas@tableentry}[3]{%
+  {\par\noindent\hangindent=1.5em\hangafter=1
+   \rightskip=2.55em plus 1em \parfillskip=-\rightskip
+   \textls[70]{\textsc{#1.}}\ \textit{#2}%
+   \nobreak\hfill\nobreak\hbox to 1.55em{\hfil #3}\par}%
+  \vspace{0.3em}}
+\newcommand{\atlas@writeprop}[2]{%
+  \protected@write\@auxout{}{\string\atlas@tableline{#1}{#2}{\thepage}}}
+\RenewDocumentCommand{\AtlasProposition}{m m o}{%
+  \RenewDocumentEnvironment{#1}{o}
+    {\atlas@step[#3]%
+     \atlas@writeprop{\IfValueTF{#3}{#2~\csname the#1\endcsname}{#2}}{\IfValueTF{##1}{##1}{}}%
+     \atlas@head[##1]{#2\atlas@number{#1}[#3].}\itshape\ignorespaces}
+    {\par}}
+\newcommand{\AtlasTable}{%
+  \ifatlas@hastable
+    \atlas@head{A Table of the Propositions.}%
+    \small\the\atlas@proptoks\normalsize
+  \fi}
+
+% --- the title leaf (07), framed (05), on a page of its own ---------------------------
+\newif\ifatlas@titleleaf
+\newcommand{\AtlasImprint}{%
+  \begin{center}\footnotesize\color{rubric}
+    \textls[90]{\textsc{Printed for the Author,}}\par
+    \textls[90]{\textsc{and to be had at levineuwirth.org.}}\par
+    \vspace{0.3em}
+    \textls[90]{\textsc{mmxxvi.}}\par
+  \end{center}}
+\renewcommand{\maketitle}{%
+  \global\atlas@titleleaftrue
+  \thispagestyle{empty}%
+  \begingroup
+  \def\address##1##2{{\small\itshape ##2}\par}%
+  \def\curraddr##1##2{}\def\email##1##2{}\def\urladdr##1##2{}%
+  \def\and{\ and\ }%
+  \begin{center}
+    \vspace*{6mm}
+    {\Large\def\\{\unskip\space\ignorespaces}%
+     \color{rubric}\textls[160]{\MakeUppercase{\@title}}}\par
+    \vspace{1.2em}
+    {\small by}\par
+    \vspace{0.3em}
+    {\small\textls[140]{\textsc{\authors}}}\par
+    \addresses
+    \vspace{0.3em}
+    {\small\@date}\par
+    \vspace{1.2em}
+    \textcolor{rubric}{\rule{0.45\linewidth}{0.8pt}}\par\nointerlineskip
+    \vspace{1.6pt}\textcolor{rubric}{\rule{0.45\linewidth}{0.3pt}}\par
+  \end{center}
+  \endgroup
+  \ifvoid\atlas@abstractbox\else\box\atlas@abstractbox\fi
+  \atlas@fleuron
+  \AtlasTable
+  \vfill
+  \AtlasImprint
+  \clearpage
+  \global\atlas@titleleaffalse
+  \markboth{\shorttitle}{\shorttitle}%
+  \global\let\maketitle\relax}
+
+% --- the sheet beneath every page (06), the frame on the title leaf (05) ----------
+\AddToHook{shipout/background}{\put(0,0){%
+  \begin{tikzpicture}[overlay]
+    \ifatlas@plain\else
+      % laid paper: fine laid lines, chain lines at a hand's breadth
+      \foreach \y in {0,1.15,...,297} {
+        \draw[ink,opacity=0.04,line width=0.25pt] (0,-\y mm) -- (\paperwidth,-\y mm);
+      }
+      \foreach \x in {15,41,...,210} {
+        \draw[ink,opacity=0.06,line width=0.55pt] (\x mm,0) -- (\x mm,-\paperheight);
+      }
+      % foxing: the seed is set once (below), so the spots differ page to
+      % page and are the same on every run
+      \foreach \i in {1,...,55} {
+        \pgfmathsetmacro{\fx}{rnd*210}
+        \pgfmathsetmacro{\fy}{rnd*297}
+        \pgfmathsetmacro{\fr}{0.3+rnd*rnd*2.2}
+        \pgfmathsetmacro{\fo}{0.03+rnd*0.08}
+        \fill[foxing,opacity=\fo] (\fx mm,-\fy mm) ellipse ({\fr mm} and {0.8*\fr mm});
+      }
+      \shade[inner color=parchment,outer color=foxing,opacity=0.09]
+        (0,0) rectangle (\paperwidth,-\paperheight);
+    \fi
+    \ifatlas@titleleaf
+      \coordinate (SE) at (\paperwidth,-\paperheight);
+      \draw[rubric,line width=1.1pt] (16mm,-16mm) rectangle ($(SE)+(-16mm,16mm)$);
+      \draw[rubric,line width=0.3pt] (18mm,-18mm) rectangle ($(SE)+(-18mm,18mm)$);
+      \node[anchor=north west] at (19mm,-19mm)
+        {\pgfornament[width=14mm,color=rubric]{61}};
+      \node[anchor=north east] at ($(SE)+(-19mm,\paperheight-19mm)$)
+        {\pgfornament[width=14mm,color=rubric,symmetry=v]{61}};
+      \node[anchor=south west] at ($(SE)+(19mm-\paperwidth,19mm)$)
+        {\pgfornament[width=14mm,color=rubric,symmetry=h]{61}};
+      \node[anchor=south east] at ($(SE)+(-19mm,19mm)$)
+        {\pgfornament[width=14mm,color=rubric,symmetry=c]{61}};
+    \fi
+  \end{tikzpicture}}}
+\AtBeginDocument{\pgfmathsetseed{1683}}
+
+% --- the hand press (06): text lines only, math glyphs left level -----------------
+\begin{luacode*}
+atlas = atlas or {}
+atlas.jitter, atlas.inkspread, atlas.inking = 0.24, 0.06, 0.04
+local seed = 1683
+local function rnd()
+  seed = (seed * 1103515245 + 12345) % 2147483648
+  return seed / 1073741824 - 1
+end
+local GLYPH, HLIST, VLIST = node.id("glyph"), node.id("hlist"), node.id("vlist")
+local MATH = node.id("math")
+-- Is this glyph's font a math font? Read once per font id.
+local mathfont = {}
+local function is_math(fid)
+  if mathfont[fid] == nil then
+    local f = font.getfont(fid) or font.fonts[fid]
+    local name = (f and (f.psname or f.fullname or f.name)) or ""
+    mathfont[fid] = (name:find("Math") ~= nil)
+  end
+  return mathfont[fid]
+end
+local function scatter(head, amp)
+  for n in node.traverse(head) do
+    if n.id == GLYPH then
+      if not is_math(n.font) then
+        n.yoffset = n.yoffset + math.floor(amp * rnd() * 65536)
+      end
+    elseif (n.id == HLIST or n.id == VLIST) and n.head then
+      scatter(n.head, amp)
+    end
+  end
+end
+local function literal(s)
+  local w = node.new("whatsit", "pdf_literal")
+  w.mode = 1
+  w.data = s
+  return w
+end
+local function impress(head)
+  for line in node.traverse_id(HLIST, head) do
+    if line.head then
+      local w = atlas.inkspread + atlas.inking * rnd()
+      if w > 0.005 then
+        line.head = node.insert_before(line.head, line.head,
+          literal(string.format("2 Tr %.3f w", w)))
+        node.insert_after(line.head, node.tail(line.head), literal("0 Tr"))
+      end
+      if atlas.jitter > 0 then scatter(line.head, atlas.jitter) end
+    end
+  end
+  return true
+end
+if not atlas.impress_registered then
+  luatexbase.add_to_callback("post_linebreak_filter", impress, "atlas.impress")
+  atlas.impress_registered = true
+end
+\end{luacode*}
+\ifatlas@plain\directlua{atlas.jitter, atlas.inkspread, atlas.inking = 0, 0, 0}\fi
+
+% --- the colophon leaf -------------------------------------------------------------
+% \AtlasColophon sets the last leaf. \atlasrevision (the sources' commit)
+% and \atlassources may be \def'd on the command line or in the preamble.
+\providecommand{\atlasrevision}{unrecorded}
+\providecommand{\atlassources}{the author's sources}
+\newcommand{\AtlasColophon}{%
+  \clearpage\thispagestyle{empty}%
+  \vspace*{\fill}
+  \begin{center}
+    \pgfornament[width=22mm,color=rubric]{88}\par
+    \vspace{2em}
+    {\small\textcolor{rubric}{\textls[130]{\textsc{Colophon.}}}}\par
+    \vspace{1em}
+    \begin{minipage}{0.7\linewidth}\small\centering
+      This edition of the preprint was set in EB~Garamond, with
+      Garamond-Math for the mathematics, by LuaTeX
+      (\directlua{local v = status.luatex_version
+         tex.print((v // 100) .. "." .. (v - (v // 100) * 100) .. "." .. status.luatex_revision)}),
+      from \atlassources{} at revision \texttt{\atlasrevision}, on
+      \@date. The paper is laid, foxed and darkened at the edges by
+      computation; the impression of a hand press is counterfeited after
+      the paragraphs are set, by scattering the baselines of the type and
+      swelling its outline with ink, line by line, in a fixed and
+      repeatable order. The propositions are numbered as the author left
+      them. Nothing in the mathematics has been altered by the dress.
+    \end{minipage}\par
+    \vspace{2em}
+    \pgfornament[width=22mm,color=rubric,symmetry=h]{88}\par
+  \end{center}
+  \vspace*{\fill}
+  \AtlasImprint}
+
+\endinput
