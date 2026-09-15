@@ -19,6 +19,8 @@ toward reusable website preprint styles.
 | 01 rubricated incipit | 02 marginal scholia | 03 hatched bar chart |
 | [![04](preview/04-propositions.png)](examples/04-propositions.tex) | [![05](preview/05-engraved-graph-plate.png)](examples/05-engraved-graph-plate.tex) | [![06](preview/06-hand-press-impression.png)](examples/06-hand-press-impression.tex) |
 | 04 propositions | 05 engraved graph plate | 06 hand-press impression |
+| [![07](preview/07-front-matter.png)](examples/07-front-matter.tex) | | |
+| 07 front matter | | |
 
 ## Examples
 
@@ -30,6 +32,7 @@ toward reusable website preprint styles.
 | 04 | `04-propositions.tex` | theorem apparatus after the *Principia* against amsthm; a math font cut for the text against Latin Modern | mathfont, paper, heads, qed, scholium |
 | 05 | `05-engraved-graph-plate.tex` | an engraved plate of two graphs: tapered burin strokes, hatched spheres, a matching by line weight, frame and lettering | paper, taper, matching, stipple, frame, lettering |
 | 06 | `06-hand-press-impression.tex` | the hand press, counterfeited in a LuaTeX callback: baseline scatter, ink squash, uneven inking, laid paper, foxing | paper, jitter, inkspread, inking, laid, foxing |
+| 07 | `07-front-matter.tex` | the leaf before 04: a period title block against `\maketitle`, *The Argument* against the abstract, a Table of the Propositions with their statements against a list of theorems, fleurons, the imprint against the date | paper, imprint, title, argument, table, fleuron |
 
 Every control has a *modern default*: what you get from the document
 class, the plotting library, or the engine when you do nothing. The
@@ -38,9 +41,10 @@ Q.E.D. a tombstone, of parchment white paper. So each lab variant is a
 fair comparison, not a page with a hole in it.
 
 `paper` is a control in every plate. The tints differ slightly per plate
-(`F5EDDC`, `F4EBDD`, `F4EAD8`, `F5ECDB`, `F6EFE1`, `F3E9D6`): deliberate
-per-plate tuning, not a shared token yet. Ablating it across all six is
-how that question gets decided.
+(`F5EDDC`, `F4EBDD`, `F4EAD8`, `F5ECDB`, `F6EFE1`, `F3E9D6`; 07 takes
+04's, being the same book): deliberate per-plate tuning, not a shared
+token yet. Ablating it across all seven is how that question gets
+decided.
 
 ## Build
 
@@ -157,6 +161,18 @@ lower-case letters, digits and hyphens.
 | ![without inking](preview/ablate/06-hand-press-impression--no-inking.png) | ![without laid](preview/ablate/06-hand-press-impression--no-laid.png) | ![without foxing](preview/ablate/06-hand-press-impression--no-foxing.png) | ![plain](preview/ablate/06-hand-press-impression--plain.png) |
 | without inking | without laid | without foxing | plain |
 
+### 07 front matter
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| [![full](preview/07-front-matter.png)](examples/07-front-matter.tex) | ![without paper](preview/ablate/07-front-matter--no-paper.png) | ![without imprint](preview/ablate/07-front-matter--no-imprint.png) | ![without title](preview/ablate/07-front-matter--no-title.png) |
+| full | without paper | without imprint | without title |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without argument](preview/ablate/07-front-matter--no-argument.png) | ![without table](preview/ablate/07-front-matter--no-table.png) | ![without fleuron](preview/ablate/07-front-matter--no-fleuron.png) | ![plain](preview/ablate/07-front-matter--plain.png) |
+| without argument | without table | without fleuron | plain |
+
 <!-- lab:end -->
 
 ## Toward website preprints
@@ -165,9 +181,9 @@ Kept as a standalone lab for now. When a treatment proves itself here,
 it graduates to a shared `.sty` for preprints exported to
 `levineuwirth.org` (sources live in `~/Repos/research/meyniel`, export
 via `make export`). What the lab suggests so far: the gloss, the
-apparatus of 04, and the monochrome discipline of 03 and 05 are
-candidates; the frame, the lettering and everything in 06 are costume,
-and stay here. No vault (`~/universum`) material enters this repo.
+apparatus of 04, the front matter of 07, and the monochrome discipline of
+03 and 05 are candidates; the frame, the lettering, 07's fleurons and
+imprint, and everything in 06 are costume, and stay here. No vault (`~/universum`) material enters this repo.
 
 ## License
 

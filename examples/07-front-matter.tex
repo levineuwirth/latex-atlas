@@ -1,0 +1,245 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 07: the front matter of a treatise in propositions, the leaf
+% before 04. A title block after the title leaves of the period, "The
+% Argument" in the place of the abstract, a Table of the Propositions that
+% gives each statement in the place of a list of theorems, a band of
+% fleurons between the parts, and the imprint at the foot. Against each,
+% what \maketitle, abstract, thmtools' \listoftheorems and \date give when
+% nothing is done. Page numbers in the table are set by hand: the treatise
+% is not here, and build.sh runs once.
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{pgfornament}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+% The statements in the table carry a little mathematics; cut it to the
+% text face as 04 does. Not a control here: 04 already tests it.
+\IfFontExistsTF{Garamond-Math.otf}{
+  \setmathfont{Garamond-Math.otf}[StylisticSet={5,7}]
+}{
+  \setmathfont{TeX Gyre Pagella Math}
+}
+
+% This leaf and 04 are one book, so the paper is 04's stock exactly: the
+% first plate whose tint is shared rather than tuned (see README).
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F5ECDB}
+  \definecolor{ink}{HTML}{241F19}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+}
+\pagecolor{parchment}
+\color{ink}
+\geometry{a4paper,top=30mm,bottom=30mm,left=34mm,right=34mm}
+\setlength{\parindent}{1.1em}
+\setlength{\parskip}{0pt}
+\pagestyle{empty}
+
+% The imprint at the foot of the leaf: printer, bookseller and the year,
+% in the period's manner; or the date under the author, where \maketitle
+% puts it. Decided first, because the title block reads \titledateline.
+\atlascontrol{imprint}{
+  \newcommand{\titledate}{}
+  \newcommand{\titledateline}{}
+  \newcommand{\imprint}{%
+    \begin{center}\footnotesize
+      \textls[90]{\textsc{Printed for the Author,}}\par
+      \textls[90]{\textsc{and to be had at levineuwirth.org.}}\par
+      \vspace{0.3em}
+      \textls[90]{\textsc{mmxxvi.}}\par
+    \end{center}}
+}{
+  \newcommand{\titledate}{15 September 2026}
+  \newcommand{\titledateline}{\vspace{0.3em}{\small\titledate}\par}
+  \newcommand{\imprint}{}
+}
+
+% The title block: the title in spaced capitals on two lines, the "or,"
+% subtitle in italic, the author set off by the period's "digested ... by",
+% a double rule beneath; or \maketitle.
+\atlascontrol{title}{
+  \newcommand{\titleblock}{%
+    \begin{center}
+      {\LARGE\textls[180]{OF THE PURSUIT}}\par
+      \vspace{0.35em}
+      {\LARGE\textls[180]{UPON A GRAPH}}\par
+      \vspace{0.8em}
+      {\large\itshape or, Cops and Robber, in Propositions}\par
+      \vspace{1.4em}
+      {\small Digested after the manner of the \textit{Principia}}\par
+      \vspace{0.3em}
+      {\small by}\par
+      \vspace{0.3em}
+      {\small\textls[140]{\textsc{Levi Neuwirth}}}\par
+      \titledateline
+      \vspace{1.2em}
+      \rule{0.45\linewidth}{0.8pt}\par\nointerlineskip
+      \vspace{1.6pt}\rule{0.45\linewidth}{0.3pt}\par
+    \end{center}}
+}{
+  \title{Of the Pursuit upon a Graph:\\ Cops and Robber, in Propositions}
+  \author{Levi Neuwirth}
+  \date{\titledate}
+  \newcommand{\titleblock}{\maketitle}
+}
+
+% The Argument: the treatise's matter told in one paragraph, headed in
+% spaced small capitals and set small in the full measure, as the argument
+% before a book was; or the class's abstract.
+\atlascontrol{argument}{
+  \NewDocumentEnvironment{Argument}{}
+    {\par\addvspace{1.4em}%
+     \centerline{\small\textls[130]{\textsc{The Argument.}}}\nobreak
+     \vspace{0.5em}\noindent\small\ignorespaces}
+    {\par}
+}{
+  \NewDocumentEnvironment{Argument}{}{\begin{abstract}}{\end{abstract}}
+}
+
+% A Table of the Propositions: each by its running number and kind, as its
+% head reads in the text, with its statement run in and the page set right
+% without leaders; or thmtools' list of theorems, which gives number, kind
+% and attribution over dot leaders through the same \@dottedtocline that
+% \listoffigures uses. \makeatletter must sit outside the control: the
+% argument is tokenised before it runs.
+\newcounter{propentry}
+\newcommand{\abbrTheorem}{Theor.}
+\newcommand{\abbrLemma}{Lem.}
+\newcommand{\abbrProblem}{Prob.}
+\makeatletter
+\atlascontrol{table}{
+  \newcommand{\tablehead}{%
+    \par\addvspace{1.6em}%
+    \centerline{\small\textls[130]{\textsc{A Table of the Propositions.}}}%
+    \nobreak\vspace{0.7em}}
+  % #1 head as set, #2 head as the modern list names it, #3 text, #4 page.
+  % The statement keeps clear of the number column: every line is set
+  % short by \rightskip, and \parfillskip=-\rightskip lets the last one
+  % run out to the edge, where \hfill puts the page. The same idiom as
+  % \@dottedtocline, without its dots.
+  \NewDocumentCommand{\tableline}{m m m m}{%
+    {\par\noindent\hangindent=1.5em\hangafter=1
+     \rightskip=2.55em plus 1em \parfillskip=-\rightskip
+     \textls[70]{\textsc{#1}}\ \textit{#3}%
+     \nobreak\hfill\nobreak\hbox to 1.55em{\hfil #4}\par}%
+    \vspace{0.3em}}
+  % #1 kind, #2 kind number, #3 attribution, #4 statement, #5 page
+  \NewDocumentCommand{\propentry}{m m m m m}{%
+    \stepcounter{propentry}%
+    \tableline{Prop.~\Roman{propentry}.\ \csname abbr#1\endcsname~#2.}{#1}{#4}{#5}}
+}{
+  \newcommand{\tablehead}{\section*{List of Theorems}}
+  \NewDocumentCommand{\tableline}{m m m m}{%
+    \@dottedtocline{1}{1.5em}{2.3em}{#2}{#4}}
+  \NewDocumentCommand{\propentry}{m m m m m}{%
+    \stepcounter{propentry}%
+    \@dottedtocline{1}{1.5em}{2.3em}{\numberline{\arabic{propentry}}#1 (#3)}{#5}}
+}
+\makeatother
+
+% A band of printer's flowers between the parts of the leaf; or the white
+% space alone, which is all the class gives.
+\atlascontrol{fleuron}{
+  \newcommand{\fleuron}{%
+    \par\addvspace{1.3em}\centerline{\pgfornament[width=20mm,color=ink]{71}}\par}
+}{
+  \newcommand{\fleuron}{\par\addvspace{1.3em}}
+}
+
+\begin{document}
+
+\titleblock
+
+\begin{Argument}
+That the pursuit of a robber by cops upon the vertices of a graph, each
+moving by turns along its edges, is decided by the figure of the graph
+alone. That one cop suffices exactly when the graph may be dismantled
+corner by corner (Prop.~I.); that the number of cops needful cannot grow
+in passing to a retract (Prop.~II.); that three suffice upon any graph
+drawn in the plane without crossing, and that upon a graph without short
+circuits no fewer than the least degree will serve (Props.~III., IV.);
+and that upon a surface of genus $g$, $\lfloor 3g/2 \rfloor + 3$ are
+enough (Prop.~V.). Lastly, of Meyniel's question, whether some multiple of
+the square root of the number of vertices suffices for every connected
+graph, which is set forth with what is known toward it (Prop.~VI. and
+Scholium).
+\end{Argument}
+
+\fleuron
+
+\tablehead
+\tableline{Definitions.}{Definitions}{Of corners, of dismantling, and of the cop number.}{1}
+\propentry{Theorem}{I}{Nowakowski and Winkler; Quilliot, 1983}{A finite connected graph is cop-win if and only if it is dismantlable.}{1}
+\propentry{Lemma}{I}{Berarducci and Intrigila, 1993}{If $H$ is a retract of $G$, then $c(H) \le c(G)$.}{1}
+\propentry{Theorem}{II}{Aigner and Fromme, 1984}{Three cops suffice upon every planar graph.}{2}
+\propentry{Lemma}{II}{Aigner and Fromme, 1984}{Upon a graph of girth five or more, no fewer cops than its least degree will serve.}{2}
+\propentry{Theorem}{III}{Schröder, 2001}{Upon a graph of genus $g$, $\lfloor 3g/2 \rfloor + 3$ cops suffice.}{3}
+\propentry{Problem}{I}{Meyniel, 1985}{Whether there is an absolute constant $C$ such that $c(G) \le C\sqrt{n}$ for every connected graph upon $n$ vertices.}{4}
+\tableline{Scholium.}{Remark}{Of the bounds yet demonstrated toward the Problem.}{4}
+
+\fleuron
+
+\vspace{0.6em}
+\footnotesize\noindent
+The leaf before the propositions of 04, and the same stock. The Argument
+stands where the abstract does and says what the treatise shews; the Table
+gives every proposition its statement, where a list of theorems gives its
+number and its name; the imprint puts the year at the foot, where the class
+puts the date under the author. The page numbers are set by hand.
+
+\medskip\noindent\itshape\atlasstamp
+\normalfont\normalsize
+
+\vfill
+\imprint
+
+\end{document}
