@@ -11,15 +11,19 @@
 %   rareligatures  the period's ct/st ties (07 --no-ligatures showed a
 %                  functional preprint wants them off; default off)
 %
-% What it sets: EB Garamond with Garamond-Math (Pagella pair as fallback),
-% old-style figures, the parchment stock and ink of 04/07/08 and their
-% geometry on A4, spaced small-capital heads for sections, a title leaf
-% after 07 with "The Argument" in place of the abstract, the proposition
-% apparatus of 04 (centred head, attribution beneath, italic statement,
-% Demonstration, Q.E.D., run-in definitions and scholia), a running head
-% under a hair rule and a centred folio, and 08's "The Authorities" head and
-% small type for the reference list. Bibliography *entries* are left as the
-% manuscript sets them; 08's biblatex style graduates separately.
+% What it sets: EB Garamond with Garamond-Math (Pagella pair as fallback,
+% and Pagella Math for the symbols Garamond-Math lacks), old-style figures
+% in prose and lining ones in tables and in the text of links, microtype's
+% protrusion and expansion, the parchment stock and ink of 04/07/08 and
+% their geometry on A4, spaced small-capital heads for sections, a title
+% leaf after 07 with "The Argument" in place of the abstract and the
+% class's first-page footnotes (keywords, subject class, \thanks) beneath,
+% the proposition apparatus of 04 (centred head, attribution beneath,
+% italic statement, Demonstration, Q.E.D., run-in definitions and
+% scholia), a running head under a hair rule and a centred folio, and 08's
+% "The Authorities" head and small type for the reference list.
+% Bibliography *entries* are left as the manuscript sets them; 08's
+% biblatex style graduates separately.
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{atlas}[2026/09/16 v0 latex-atlas graduated treatments]
 
@@ -37,18 +41,28 @@
 
 % --- faces ------------------------------------------------------------------
 \RequirePackage{fontspec}
+% A manuscript that loads mathtools ahead of this file gets two unicode-math
+% warnings at \begin{document}: that mathtools keeps \overbracket and
+% \underbracket, and that \coloneqq and its three siblings become
+% unicode-math's single glyphs. Both are unicode-math's own decisions,
+% made because this file loaded it; neither asks the author for anything.
+\PassOptionsToPackage{warnings-off={mathtools-colon,mathtools-overbracket}}{unicode-math}
 \RequirePackage{unicode-math}
 \RequirePackage{xcolor}
 \RequirePackage{geometry}
 \RequirePackage{fancyhdr}
 % microtype may already be loaded by the manuscript; no options here, so no
-% clash, and the settings the plates use go through \microtypesetup.
-% Protrusion and expansion are off because the HarfBuzz renderer does not
-% support them; tracking supplies \textls for the heads.
+% clash, and the settings go through \microtypesetup. Tracking supplies
+% \textls for the heads. Protrusion and expansion are ON, which the plates'
+% HarfBuzz renderer cannot do: the plates inherited HarfBuzz from 01 without
+% a reason, and a 35-page manuscript on this measure set eight overfull
+% lines (up to 17 pt) without expansion and none with it. The node renderer
+% keeps everything the plates use -- tracking, small capitals, old-style
+% figures, the common and the rare ligatures -- compared on a title leaf.
 \RequirePackage{microtype}
-\microtypesetup{tracking=true,protrusion=false,expansion=false}
+\microtypesetup{tracking=true,protrusion=true,expansion=true}
 
-\defaultfontfeatures{Renderer=HarfBuzz}
+\defaultfontfeatures{Renderer=Node}
 \ifatlas@rare
   \defaultfontfeatures+[EB Garamond]{Ligatures=Rare}
 \fi
@@ -65,6 +79,20 @@
 }
 \IfFontExistsTF{Garamond-Math.otf}{
   \setmathfont{Garamond-Math.otf}[StylisticSet={5,7}]
+  % Garamond-Math lacks 54 of unicode-math's symbols that Pagella Math has,
+  % and a missing character is dropped from the page with only a log line
+  % to say so (a manuscript's \sharp came out as nothing). These are they,
+  % found by setting every command of unicode-math-table.tex under each
+  % font and reading the two logs: the ≗ ≜ ≝ family, the card suits, the
+  % accidentals, ⪋ ⪌ ⪕ ⪖, the checkmark and the maltese cross, and the
+  % bold sans-serif ∂ ϰ ϕ ϱ ϖ. luaotfload's fallback= feature does not
+  % reach math fonts, so the list is explicit; regenerate it if either
+  % font changes.
+  \setmathfont{TeX Gyre Pagella Math}[range={
+    "2257-"225F, "2305-"2306, "2320-"2321, "23AE, "23B2-"23B3,
+    "2422-"2423, "2591-"2593, "2660-"2667, "266A, "266D-"266F,
+    "2713, "2720, "27E0-"27E3, "27F4, "2A8B-"2A8C, "2A95-"2A96,
+    "1D789, "1D78C-"1D78F, "1D7C3, "1D7C6-"1D7C9}]
 }{
   \setmathfont{TeX Gyre Pagella Math}
 }
@@ -84,6 +112,25 @@
 \setlength{\parskip}{0pt}
 % Loaded last, so hyperref, if the manuscript uses it, is already there.
 \@ifpackageloaded{hyperref}{\hypersetup{colorlinks=true,allcolors=ink}}{}
+% 08's rule, prose figures old-style and codes lining, applied to the text
+% of every external link: a DOI or an arXiv number hand-set as
+% \href{...}{10.1016/...} is text, and took the old-style figures ("IO.IOI6").
+% \url escapes only because its digits are set in math mode. The driver's
+% \hyper@linkurl{text}{url} is the one place both go through.
+\@ifpackageloaded{hyperref}{%
+  \@ifundefined{hyper@linkurl}{}{%
+    \let\atlas@linkurl\hyper@linkurl
+    \def\hyper@linkurl#1#2{\atlas@linkurl{{\addfontfeature{Numbers=Lining}#1}}{#2}}}}{}
+
+% --- tables -----------------------------------------------------------------------
+% 03's finding: a table's figures are lining and tabular, so columns align.
+% A manuscript's table mixes text cells and math cells, and the math font's
+% digits are lining already; without this a column of years in text sat
+% old-style beside a column of values in math. A table of words is untouched.
+\AddToHook{env/tabular/begin}{\addfontfeature{Numbers={Lining,Tabular}}}
+\AddToHook{env/tabular*/begin}{\addfontfeature{Numbers={Lining,Tabular}}}
+\AddToHook{env/tabularx/begin}{\addfontfeature{Numbers={Lining,Tabular}}}
+\AddToHook{env/longtable/begin}{\addfontfeature{Numbers={Lining,Tabular}}}
 
 % --- heads ----------------------------------------------------------------------
 % \atlas@head[note]{text}: centred spaced small capitals, with an italic note
@@ -163,13 +210,38 @@
   \global\setbox\atlas@abstractbox=\vtop\bgroup
     \hsize\textwidth
     \atlas@head{The Argument.}\small\noindent\ignorespaces}
-  {\par\egroup}
+  % article's order is \maketitle then abstract: the leaf has been set, so
+  % set the Argument here, as amsart does for an abstract that comes late.
+  {\par\egroup\ifx\maketitle\relax\atlas@setabstract\fi}
+% The Argument, then the space amsart leaves before the body (34 pt less a
+% line): a manuscript whose body opens with a paragraph, not a section,
+% would otherwise run straight on from the abstract's last line.
+\newcommand{\atlas@setabstract}{%
+  \ifvoid\atlas@abstractbox\else
+    \box\atlas@abstractbox\prevdepth\z@
+    \dimen@34\p@ \advance\dimen@-\baselineskip \vskip\dimen@\relax
+  \fi}
 \renewcommand{\maketitle}{%
   \thispagestyle{empty}%
   \begingroup
   \def\address##1##2{{\small\itshape ##2}\par}%
   \def\curraddr##1##2{}\def\email##1##2{}\def\urladdr##1##2{}%
   \def\and{\ and\ }%
+  % hyperref wraps \maketitle to use the unpatched footnote commands inside
+  % it (its anchors need a mark that these footnotes never get). This
+  % \renewcommand replaced that wrapper, so do what it did, in this group.
+  \@ifundefined{H@@footnotetext}{}{%
+    \let\@footnotetext\H@@footnotetext \let\@footnotemark\H@@footnotemark}%
+  % amsart's first-page footnotes, unmarked: subject class, keywords and
+  % \thanks, as its \@adminfootnotes sets them; the date is not repeated,
+  % the leaf gives it.
+  {\let\@makefnmark\relax \let\@thefnmark\relax
+   \@ifundefined{@subjclass}{}{\ifx\@empty\@subjclass\else\@footnotetext{\@setsubjclass}\fi}%
+   \@ifundefined{@keywords}{}{\ifx\@empty\@keywords\else\@footnotetext{\@setkeywords}\fi}%
+   \@ifundefined{thankses}{}{\ifx\@empty\thankses\else\@footnotetext{\def\par{\let\par\@par}\@setthanks}\fi}}%
+  % article's \thanks: a symbol mark in the author line, the text as a
+  % footnote after the leaf, as its \maketitle does.
+  \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
   \begin{center}
     % A manuscript's hand-placed \\ was set for its own class's measure;
     % in spaced capitals the title is let to flow. Redefined here, inside
@@ -187,8 +259,9 @@
     \rule{0.45\linewidth}{0.8pt}\par\nointerlineskip
     \vspace{1.6pt}\rule{0.45\linewidth}{0.3pt}\par
   \end{center}
+  \@ifundefined{@thanks}{}{\@thanks\global\let\@thanks\@empty}%
   \endgroup
-  \ifvoid\atlas@abstractbox\else\box\atlas@abstractbox\fi
+  \atlas@setabstract
   \markboth{\shorttitle}{\shorttitle}%
   \global\let\maketitle\relax}
 
