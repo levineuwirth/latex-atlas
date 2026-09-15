@@ -1,0 +1,384 @@
+%!TEX program = lualatex
+%!ATLAS passes=3
+%!ATLAS biber
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 08: the last leaf of the treatise of 04 and 07, where the
+% authorities are named. A General Scholium cites them by name and year, run
+% into the sentence, and a table lists them under the name the text used:
+% entries hanging from a small-capital family name, the year and the
+% figures old-style, the identifier set as a word of the text and the
+% address left out. Against each, what \usepackage{biblatex} gives when
+% nothing is done: its numeric style, plain names, the face's lining
+% figures, and the DOI and URL in typewriter. The style is a real .bbx and
+% .cbx, written below and loaded by name; the .bib is written here too, so
+% the plate stays standalone. Three passes: the second reads biber's .bbl,
+% the third settles the .aux (the page is complete after the second; the
+% third only quiets "Please rerun LaTeX").
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+% Old-style figures for the whole leaf, as every plate has them; or the
+% figures the face gives when nothing is asked, which for EB Garamond and
+% Pagella are lining, and for Latin Modern are all there is. The one plate
+% where the figures are a control: a reference list is the densest ground
+% of figures in a paper. Declared as a default so the two font branches
+% below stay one call each.
+\atlascontrol{oldstyle}{
+  \defaultfontfeatures+[EB Garamond]{Numbers={OldStyle,Proportional}}
+  \defaultfontfeatures+[TeX Gyre Pagella]{Numbers={OldStyle,Proportional}}
+}{}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[Ligatures={TeX,Common,Rare}]
+}{
+  \setmainfont{TeX Gyre Pagella}[Ligatures={TeX,Common}]
+}
+% One title carries a little mathematics; cut it to the text face as 04
+% does. Not a control here: 04 already tests it.
+\IfFontExistsTF{Garamond-Math.otf}{
+  \setmathfont{Garamond-Math.otf}[StylisticSet={5,7}]
+}{
+  \setmathfont{TeX Gyre Pagella Math}
+}
+
+% The same book as 04 and 07, so the same stock.
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F5ECDB}
+  \definecolor{ink}{HTML}{241F19}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+}
+\pagecolor{parchment}
+\color{ink}
+\geometry{a4paper,top=30mm,bottom=30mm,left=34mm,right=34mm}
+\setlength{\parindent}{1.1em}
+\setlength{\parskip}{0pt}
+\pagestyle{empty}
+
+% --- the authorities, as data ---------------------------------------------
+% The six works the attributions of 04 and 07 name. Written by the plate so
+% the file stays standalone; each variant writes its own copy under its own
+% jobname, which is what keeps them apart under -j. Every DOI resolves; the
+% URLs are the resolver's, as a reference manager exports them.
+\begin{filecontents*}[overwrite,nowarn]{\jobname.bib}
+@article{nowakowski1983,
+  author       = {Nowakowski, Richard and Winkler, Peter},
+  title        = {Vertex-to-vertex pursuit in a graph},
+  journaltitle = {Discrete Mathematics},
+  volume       = {43},
+  number       = {2--3},
+  date         = {1983},
+  pages        = {235--239},
+  doi          = {10.1016/0012-365X(83)90160-7},
+  url          = {https://doi.org/10.1016/0012-365X(83)90160-7},
+}
+@thesis{quilliot1983,
+  author       = {Quilliot, Alain},
+  title        = {Problèmes de jeux, de point fixe, de connectivité et de
+                  représentation sur des graphes, des ensembles ordonnés et
+                  des hypergraphes},
+  type         = {Thèse d'État},
+  institution  = {Université de Paris VI},
+  date         = {1983},
+}
+@article{aigner1984,
+  author       = {Aigner, Martin and Fromme, Michael},
+  title        = {A game of cops and robbers},
+  journaltitle = {Discrete Applied Mathematics},
+  volume       = {8},
+  number       = {1},
+  date         = {1984},
+  pages        = {1--12},
+  doi          = {10.1016/0166-218X(84)90073-8},
+  url          = {https://doi.org/10.1016/0166-218X(84)90073-8},
+}
+@article{frankl1987,
+  author       = {Frankl, Peter},
+  title        = {Cops and robbers in graphs with large girth and {Cayley} graphs},
+  journaltitle = {Discrete Applied Mathematics},
+  volume       = {17},
+  number       = {3},
+  date         = {1987},
+  pages        = {301--305},
+  doi          = {10.1016/0166-218X(87)90033-3},
+  url          = {https://doi.org/10.1016/0166-218X(87)90033-3},
+}
+@article{berarducci1993,
+  author       = {Berarducci, Alessandro and Intrigila, Benedetto},
+  title        = {On the cop number of a graph},
+  journaltitle = {Advances in Applied Mathematics},
+  volume       = {14},
+  number       = {4},
+  date         = {1993},
+  pages        = {389--403},
+  doi          = {10.1006/aama.1993.1019},
+  url          = {https://doi.org/10.1006/aama.1993.1019},
+}
+@incollection{schroder2001,
+  author       = {Schröder, Bernd S. W.},
+  title        = {The copnumber of a graph is bounded by
+                  $\lfloor 3/2\,\mathrm{genus}(G) \rfloor + 3$},
+  booktitle    = {Categorical Perspectives},
+  editor       = {Koslowski, Jürgen and Melton, Austin},
+  series       = {Trends in Mathematics},
+  publisher    = {Birkhäuser},
+  location     = {Boston},
+  date         = {2001},
+  pages        = {243--263},
+  doi          = {10.1007/978-1-4612-1370-3_14},
+  url          = {https://doi.org/10.1007/978-1-4612-1370-3_14},
+}
+\end{filecontents*}
+
+% --- the style: the list -----------------------------------------------------
+% A bibliography style in the period's manner, on biblatex's standard
+% drivers. What it fixes is the shape of the list: entries hanging from the
+% name they are found by, every name inverted and cut to initials, the year
+% after the journal in parentheses, "vol." and "pp." spelt, no quotation
+% marks about a title, no "In:" before a journal, the whole set small under
+% a centred head. The dress that the controls test (small capitals, the
+% figures, the identifier) is laid on from the preamble below, so that each
+% can be taken off alone; when the style graduates to the .sty they move in
+% here.
+\begin{filecontents*}[overwrite,nowarn]{\jobname.bbx}
+\ProvidesFile{\jobname.bbx}[2026/09/15 latex-atlas: the authorities]
+\RequireBibliographyStyle{standard}
+\ExecuteBibliographyOptions{labeldateparts,sorting=nyt,giveninits=true,
+  maxbibnames=99,isbn=false,eprint=false}
+\providecommand*{\textls}[2][]{#2}
+
+% Every author family first, and the last joined with a comma before the
+% "and": "Nowakowski, R., and Winkler, P." Editors keep the natural order
+% and biblatex's delimiter, "edited by J. Koslowski and A. Melton".
+\DeclareNameAlias{sortname}{family-given}
+\DeclareNameAlias{author}{sortname}
+\DeclareDelimFormat[bib]{finalnamedelim}{%
+  \ifcurrentname{author}
+    {\addcomma\space}
+    {\ifnumgreater{\value{liststop}}{2}{\finalandcomma}{}\addspace}%
+  \bibstring{and}\space}
+\DefineBibliographyStrings{english}{byeditor = {edited by}}
+
+% The list: hanging entries, no label, set small, under a centred head in
+% spaced small capitals, as the heads of 04 and 07 are set.
+\setlength{\bibhang}{1.5em}
+\setlength{\bibitemsep}{0.3em plus 0.1em}
+\renewcommand*{\bibfont}{\normalfont\small}
+\defbibenvironment{bibliography}
+  {\list{}{%
+     \setlength{\leftmargin}{\bibhang}%
+     \setlength{\itemindent}{-\leftmargin}%
+     \setlength{\itemsep}{\bibitemsep}%
+     \setlength{\parsep}{\bibparsep}}}
+  {\endlist}
+  {\item}
+\DefineBibliographyStrings{english}{references = {The Authorities}}
+\defbibheading{bibliography}[\refname.]{%
+  \par\addvspace{1.6em}%
+  \centerline{\small\textls[130]{\textsc{#1}}}%
+  \nobreak\vspace{0.7em}}
+
+% The entry: title in roman without quotation marks, the thesis's in italic;
+% "Journal, vol. 8 (1984), pp. 1--12."; "In:" only before a book; the
+% publisher before its place, and the year after both.
+\DeclareFieldFormat[article,incollection,inproceedings]{title}{#1\isdot}
+\DeclareFieldFormat[thesis]{title}{\mkbibemph{#1}}
+\DeclareFieldFormat[article]{volume}{\bibstring{volume}~#1}
+\renewbibmacro*{in:}{%
+  \ifentrytype{article}{}{\printtext{\bibstring{in}\intitlepunct}}}
+\renewbibmacro*{volume+number+eid}{\printfield{volume}}
+\renewbibmacro*{journal+issuetitle}{%
+  \usebibmacro{journal}%
+  \setunit*{\addcomma\space}%
+  \iffieldundef{series}{}{\newunit\printfield{series}\setunit{\addspace}}%
+  \usebibmacro{volume+number+eid}%
+  \setunit{\addnbspace}%
+  \usebibmacro{issue+date}%
+  \newunit}
+\renewbibmacro*{publisher+location+date}{%
+  \printlist{publisher}%
+  \setunit*{\addcomma\space}%
+  \printlist{location}%
+  \setunit*{\addcomma\space}%
+  \usebibmacro{date}%
+  \newunit}
+\endinput
+\end{filecontents*}
+
+% --- the style: the citations -----------------------------------------------
+% The citation names the authority and dates it, run into the sentence:
+% \textcite gives "Aigner and Fromme (1984)", \parencite "(Aigner and
+% Fromme, 1984)". Several works in one citation are separated by
+% semicolons, and a year that two neighbours share is given once, after
+% the last of them, so that \parencite of Nowakowski--Winkler and Quilliot
+% prints "(Nowakowski and Winkler; Quilliot, 1983)": the string 04 sets by
+% hand under Proposition I. The year is therefore held back until the next
+% entry, or the end, says whether it changes.
+\begin{filecontents*}[overwrite,nowarn]{\jobname.cbx}
+\ProvidesFile{\jobname.cbx}[2026/09/15 latex-atlas: citations by name and year]
+\ExecuteBibliographyOptions{labeldateparts,uniquename=init,uniquelist=true}
+\DeclareDelimFormat{nameyeardelim}{\addcomma\space}
+\DeclareDelimFormat{multicitedelim}{\addsemicolon\space}
+\newbool{cbx:textcite}
+
+% The year held back from the entry before: as ", 1983", or as " (1983)"
+% after a name in the sentence.
+\newbibmacro*{cite:save}{%
+  \savefield{labelyear}{\cbx@lastyear}%
+  \iffieldundef{extradate}
+    {\global\let\cbx@lastextra\@empty}
+    {\xdef\cbx@lastextra{\mknumalph{\thefield{extradate}}}}}
+\newbibmacro*{cite:year}{%
+  \ifbool{cbx:textcite}
+    {\setunit{\addspace}%
+     \printtext{\bibopenparen\cbx@lastyear\cbx@lastextra\bibcloseparen}}
+    {\setunit{\printdelim{nameyeardelim}}%
+     \printtext{\cbx@lastyear\cbx@lastextra}}}
+\newbibmacro*{cite:year+postnote}{%
+  \ifbool{cbx:textcite}
+    {\setunit{\addspace}%
+     \printtext{\bibopenparen\cbx@lastyear\cbx@lastextra}%
+     \usebibmacro{postnote}%
+     \bibcloseparen}
+    {\usebibmacro{cite:year}%
+     \usebibmacro{postnote}}}
+\newbibmacro*{cite}{%
+  \iffirstcitekey
+    {}
+    {\iffieldequals{labelyear}{\cbx@lastyear}
+       {\setunit{\printdelim{multicitedelim}}}
+       {\usebibmacro{cite:year}%
+        \setunit{\printdelim{multicitedelim}}}}%
+  \printnames{labelname}%
+  \usebibmacro{cite:save}}
+
+\DeclareCiteCommand{\cite}
+  {\boolfalse{cbx:textcite}\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}\usebibmacro{cite}}
+  {}
+  {\usebibmacro{cite:year+postnote}}
+\DeclareCiteCommand{\parencite}[\mkbibparens]
+  {\boolfalse{cbx:textcite}\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}\usebibmacro{cite}}
+  {}
+  {\usebibmacro{cite:year+postnote}}
+\DeclareCiteCommand{\textcite}
+  {\booltrue{cbx:textcite}\usebibmacro{prenote}}
+  {\usebibmacro{citeindex}\usebibmacro{cite}}
+  {}
+  {\usebibmacro{cite:year+postnote}}
+\endinput
+\end{filecontents*}
+
+% The authorities cited by name and year and listed under the name, by the
+% .bbx and .cbx above; or biblatex as \usepackage{biblatex} loads it, the
+% numeric style, where a number in brackets stands for the name in the text
+% and labels the entry in the list, under \section*{References}.
+\atlascontrol{names}{
+  \usepackage[bibstyle=\jobname,citestyle=\jobname]{biblatex}
+}{
+  \usepackage{biblatex}
+}
+\addbibresource{\jobname.bib}
+
+% The author's family name in small capitals, lightly spaced, in the list
+% only: editors keep the text face, and so do the cites in the text, as
+% 04's attributions do; or the name as biblatex sets it.
+\atlascontrol{smallcaps}{
+  \AtBeginBibliography{%
+    \renewcommand*{\mkbibnamefamily}[1]{%
+      \ifcurrentname{author}{\textls[50]{\textsc{#1}}}{#1}}}
+}{}
+
+% The identifier as a word of the entry, in the text face and its figures,
+% and the address left out, the DOI being the durable pointer and a URL
+% not a bibliographic datum; or biblatex's "doi:" and "url:" both, the
+% identifier and the address in typewriter.
+\atlascontrol{doi}{
+  \ExecuteBibliographyOptions{url=false}
+  \DeclareFieldFormat{doi}{\mkbibacro{DOI}\space{\urlstyle{same}\nolinkurl{#1}}}
+}{}
+
+\begin{document}
+
+\begin{center}
+  {\small\textls[130]{\textsc{Of the Pursuit upon a Graph}}}\par
+  \vspace{0.3em}
+  {\Large\itshape Cops and Robber, in Propositions}\par
+  \vspace{0.3em}
+  {\footnotesize the last leaf}
+\end{center}
+
+\vspace{0.6em}
+
+\par\addvspace{1.1em plus .3em}%
+\centerline{\small\textls[120]{\textsc{Scholium Generale.}}}%
+\nobreak\vspace{.3em}\noindent
+That a single cop wins exactly upon the dismantlable graphs (Prop.~I.) was
+shewn twice in one year \parencite{nowakowski1983,quilliot1983}: by
+\citeauthor{nowakowski1983}, for the game as it is played here, and by
+\citeauthor{quilliot1983}, in a thesis. The number of cops was made a
+quantity of the graph by \textcite{aigner1984}, who found three enough upon
+every planar graph, and upon a graph of girth five no fewer than the least
+degree (Props.~III., IV.). That the number cannot grow in passing to a
+retract (Prop.~II.) is the lemma of \textcite{berarducci1993}; the bound
+by the genus (Prop.~V.) is that of \textcite{schroder2001}. The Problem
+is Meyniel's, who did not print it; it is set down first by
+\textcite{frankl1987}, with the bound $n \log\log n / \log n$ upon every
+connected graph of $n$ vertices, since improved (Scholium to Prop.~VI.).
+
+\printbibliography
+
+\vspace{1.2em}
+\footnotesize\noindent
+The last leaf of the treatise of which 04 shews a page and 07 the first
+leaf, numbered as 07's Table numbers the whole. The Scholium names the
+authorities where it uses them and the list gives each under the name it
+was cited by: what the text calls (Nowakowski and Winkler; Quilliot, 1983)
+the list heads Nowakowski, R., and Winkler, P. The list, the entry and the
+citation are a \texttt{.bbx} and a \texttt{.cbx} written in this file and
+loaded by name, and the \texttt{.bib} is written here too; biber runs
+between the passes. The small capitals, the old-style figures and the
+identifier as text are laid on from the preamble, so each can be taken off
+alone.
+
+\medskip\noindent\itshape\atlasstamp
+
+\end{document}

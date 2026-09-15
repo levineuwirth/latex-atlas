@@ -19,8 +19,8 @@ toward reusable website preprint styles.
 | 01 rubricated incipit | 02 marginal scholia | 03 hatched bar chart |
 | [![04](preview/04-propositions.png)](examples/04-propositions.tex) | [![05](preview/05-engraved-graph-plate.png)](examples/05-engraved-graph-plate.tex) | [![06](preview/06-hand-press-impression.png)](examples/06-hand-press-impression.tex) |
 | 04 propositions | 05 engraved graph plate | 06 hand-press impression |
-| [![07](preview/07-front-matter.png)](examples/07-front-matter.tex) | | |
-| 07 front matter | | |
+| [![07](preview/07-front-matter.png)](examples/07-front-matter.tex) | [![08](preview/08-bibliography.png)](examples/08-bibliography.tex) | |
+| 07 front matter | 08 bibliography | |
 
 ## Examples
 
@@ -33,6 +33,7 @@ toward reusable website preprint styles.
 | 05 | `05-engraved-graph-plate.tex` | an engraved plate of two graphs: tapered burin strokes, hatched spheres, a matching by line weight, frame and lettering | paper, taper, matching, stipple, frame, lettering |
 | 06 | `06-hand-press-impression.tex` | the hand press, counterfeited in a LuaTeX callback: baseline scatter, ink squash, uneven inking, laid paper, foxing | paper, jitter, inkspread, inking, laid, foxing |
 | 07 | `07-front-matter.tex` | the leaf before 04: a period title block against `\maketitle`, *The Argument* against the abstract, a Table of the Propositions with their statements against a list of theorems, fleurons, the imprint against the date; the period's ct/st ties against the common ligatures | ligatures, paper, imprint, title, argument, table, fleuron |
+| 08 | `08-bibliography.tex` | the last leaf of 04 and 07: the authorities cited by name and year and listed under the name, by a real `.bbx`/`.cbx` written in the plate, against biblatex's numeric default; small-capital family names, old-style figures for the whole leaf, the DOI as text without the URL | oldstyle, paper, names, smallcaps, doi |
 
 Every control has a *modern default*: what you get from the document
 class, the plotting library, or the engine when you do nothing. The
@@ -41,9 +42,9 @@ Q.E.D. a tombstone, of parchment white paper. So each lab variant is a
 fair comparison, not a page with a hole in it.
 
 `paper` is a control in every plate. The tints differ slightly per plate
-(`F5EDDC`, `F4EBDD`, `F4EAD8`, `F5ECDB`, `F6EFE1`, `F3E9D6`; 07 takes
-04's, being the same book): deliberate per-plate tuning, not a shared
-token yet. Ablating it across all seven is how that question gets
+(`F5EDDC`, `F4EBDD`, `F4EAD8`, `F5ECDB`, `F6EFE1`, `F3E9D6`; 07 and 08
+take 04's, being the same book): deliberate per-plate tuning, not a
+shared token yet. Ablating it across all eight is how that question gets
 decided.
 
 ## Build
@@ -52,13 +53,28 @@ decided.
 ./build.sh                          # every plate, full treatment, into build/
 ./build.sh 04-propositions          # a subset
 ./build.sh --ablate                 # also every lab variant, into build/ablate/
+./build.sh -j --ablate              # the same, one job per core (-j4 for four)
 ./preview.sh                        # PNGs into preview/ and preview/ablate/
 ./gallery.sh                        # regenerate the lab gallery in this README
 ```
 
+One `lualatex` run per PDF is the rule. A plate that needs more declares
+it in its header, next to `%!TEX program`, and every variant inherits the
+declaration:
+
+```latex
+%!ATLAS passes=3
+%!ATLAS biber
+```
+
+`passes=N` runs `lualatex` N times under the same jobname; `biber` runs
+biber after the first pass, on the `.bcf` in the output directory. 08 is
+the plate that needs both.
+
 Requirements: LuaLaTeX (TeX Live 2026), `fontspec`, `unicode-math`,
 `amsthm`, `geometry`, `microtype`, `xcolor`, `tikz` (+ `calc`,
-`patterns.meta`), `pgfornament`, `fancyhdr`, `lettrine`, `luacode`.
+`patterns.meta`), `pgfornament`, `fancyhdr`, `lettrine`, `luacode`,
+`biblatex` with `biber`.
 EB Garamond and Garamond-Math if present (`texlive-fontsextra`), else
 TeX Gyre Pagella and Pagella Math; the committed previews are the
 Garamond renderings. Previews need poppler's `pdftoppm`; they are
@@ -85,7 +101,9 @@ To add a plate: copy the lab block, wrap each device you want to test in
 `\atlascontrol` with an honest modern default in the third argument, end
 the plate with `\atlasstamp`, and run the three scripts. `build.sh` finds
 the controls by grepping for `\atlascontrol{name}`, so a name is
-lower-case letters, digits and hyphens.
+lower-case letters, digits and hyphens. A plate must stay one file: what
+it needs beyond the TeX distribution it writes itself, as 08 writes its
+`.bib`, `.bbx` and `.cbx` in `filecontents*` blocks under `\jobname`.
 
 <!-- lab:begin -->
 
@@ -178,6 +196,18 @@ lower-case letters, digits and hyphens.
 | ![plain](preview/ablate/07-front-matter--plain.png) | | | |
 | plain | | | |
 
+### 08 bibliography
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| [![full](preview/08-bibliography.png)](examples/08-bibliography.tex) | ![without oldstyle](preview/ablate/08-bibliography--no-oldstyle.png) | ![without paper](preview/ablate/08-bibliography--no-paper.png) | ![without names](preview/ablate/08-bibliography--no-names.png) |
+| full | without oldstyle | without paper | without names |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without smallcaps](preview/ablate/08-bibliography--no-smallcaps.png) | ![without doi](preview/ablate/08-bibliography--no-doi.png) | ![plain](preview/ablate/08-bibliography--plain.png) | |
+| without smallcaps | without doi | plain | |
+
 <!-- lab:end -->
 
 ## Toward website preprints
@@ -186,8 +216,8 @@ Kept as a standalone lab for now. When a treatment proves itself here,
 it graduates to a shared `.sty` for preprints exported to
 `levineuwirth.org` (sources live in `~/Repos/research/meyniel`, export
 via `make export`). What the lab suggests so far: the gloss, the
-apparatus of 04, the front matter of 07, and the monochrome discipline of
-03 and 05 are candidates; the frame, the lettering, 07's fleurons and
+apparatus of 04, the front matter of 07, the reference list of 08, and
+the monochrome discipline of 03 and 05 are candidates; the frame, the lettering, 07's fleurons and
 imprint, and everything in 06 are costume, and stay here. No vault (`~/universum`) material enters this repo.
 
 ## License
