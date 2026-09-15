@@ -1,0 +1,214 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 06: the impression of a hand press, pure costume. After the
+% paragraph builder has set each line, a Lua callback walks its glyphs and
+% scatters their baselines by a hair (type never sat perfectly level in the
+% forme), and wraps the line in a PDF text-render literal that strokes each
+% glyph's outline by a small, per-line-varying width (ink squash: a hard pull
+% swells the letter, a soft one leaves it grey). Beneath, the sheet is laid
+% paper with chain lines, foxed and darkened toward the edges. Each is a
+% control; none belongs in a preprint, which is what the lab is for.
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
+
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{luacode}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+
+% Paper tint is per-example tuning for this pressed sheet, not a shared
+% token yet; the examples deliberately differ slightly (see README).
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F3E9D6}
+  \definecolor{ink}{HTML}{2A231C}
+  \definecolor{foxing}{HTML}{8A5A2B}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+  \definecolor{foxing}{HTML}{8A5A2B}
+}
+\pagecolor{parchment}
+\color{ink}
+\geometry{a5paper,top=22mm,bottom=24mm,left=21mm,right=21mm}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0pt}
+\pagestyle{empty}
+
+% The press. Amplitudes are zero until a control sets them; the callback is
+% registered regardless and does nothing at zero. Deterministic: one LCG,
+% seeded once, so the same source pulls the same sheet every time.
+\begin{luacode*}
+atlas = atlas or {}
+atlas.jitter, atlas.inkspread, atlas.inking = 0, 0, 0
+local seed = 1683
+local function rnd()
+  seed = (seed * 1103515245 + 12345) % 2147483648
+  return seed / 1073741824 - 1
+end
+local GLYPH, HLIST, VLIST = node.id("glyph"), node.id("hlist"), node.id("vlist")
+-- Raise or lower every glyph in a line, and in any box nested in it, by up
+-- to amp points.
+local function scatter(head, amp)
+  for n in node.traverse(head) do
+    if n.id == GLYPH then
+      n.yoffset = n.yoffset + math.floor(amp * rnd() * 65536)
+    elseif (n.id == HLIST or n.id == VLIST) and n.head then
+      scatter(n.head, amp)
+    end
+  end
+end
+local function literal(s)
+  local w = node.new("whatsit", "pdf_literal")
+  w.mode = 1
+  w.data = s
+  return w
+end
+-- Text render mode 2 fills and strokes each glyph; the stroke width is the
+-- ink squash, base plus a per-line variation. Reset at the end of the line
+-- so nothing outside the paragraph inherits it.
+local function impress(head)
+  for line in node.traverse_id(HLIST, head) do
+    if line.head then
+      local w = atlas.inkspread + atlas.inking * rnd()
+      if w > 0.005 then
+        line.head = node.insert_before(line.head, line.head,
+          literal(string.format("2 Tr %.3f w", w)))
+        node.insert_after(line.head, node.tail(line.head), literal("0 Tr"))
+      end
+      if atlas.jitter > 0 then scatter(line.head, atlas.jitter) end
+    end
+  end
+  return true
+end
+luatexbase.add_to_callback("post_linebreak_filter", impress, "atlas.impress")
+\end{luacode*}
+
+% Baseline scatter, in points; or type that sits level.
+\atlascontrol{jitter}{\directlua{atlas.jitter = 0.28}}{}
+
+% Ink squash: a uniform stroke on every glyph; or the outline as cut.
+\atlascontrol{inkspread}{\directlua{atlas.inkspread = 0.09}}{}
+
+% Uneven inking: the squash varies from line to line; or every line alike.
+\atlascontrol{inking}{\directlua{atlas.inking = 0.07}}{}
+
+% The sheet, drawn in the shipout background (origin top-left, y downward).
+% Laid paper: fine laid lines and chain lines at a hand's breadth.
+\atlascontrol{laid}{
+  \AddToHook{shipout/background}{\put(0,0){%
+    \begin{tikzpicture}[overlay]
+      \foreach \y in {0,1.15,...,210} {
+        \draw[ink,opacity=0.045,line width=0.25pt] (0,-\y mm) -- (\paperwidth,-\y mm);
+      }
+      \foreach \x in {13,38,...,148} {
+        \draw[ink,opacity=0.07,line width=0.55pt] (\x mm,0) -- (\x mm,-\paperheight);
+      }
+    \end{tikzpicture}}}
+}{}
+
+% Foxing: deterministic rust spots, and a darkening toward the edges.
+\atlascontrol{foxing}{
+  \AddToHook{shipout/background}{\put(0,0){%
+    \begin{tikzpicture}[overlay]
+      \pgfmathsetseed{1683}
+      \foreach \i in {1,...,70} {
+        \pgfmathsetmacro{\fx}{rnd*148}
+        \pgfmathsetmacro{\fy}{rnd*210}
+        \pgfmathsetmacro{\fr}{0.3+rnd*rnd*2.4}
+        \pgfmathsetmacro{\fo}{0.03+rnd*0.09}
+        \fill[foxing,opacity=\fo] (\fx mm,-\fy mm) ellipse ({\fr mm} and {0.8*\fr mm});
+      }
+      \shade[inner color=parchment,outer color=foxing,opacity=0.10]
+        (0,0) rectangle (\paperwidth,-\paperheight);
+    \end{tikzpicture}}}
+}{}
+
+\begin{document}
+
+\begin{center}
+  {\small\textls[130]{\textsc{Mechanick Exercises}}}\par
+  \vspace{0.3em}
+  {\Large\itshape Of the Press-man's Trade}\par
+  \vspace{0.3em}
+  {\footnotesize the impression of a hand press, counterfeited}
+\end{center}
+
+\vspace{0.8em}
+
+The forme being laid upon the press-stone and locked in the chase, the
+press-man takes the ink upon his balls and beats the face of the type,
+going twice over the forme and turning the balls between, that the ink
+lie even. He lays the sheet upon the tympan, brings down the frisket,
+runs in the carriage, and pulls.
+
+A hard pull drives the type into the paper, and the letter shews its
+outline swelled with ink; a soft pull leaves the impression grey and
+uneven. Neither is the fault of the type. The letters were cast true, but
+they are locked up by hand, and a quoin driven a hair too far will lift a
+whole line above its fellows, so that the eye, reading along the
+baseline, is carried up and down as over a ploughed field.
+
+The paper is wet, and takes the impression the better for it, and being
+laid it bears the marks of the mould: the fine laid lines, and the chain
+lines at a hand's breadth, which shew against the light. Kept damp too
+long it foxes, and the sheet wears its age at the edges first.
+
+\vspace{1em}
+\begin{center}
+  \rule{0.3\linewidth}{0.45pt}
+\end{center}
+
+\footnotesize\noindent
+Nothing here belongs in a preprint. Baseline scatter and ink squash are
+done after the paragraph is set, by a Lua callback on the line's glyph
+nodes and a text-render literal on the line; the sheet is drawn beneath in
+the shipout background. The controls exist to show what each costs.
+
+\medskip\noindent\itshape\atlasstamp
+
+\end{document}

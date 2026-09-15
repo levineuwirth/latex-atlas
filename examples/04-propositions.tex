@@ -1,0 +1,231 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 04: theorem apparatus after the Principia. Every statement is a
+% Proposition with a running number and a kind ("Proposition II. Lemma I."),
+% heads are centred spaced capitals, a demonstration closes with Q.E.D., and
+% remarks are scholia. Against it, amsthm's plain style. The mathematics is
+% set in a math font cut to match the text, against Latin Modern Math.
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
+
+\usepackage{amsthm}
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+
+% Mathematics in a face cut for the text (Garamond-Math beside EB Garamond,
+% Pagella Math beside Pagella), or the engine's default, Latin Modern Math.
+% Math digits are lining in either case, so the old-style figures of the
+% text never leak into a formula.
+\atlascontrol{mathfont}{
+  \IfFontExistsTF{Garamond-Math.otf}{
+    \setmathfont{Garamond-Math.otf}[StylisticSet={5,7}]
+  }{
+    \setmathfont{TeX Gyre Pagella Math}
+  }
+}{
+  \setmathfont{Latin Modern Math}
+}
+
+% Paper tint is per-example tuning for this proposition page, not a shared
+% token yet; the examples deliberately differ slightly (see README).
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F5ECDB}
+  \definecolor{ink}{HTML}{241F19}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+}
+\pagecolor{parchment}
+\color{ink}
+\geometry{a4paper,top=30mm,bottom=30mm,left=34mm,right=34mm}
+\setlength{\parindent}{1.1em}
+\setlength{\parskip}{0pt}
+\pagestyle{empty}
+
+% Proposition heads: one running count across kinds, one count per kind,
+% both in roman numerals, centred in spaced small capitals; the statement
+% in italic; an attribution, if given, closes the statement. The
+% demonstration is headed as such. The modern default is amsthm's plain
+% style with a single shared counter.
+\atlascontrol{heads}{
+  \newcounter{proposition}
+  \newcounter{theoremkind}
+  \newcounter{lemmakind}
+  \newcounter{problemkind}
+  \NewDocumentCommand{\prophead}{o m}{%
+    \par\addvspace{1.1em plus .3em}%
+    \centerline{\small\textls[120]{\textsc{#2}}}%
+    \IfValueT{#1}{\nobreak\vspace{.1em}\centerline{\footnotesize\itshape #1}}%
+    \nobreak\vspace{.3em}\noindent\ignorespaces}
+  \NewDocumentEnvironment{Definition}{}
+    {\prophead{Definitions.}\upshape}{\par}
+  \NewDocumentEnvironment{Theorem}{o}
+    {\refstepcounter{proposition}\refstepcounter{theoremkind}%
+     \prophead[#1]{Proposition \Roman{proposition}.\quad Theorem \Roman{theoremkind}.}\itshape}
+    {\par}
+  \NewDocumentEnvironment{Lemma}{o}
+    {\refstepcounter{proposition}\refstepcounter{lemmakind}%
+     \prophead[#1]{Proposition \Roman{proposition}.\quad Lemma \Roman{lemmakind}.}\itshape}
+    {\par}
+  \NewDocumentEnvironment{Problem}{o}
+    {\refstepcounter{proposition}\refstepcounter{problemkind}%
+     \prophead[#1]{Proposition \Roman{proposition}.\quad Problem \Roman{problemkind}.}\itshape}
+    {\par}
+  \NewDocumentEnvironment{Corollary}{}
+    {\par\addvspace{.5em}\noindent\textsc{Cor.}\ \ignorespaces}{\par}
+  \renewcommand{\proofname}{Demonstration}
+}{
+  \theoremstyle{plain}
+  \newtheorem{Theorem}{Theorem}
+  \newtheorem{Lemma}[Theorem]{Lemma}
+  \newtheorem{Problem}[Theorem]{Problem}
+  \newtheorem{Corollary}[Theorem]{Corollary}
+  \theoremstyle{definition}
+  \newtheorem*{Definition}{Definitions}
+}
+
+% The close of a demonstration: Q.E.D. in spaced small capitals, or the
+% tombstone.
+\atlascontrol{qed}{
+  \renewcommand{\qedsymbol}{\textls[60]{\textsc{q.e.d.}}}
+}{}
+
+% Scholium: a remark set smaller, headed in spaced small capitals; the
+% modern default is amsthm's Remark.
+\atlascontrol{scholium}{
+  \NewDocumentEnvironment{Scholium}{}
+    {\par\addvspace{.7em}\small\noindent\textls[100]{\textsc{Scholium.}}\ \ignorespaces}{\par}
+}{
+  \theoremstyle{remark}
+  \newtheorem*{Scholium}{Remark}
+}
+
+\begin{document}
+
+\begin{center}
+  {\small\textls[130]{\textsc{Of the Pursuit upon a Graph}}}\par
+  \vspace{0.3em}
+  {\Large\itshape Cops and Robber, in Propositions}\par
+  \vspace{0.3em}
+  {\footnotesize after the manner of the \textit{Principia}}
+\end{center}
+
+\vspace{0.6em}
+
+\begin{Definition}
+I. A vertex $u$ of a graph $G$ is a \emph{corner} when some other vertex
+$v$ sees all that $u$ sees, that is, $N[u] \subseteq N[v]$.
+II. $G$ is \emph{dismantlable} when its vertices may be struck out one at
+a time, each a corner of the graph that remains, until a single vertex is
+left.
+III. The \emph{cop number} $c(G)$ is the least number of cops which,
+moving by turns with the robber along the edges or resting, are certain
+of his capture; and $G$ is \emph{cop-win} when $c(G) = 1$.
+\end{Definition}
+
+\begin{Theorem}[Nowakowski and Winkler; Quilliot, 1983]
+A finite connected graph is cop-win if and only if it is dismantlable.
+\end{Theorem}
+
+\begin{proof}
+Let $u$ be a corner dominated by $v$, and let $G' = G - u$. The map that
+sends $u$ to $v$ and fixes the rest is a retraction of $G$ upon $G'$. If
+the cop wins upon $G'$, let him play there against the robber's shadow,
+which is the robber's vertex with $u$ read as $v$; when the shadow is
+taken the robber stands at the cop's vertex or at $u$, and $v$ commands
+both. Conversely, upon a cop-win graph the robber's last vertex before
+capture is dominated by the cop's; strike it out, and the graph that
+remains is cop-win again, whence the induction.
+\end{proof}
+
+\begin{Corollary}
+Every finite tree is cop-win, a leaf being a corner; and so is every
+chordal graph, a simplicial vertex being one likewise.
+\end{Corollary}
+
+\begin{Lemma}[Berarducci and Intrigila, 1993]
+If $H$ is a retract of $G$, then $c(H) \le c(G)$.
+\end{Lemma}
+
+\begin{proof}
+Let $r\colon G \to H$ be the retraction, and let $c(G)$ cops win upon
+$G$. Upon $H$ let them play the same strategy against the robber, whose
+vertex, lying already in $H$, is its own image under $r$; every move the
+strategy prescribes lies in $G$, and is carried into $H$ by $r$, which
+preserves adjacency or identity. The capture in $G$ is therefore a
+capture in $H$.
+\end{proof}
+
+\begin{Problem}[Meyniel, 1985]
+Whether there is an absolute constant $C$ such that, for every connected
+graph $G$ upon $n$ vertices,
+\[
+  c(G) \le C\sqrt{n}.
+\]
+\end{Problem}
+
+\begin{Scholium}
+The best bound yet demonstrated, by Lu and Peng, by Scott and Sudakov,
+and by Frieze, Krivelevich and Loh, is
+$c(G) \le n\,2^{-(1-o(1))\sqrt{\log_2 n}}$, which exceeds every
+$n^{1-\varepsilon}$. The conjecture stands; it is settled for graphs of
+diameter two, and for random graphs.
+\end{Scholium}
+
+\vspace{1.4em}
+\footnotesize\noindent
+The apparatus of the \textit{Principia}: propositions numbered in one
+sequence and named by kind, demonstrations rather than proofs, corollaries
+run in, scholia set small. The mathematics is cut to match the text face;
+its digits are lining while the text's are old-style, and the two never
+meet in one line.
+
+\medskip\noindent\itshape\atlasstamp
+
+\end{document}

@@ -17,6 +17,8 @@ toward reusable website preprint styles.
 |:-:|:-:|:-:|
 | [![01](preview/01-rubricated-incipit.png)](examples/01-rubricated-incipit.tex) | [![02](preview/02-marginal-scholia.png)](examples/02-marginal-scholia.tex) | [![03](preview/03-hatched-bar-chart.png)](examples/03-hatched-bar-chart.tex) |
 | 01 rubricated incipit | 02 marginal scholia | 03 hatched bar chart |
+| [![04](preview/04-propositions.png)](examples/04-propositions.tex) | [![05](preview/05-engraved-graph-plate.png)](examples/05-engraved-graph-plate.tex) | [![06](preview/06-hand-press-impression.png)](examples/06-hand-press-impression.tex) |
+| 04 propositions | 05 engraved graph plate | 06 hand-press impression |
 
 ## Examples
 
@@ -25,6 +27,9 @@ toward reusable website preprint styles.
 | 01 | `01-rubricated-incipit.tex` | two-colour rubrication: the colour, and each device that carries it | paper, rubric, pilcrow, initial, runhead |
 | 02 | `02-marginal-scholia.tex` | the gloss in the margin against the footnote, and the page cut to make room for it | paper, margin, gloss, catchword, folio |
 | 03 | `03-hatched-bar-chart.tex` | series by hatch against grey fill; the table of the record; lining figures | paper, hatch, table, lining |
+| 04 | `04-propositions.tex` | theorem apparatus after the *Principia* against amsthm; a math font cut for the text against Latin Modern | mathfont, paper, heads, qed, scholium |
+| 05 | `05-engraved-graph-plate.tex` | an engraved plate of two graphs: tapered burin strokes, hatched spheres, a matching by line weight, frame and lettering | paper, taper, matching, stipple, frame, lettering |
+| 06 | `06-hand-press-impression.tex` | the hand press, counterfeited in a LuaTeX callback: baseline scatter, ink squash, uneven inking, laid paper, foxing | paper, jitter, inkspread, inking, laid, foxing |
 
 Every control has a *modern default*: what you get from the document
 class, the plotting library, or the engine when you do nothing. The
@@ -33,24 +38,26 @@ Q.E.D. a tombstone, of parchment white paper. So each lab variant is a
 fair comparison, not a page with a hole in it.
 
 `paper` is a control in every plate. The tints differ slightly per plate
-(`F5EDDC`, `F4EBDD`, `F4EAD8`): deliberate per-plate tuning, not a shared
-token yet. Ablating it across every plate is how that question gets
-decided.
+(`F5EDDC`, `F4EBDD`, `F4EAD8`, `F5ECDB`, `F6EFE1`, `F3E9D6`): deliberate
+per-plate tuning, not a shared token yet. Ablating it across all six is
+how that question gets decided.
 
 ## Build
 
 ```sh
 ./build.sh                          # every plate, full treatment, into build/
-./build.sh 01-rubricated-incipit    # a subset
+./build.sh 04-propositions          # a subset
 ./build.sh --ablate                 # also every lab variant, into build/ablate/
 ./preview.sh                        # PNGs into preview/ and preview/ablate/
 ./gallery.sh                        # regenerate the lab gallery in this README
 ```
 
-Requirements: LuaLaTeX (TeX Live 2026), `fontspec`, `geometry`,
-`microtype`, `xcolor`, `tikz` (+ `patterns.meta`), `fancyhdr`,
-`lettrine`. EB Garamond if present, else TeX Gyre Pagella fallback
-(this machine has only the latter; CI/full TeX Live gets the former). Previews need poppler's `pdftoppm`; they are byte-reproducible
+Requirements: LuaLaTeX (TeX Live 2026), `fontspec`, `unicode-math`,
+`amsthm`, `geometry`, `microtype`, `xcolor`, `tikz` (+ `calc`,
+`patterns.meta`), `pgfornament`, `fancyhdr`, `lettrine`, `luacode`.
+EB Garamond and Garamond-Math if present, else TeX Gyre Pagella and
+Pagella Math (this machine has only the latter; CI/full TeX Live gets the
+former). Previews need poppler's `pdftoppm`; they are byte-reproducible
 from a clean build, so a rebuild leaves the tree clean.
 
 ## The lab
@@ -114,6 +121,42 @@ lower-case letters, digits and hyphens.
 | ![without lining](preview/ablate/03-hatched-bar-chart--no-lining.png) | ![plain](preview/ablate/03-hatched-bar-chart--plain.png) | | |
 | without lining | plain | | |
 
+### 04 propositions
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| [![full](preview/04-propositions.png)](examples/04-propositions.tex) | ![without mathfont](preview/ablate/04-propositions--no-mathfont.png) | ![without paper](preview/ablate/04-propositions--no-paper.png) | ![without heads](preview/ablate/04-propositions--no-heads.png) |
+| full | without mathfont | without paper | without heads |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without qed](preview/ablate/04-propositions--no-qed.png) | ![without scholium](preview/ablate/04-propositions--no-scholium.png) | ![plain](preview/ablate/04-propositions--plain.png) | |
+| without qed | without scholium | plain | |
+
+### 05 engraved graph plate
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| [![full](preview/05-engraved-graph-plate.png)](examples/05-engraved-graph-plate.tex) | ![without paper](preview/ablate/05-engraved-graph-plate--no-paper.png) | ![without taper](preview/ablate/05-engraved-graph-plate--no-taper.png) | ![without matching](preview/ablate/05-engraved-graph-plate--no-matching.png) |
+| full | without paper | without taper | without matching |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without stipple](preview/ablate/05-engraved-graph-plate--no-stipple.png) | ![without frame](preview/ablate/05-engraved-graph-plate--no-frame.png) | ![without lettering](preview/ablate/05-engraved-graph-plate--no-lettering.png) | ![plain](preview/ablate/05-engraved-graph-plate--plain.png) |
+| without stipple | without frame | without lettering | plain |
+
+### 06 hand press impression
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| [![full](preview/06-hand-press-impression.png)](examples/06-hand-press-impression.tex) | ![without paper](preview/ablate/06-hand-press-impression--no-paper.png) | ![without jitter](preview/ablate/06-hand-press-impression--no-jitter.png) | ![without inkspread](preview/ablate/06-hand-press-impression--no-inkspread.png) |
+| full | without paper | without jitter | without inkspread |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without inking](preview/ablate/06-hand-press-impression--no-inking.png) | ![without laid](preview/ablate/06-hand-press-impression--no-laid.png) | ![without foxing](preview/ablate/06-hand-press-impression--no-foxing.png) | ![plain](preview/ablate/06-hand-press-impression--plain.png) |
+| without inking | without laid | without foxing | plain |
+
 <!-- lab:end -->
 
 ## Toward website preprints
@@ -121,7 +164,10 @@ lower-case letters, digits and hyphens.
 Kept as a standalone lab for now. When a treatment proves itself here,
 it graduates to a shared `.sty` for preprints exported to
 `levineuwirth.org` (sources live in `~/Repos/research/meyniel`, export
-via `make export`). No vault (`~/universum`) material enters this repo.
+via `make export`). What the lab suggests so far: the gloss, the
+apparatus of 04, and the monochrome discipline of 03 and 05 are
+candidates; the frame, the lettering and everything in 06 are costume,
+and stay here. No vault (`~/universum`) material enters this repo.
 
 ## License
 

@@ -1,0 +1,218 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 05: an engraved plate of two graphs. Edges are burin strokes
+% that swell in the middle and taper to the ends, vertices are spheres shaded
+% by hatching, a perfect matching is shewn by the heavier line rather than
+% by colour, the plate is framed and lettered as a plate. Each of those is a
+% control; the modern default is the drawing a graph paper prints today.
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
+
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns.meta}
+\usepackage{pgfornament}
+\usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
+
+\defaultfontfeatures{Renderer=HarfBuzz}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+
+% Plate paper: a shade whiter than a text page, as plate stock was. Per-
+% example tuning, not a shared token yet (see README).
+\atlascontrol{paper}{
+  \definecolor{plate}{HTML}{F6EFE1}
+  \definecolor{ink}{HTML}{22201C}
+}{
+  \definecolor{plate}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+}
+\pagecolor{plate}
+\color{ink}
+\geometry{a4paper,top=36mm,bottom=36mm,left=36mm,right=36mm}
+\pagestyle{empty}
+
+% A stroke from #1 to #2 of half-width #3 in colour #4: a lens that swells
+% at the middle and tapers to nothing at the ends, as a burin cuts; or a
+% line of uniform width.
+\atlascontrol{taper}{
+  \newcommand{\stroke}[4]{%
+    \coordinate (strokeM) at ($(#1)!0.5!(#2)$);
+    \coordinate (strokeU) at ($(strokeM)!#3!90:(#2)$);
+    \coordinate (strokeD) at ($(strokeM)!#3!-90:(#2)$);
+    \fill[#4] (#1) .. controls (strokeU) and (strokeU) .. (#2)
+                   .. controls (strokeD) and (strokeD) .. (#1) -- cycle;}
+}{
+  % A lens averages far thinner than its widest point, so the uniform
+  % line takes a fraction of the same figure.
+  \newcommand{\stroke}[4]{\draw[#4,line width={0.6*#3}] (#1) -- (#2);}
+}
+
+% The perfect matching, by the heavier line or by a second colour.
+\atlascontrol{matching}{
+  \newcommand{\edge}[2]{\stroke{#1}{#2}{0.9pt}{ink}}
+  \newcommand{\medge}[2]{\stroke{#1}{#2}{2.2pt}{ink}}
+}{
+  \definecolor{matchred}{HTML}{C0392B}
+  \newcommand{\edge}[2]{\stroke{#1}{#2}{0.9pt}{ink}}
+  \newcommand{\medge}[2]{\stroke{#1}{#2}{0.9pt}{matchred}}
+}
+
+% A vertex: a sphere lit from the upper left and shaded by two crescents of
+% hatching, denser toward the rim; or the filled disc of a modern drawing.
+\newlength{\vr}\setlength{\vr}{2.2mm}
+\atlascontrol{stipple}{
+  \newcommand{\vertex}[1]{%
+    \begin{scope}
+      \clip (#1) circle (\vr);
+      \fill[plate] (#1) circle (\vr);
+      \begin{scope}[even odd rule]
+        \clip (#1) circle (\vr) ($(#1)+(-0.38\vr,0.38\vr)$) circle (1.0\vr);
+        \fill[pattern={Lines[angle=35,distance=1.5pt,line width=0.22pt]},pattern color=ink]
+          ($(#1)-(\vr,\vr)$) rectangle ($(#1)+(\vr,\vr)$);
+      \end{scope}
+      \begin{scope}[even odd rule]
+        \clip (#1) circle (\vr) ($(#1)+(-0.66\vr,0.66\vr)$) circle (1.12\vr);
+        \fill[pattern={Lines[angle=-50,distance=1.5pt,line width=0.22pt]},pattern color=ink]
+          ($(#1)-(\vr,\vr)$) rectangle ($(#1)+(\vr,\vr)$);
+      \end{scope}
+    \end{scope}
+    \draw[ink,line width=0.4pt] (#1) circle (\vr);}
+}{
+  \newcommand{\vertex}[1]{\fill[ink] (#1) circle (0.55\vr);}
+}
+
+% The plate frame: a heavy rule outside a hair rule, with a corner piece at
+% each corner; or no frame at all.
+\atlascontrol{frame}{
+  % Drawn in the shipout background, whose picture origin is the page's
+  % top-left corner, so no second run is needed to place it.
+  \AddToHook{shipout/background}{\put(0,0){%
+    \begin{tikzpicture}[overlay]
+      \coordinate (SE) at (\paperwidth,-\paperheight);
+      \draw[ink,line width=1.1pt] (16mm,-16mm) rectangle ($(SE)+(-16mm,16mm)$);
+      \draw[ink,line width=0.3pt] (18mm,-18mm) rectangle ($(SE)+(-18mm,18mm)$);
+      \node[anchor=north west] at (19mm,-19mm)
+        {\pgfornament[width=14mm,color=ink]{61}};
+      \node[anchor=north east] at ($(SE)+(-19mm,\paperheight-19mm)$)
+        {\pgfornament[width=14mm,color=ink,symmetry=v]{61}};
+      \node[anchor=south west] at ($(SE)+(19mm-\paperwidth,19mm)$)
+        {\pgfornament[width=14mm,color=ink,symmetry=h]{61}};
+      \node[anchor=south east] at ($(SE)+(-19mm,19mm)$)
+        {\pgfornament[width=14mm,color=ink,symmetry=c]{61}};
+    \end{tikzpicture}}}
+}{}
+
+% Plate lettering: a running title and plate number in the head, figures
+% numbered "Fig." with a short title, a direction to the binder in the
+% foot; or the caption a document class prints.
+\atlascontrol{lettering}{
+  \newcommand{\platehead}{%
+    \noindent{\small\textit{Cops and Robber.}}\hfill{\small\textls[120]{\textsc{Plate I.}}}\par}
+  \newcommand{\figcaption}[2]{%
+    \begin{center}{\small\textls[80]{\textsc{Fig.~#1.}}---\textit{#2}}\end{center}}
+  \newcommand{\platefoot}{%
+    \noindent\hfill{\footnotesize\textit{To face page 12.}}\par}
+}{
+  \newcommand{\platehead}{}
+  \newcommand{\figcaption}[2]{%
+    \begin{center}{\small Figure #1: #2}\end{center}}
+  \newcommand{\platefoot}{}
+}
+
+\begin{document}
+\platehead
+
+\vspace{1.4em}
+\begin{center}
+\begin{tikzpicture}
+  % Petersen: an outer pentagon, an inner pentagram, five spokes; the
+  % spokes are a perfect matching.
+  \foreach \k in {0,...,4} {
+    \coordinate (O\k) at ({90+72*\k}:3.1cm);
+    \coordinate (I\k) at ({90+72*\k}:1.35cm);
+  }
+  \foreach \k/\l in {0/1,1/2,2/3,3/4,4/0} { \edge{O\k}{O\l} }
+  \foreach \k/\l in {0/2,2/4,4/1,1/3,3/0} { \edge{I\k}{I\l} }
+  \foreach \k in {0,...,4} { \medge{O\k}{I\k} }
+  \foreach \k in {0,...,4} { \vertex{O\k} \vertex{I\k} }
+  \foreach \k/\lab in {0/A,1/B,2/C,3/D,4/E} {
+    \node[font=\itshape] at ({90+72*\k}:3.6cm) {\lab};
+  }
+  \foreach \k/\lab in {0/a,1/b,2/c,3/d,4/e} {
+    \node[font=\itshape\small] at ({90+72*\k+24}:1.8cm) {\lab};
+  }
+\end{tikzpicture}
+\end{center}
+\figcaption{1}{The graph of Petersen; the spokes $Aa$, $Bb$, $Cc$, $Dd$, $Ee$ are a perfect matching.}
+
+\vspace{1.2em}
+\begin{center}
+\begin{tikzpicture}
+  % K(3,3) on a hexagon: the two classes alternate, every edge joins them,
+  % and alternate sides of the hexagon are a perfect matching.
+  \foreach \k in {0,...,5} { \coordinate (H\k) at ({90+60*\k}:1.7cm); }
+  \foreach \k in {0,2,4} { \foreach \l in {1,3,5} { \edge{H\k}{H\l} } }
+  \foreach \k/\l in {0/1,2/3,4/5} { \medge{H\k}{H\l} }
+  \foreach \k in {0,...,5} { \vertex{H\k} }
+  \foreach \k/\lab in {0/P,1/q,2/R,3/s,4/T,5/u} {
+    \node[font=\itshape] at ({90+60*\k}:2.2cm) {\lab};
+  }
+\end{tikzpicture}
+\end{center}
+\figcaption{2}{The complete bipartite graph on three and three; $Pq$, $Rs$, $Tu$ are a perfect matching.}
+
+\vspace{1em}
+\footnotesize\noindent
+Burin strokes that swell and taper, spheres shaded by hatching, and a
+matching carried by the weight of the line: the plate survives a
+photocopier and a colour-blind reader alike. The frame and the lettering
+are pure costume, and are kept for that reason.
+
+\medskip\noindent\itshape\atlasstamp
+\normalfont\normalsize
+
+\vfill
+\platefoot
+\end{document}
