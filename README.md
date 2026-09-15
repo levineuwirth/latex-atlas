@@ -23,6 +23,10 @@ remove effects to see what they contribute.
 | 02 | `02-marginal-scholia.tex` | wide-margin scholia page: sidenotes, catchword, folio |
 | 03 | `03-hatched-bar-chart.tex` | monochrome data chart: hatched bars, no colour fill |
 
+Paper tints differ slightly per example (`F5EDDC` / `F4EBDD` / `F4EAD8`):
+deliberate per-plate tuning, not a shared token yet. Unify when the first
+treatment graduates to a `.sty`.
+
 ## Build
 
 ```sh
@@ -34,6 +38,19 @@ Requirements: LuaLaTeX (TeX Live 2026), `fontspec`, `geometry`,
 `microtype`, `xcolor`, `tikz` (+ `patterns.meta`), `fancyhdr`,
 `lettrine`. EB Garamond if present, else TeX Gyre Pagella fallback
 (this machine has only the latter; CI/full TeX Live gets the former).
+
+## Previews
+
+`preview/<name>-1.png` files are first-page renders at 100 dpi, regenerated
+from a clean build with poppler's `pdftoppm` (verified byte-reproducible):
+
+```sh
+./build.sh
+for pdf in build/*.pdf; do
+  name=$(basename "${pdf%.pdf}")
+  pdftoppm -png -r 100 "$pdf" "preview/$name"
+done
+```
 
 ## Toward website preprints
 
