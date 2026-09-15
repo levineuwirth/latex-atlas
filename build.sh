@@ -90,23 +90,33 @@ jobs_of() {
   done
 }
 
+# Options and plate names may be mixed in any order; an unknown option is
+# an error rather than a silently ignored name.
 ablate=0
 jobs=1
+names=""
 while [ "$#" -gt 0 ]; do
   case $1 in
     --ablate) ablate=1 ;;
     -j) case ${2-} in ''|*[!0-9]*) jobs=$(nproc) ;; *) jobs=$2; shift ;; esac ;;
     -j[0-9]*) jobs=${1#-j} ;;
     --one) [ -n "${2-}" ] || exit 0; one "$2"; exit ;;
-    *) break ;;
+    -*) echo "build.sh: unknown option $1" >&2; exit 2 ;;
+    *) names="$names $1" ;;
   esac
   shift
 done
 
 mkdir -p build build/ablate
 tmp=$(mktemp) || exit 1
-trap 'rm -f "$tmp"' EXIT
-jobs_of "$@" | xargs -P "$jobs" -L1 sh "$0" --one | tee "$tmp"
+trap 'rm -f "$tmp" "$tmp.jobs"' EXIT
+# shellcheck disable=SC2086  # names is a space-separated list on purpose
+jobs_of $names > "$tmp.jobs"
+if [ ! -s "$tmp.jobs" ]; then
+  echo "build.sh: no plate matches:$names" >&2
+  exit 1
+fi
+xargs -P "$jobs" -L1 sh "$0" --one < "$tmp.jobs" | tee "$tmp"
 if grep -q '^FAIL' "$tmp"; then
   echo "Failed:$(grep '^FAIL' "$tmp" | sed 's/^FAIL//' | tr -d '\n')" >&2
   exit 1

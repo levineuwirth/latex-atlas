@@ -135,8 +135,12 @@ Look at `preview/ablate/` before building more; these are the findings.
   numeric, and a bbx that carried the dress could only be *undone* by a
   control. When the style graduates, the dress moves into the bbx.
 - **Old-style figures in a reference list** (`08 --no-oldstyle`): with
-  lining figures every "vol. 8 (1984), pp. 1–12" and every DOI stands
-  up out of the line; with old-style they sit in it. The list is the
+  lining figures every "vol. 8 (1984), pp. 1–12" stands up out of the
+  line; with old-style they sit in it. The DOIs are lining in both
+  variants and should be — an old-style "10.1016" reads as "IO.IOI6" —
+  which is a typographic finding in itself: prose figures old-style,
+  codes lining. (The review caught the plate claiming otherwise; the
+  mechanism is under the gotchas.) The list is the
   densest ground of figures in a paper, which is why 08 is the plate
   where figures are a control and why the control covers the whole leaf
   (the cites carry years too). EB Garamond's *default* figures are
@@ -235,6 +239,11 @@ Things that cost time once and should not cost it twice.
   and downgrades); say `uniquename=init` in the cbx.
 - **A `#1` in a `\DeclareFieldFormat` inside a control argument is fine**,
   as `\newcommand` was; 08's `doi` control does it.
+- **Anything set through `url` (`\url`, `\nolinkurl`) is in math mode**,
+  so under unicode-math its digits come from the math font — lining, and
+  out of reach of any `Numbers=` feature on the text font. 08's DOIs are
+  lining for that reason (and are better for it). If a URL ever needs
+  the text face's figures, it cannot go through `url`.
 
 ## Notes on 07
 

@@ -6,8 +6,8 @@
 % authorities are named. A General Scholium cites them by name and year, run
 % into the sentence, and a table lists them under the name the text used:
 % entries hanging from a small-capital family name, the year and the
-% figures old-style, the identifier set as a word of the text and the
-% address left out. Against each, what \usepackage{biblatex} gives when
+% figures old-style, the identifier set as a word of the text (its own
+% figures lining, as a code's should be) and the address left out. Against each, what \usepackage{biblatex} gives when
 % nothing is done: its numeric style, plain names, the face's lining
 % figures, and the DOI and URL in typewriter. The style is a real .bbx and
 % .cbx, written below and loaded by name; the .bib is written here too, so
@@ -327,10 +327,13 @@
       \ifcurrentname{author}{\textls[50]{\textsc{#1}}}{#1}}}
 }{}
 
-% The identifier as a word of the entry, in the text face and its figures,
-% and the address left out, the DOI being the durable pointer and a URL
-% not a bibliographic datum; or biblatex's "doi:" and "url:" both, the
-% identifier and the address in typewriter.
+% The identifier as a word of the entry, in the text face, and the address
+% left out, the DOI being the durable pointer and a URL not a bibliographic
+% datum; or biblatex's "doi:" and "url:" both, the identifier and the
+% address in typewriter. The DOI's figures stay lining whatever the
+% oldstyle control says: \nolinkurl sets its argument in math mode, so
+% unicode-math supplies the digits from the math font. Right for a code,
+% where an old-style "10.1016" would read as "IO.IOI6".
 \atlascontrol{doi}{
   \ExecuteBibliographyOptions{url=false}
   \DeclareFieldFormat{doi}{\mkbibacro{DOI}\space{\urlstyle{same}\nolinkurl{#1}}}
@@ -377,7 +380,7 @@ citation are a \texttt{.bbx} and a \texttt{.cbx} written in this file and
 loaded by name, and the \texttt{.bib} is written here too; biber runs
 between the passes. The small capitals, the old-style figures and the
 identifier as text are laid on from the preamble, so each can be taken off
-alone.
+alone; the identifier keeps lining figures, as a code should.
 
 \medskip\noindent\itshape\atlasstamp
 
