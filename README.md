@@ -32,7 +32,7 @@ toward reusable website preprint styles.
 | 04 | `04-propositions.tex` | theorem apparatus after the *Principia* against amsthm; a math font cut for the text against Latin Modern | mathfont, paper, heads, qed, scholium |
 | 05 | `05-engraved-graph-plate.tex` | an engraved plate of two graphs: tapered burin strokes, hatched spheres, a matching by line weight, frame and lettering | paper, taper, matching, stipple, frame, lettering |
 | 06 | `06-hand-press-impression.tex` | the hand press, counterfeited in a LuaTeX callback: baseline scatter, ink squash, uneven inking, laid paper, foxing | paper, jitter, inkspread, inking, laid, foxing |
-| 07 | `07-front-matter.tex` | the leaf before 04: a period title block against `\maketitle`, *The Argument* against the abstract, a Table of the Propositions with their statements against a list of theorems, fleurons, the imprint against the date | paper, imprint, title, argument, table, fleuron |
+| 07 | `07-front-matter.tex` | the leaf before 04: a period title block against `\maketitle`, *The Argument* against the abstract, a Table of the Propositions with their statements against a list of theorems, fleurons, the imprint against the date; the period's ct/st ties against the common ligatures | ligatures, paper, imprint, title, argument, table, fleuron |
 
 Every control has a *modern default*: what you get from the document
 class, the plotting library, or the engine when you do nothing. The
@@ -165,13 +165,18 @@ lower-case letters, digits and hyphens.
 
 | | | | |
 |:-:|:-:|:-:|:-:|
-| [![full](preview/07-front-matter.png)](examples/07-front-matter.tex) | ![without paper](preview/ablate/07-front-matter--no-paper.png) | ![without imprint](preview/ablate/07-front-matter--no-imprint.png) | ![without title](preview/ablate/07-front-matter--no-title.png) |
-| full | without paper | without imprint | without title |
+| [![full](preview/07-front-matter.png)](examples/07-front-matter.tex) | ![without ligatures](preview/ablate/07-front-matter--no-ligatures.png) | ![without paper](preview/ablate/07-front-matter--no-paper.png) | ![without imprint](preview/ablate/07-front-matter--no-imprint.png) |
+| full | without ligatures | without paper | without imprint |
 
 | | | | |
 |:-:|:-:|:-:|:-:|
-| ![without argument](preview/ablate/07-front-matter--no-argument.png) | ![without table](preview/ablate/07-front-matter--no-table.png) | ![without fleuron](preview/ablate/07-front-matter--no-fleuron.png) | ![plain](preview/ablate/07-front-matter--plain.png) |
-| without argument | without table | without fleuron | plain |
+| ![without title](preview/ablate/07-front-matter--no-title.png) | ![without argument](preview/ablate/07-front-matter--no-argument.png) | ![without table](preview/ablate/07-front-matter--no-table.png) | ![without fleuron](preview/ablate/07-front-matter--no-fleuron.png) |
+| without title | without argument | without table | without fleuron |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![plain](preview/ablate/07-front-matter--plain.png) | | | |
+| plain | | | |
 
 <!-- lab:end -->
 

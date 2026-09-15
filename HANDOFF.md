@@ -9,11 +9,13 @@ the lab has shown so far, what bit us, and what to do next.
 
 ## Where it stands
 
-`main` at `9e12c60`, remote
+`main` at the review-fixes commit after `9aa387f`, remote
 `ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
-clean. Seven plates, 51 PDFs from `./build.sh --ablate` in ~50 s, every
-preview byte-reproducible from a clean build (verified this session:
-`rm -rf build && ./build.sh --ablate && ./preview.sh` left the tree clean).
+clean. Seven plates, 52 PDFs from `./build.sh --ablate` in ~50 s, every
+preview byte-reproducible from a clean build (verified twice on
+2026-09-15, once by the author's review session:
+`rm -rf build && ./build.sh --ablate && ./preview.sh && ./gallery.sh`
+left the tree clean).
 
 | plate | register | controls |
 |---|---|---|
@@ -23,12 +25,13 @@ preview byte-reproducible from a clean build (verified this session:
 | 04 propositions | functional | mathfont, paper, heads, qed, scholium |
 | 05 engraved graph plate | both | paper, taper, matching, stipple, frame, lettering |
 | 06 hand-press impression | costume | paper, jitter, inkspread, inking, laid, foxing |
-| 07 front matter | both | paper, imprint, title, argument, table, fleuron |
+| 07 front matter | both | ligatures, paper, imprint, title, argument, table, fleuron |
 
 Commits so far: `69a8fec` initial three plates; `01858bd` tint notes;
 `60f0dc2` the lab plus retrofits; `8171c63` plates 04–06; `af94c05` first
 handoff; `c5a3983` previews in EB Garamond and the retunes; `9e12c60`
-plate 07.
+plate 07; `9aa387f` second handoff; then the review fixes (07's note
+reconciled with 04, `ligatures` made a control in 07, this file).
 
 ## The decision
 
@@ -103,10 +106,14 @@ Look at `preview/ablate/` before building more; these are the findings.
   does not give without work.
 - **`Ligatures=Rare`** was set in every plate but inert under Pagella.
   EB Garamond has the `ct` and `st` ties, so they are now live in 01, 02,
-  04–07 (03 never asked for them): "connected", "demonstration",
-  "strike". Deliberate and kept — it is the period's face — but note
-  that a preprint `.sty` in the functional register may want `Rare`
-  off; that is a `.sty` decision, not a plate one.
+  04–06 (03 never asked for them): "connected", "demonstration",
+  "strike". Kept as substrate there — it is the period's face — but in
+  **07 it is a control** (`ligatures`, via
+  `\defaultfontfeatures+[EB Garamond]{Ligatures=Rare}` ahead of the
+  `\setmainfont`), because 07's plain variant is meant to be exactly an
+  `article` front page and "Liſt of Theorems" with an st-tie is not.
+  `07 --no-ligatures` is the comparison; a functional `.sty` will likely
+  want `Rare` off, and now there is a plate to point at.
 
 ## Re-read before touching the plates
 
@@ -156,7 +163,7 @@ Things that cost time once and should not cost it twice.
   renderings. Pagella stays as the fallback via `\IfFontExistsTF`; a
   machine without the fonts builds fine but its previews will differ
   from the committed ones, so don't commit previews from such a machine.
-- **`preview/` is ~6 MB** (45 ablations at 100 dpi). Kept full-size so
+- **`preview/` is ~6 MB** (45 ablations at 100 dpi, 52 PNGs in all). Kept full-size so
   clicking through is worth it. If the repo grows past ~15 plates, drop
   the ablations to 60 dpi in `preview.sh` (one number) and regenerate.
 - **`vintage-latex` lives in `~/scratch/tmp/vintage-latex`**, a scratch
@@ -176,7 +183,11 @@ Things that cost time once and should not cost it twice.
 - The Table lists eight lines: Definitions, six propositions (the three
   of 04 plus Aigner–Fromme's planar and girth results and Schröder's
   genus bound, all textbook), and the Scholium. Page numbers 1–4 are
-  invented; the treatise is not on the page.
+  invented; the treatise is not on the page. **07 and 04 therefore
+  disagree on numbering** — 04's Problem is Prop. III, the Table's is
+  Prop. VI — and the plate's note now says so: 04 numbers its three to
+  stand alone, the Table numbers the six of the whole. If 04 ever grows
+  to the full treatise, the two should be reconciled.
 - The imprint says "to be had at levineuwirth.org" — the period's "to be
   sold by", with the site standing in for the bookseller. It is the only
   URL in the repo and it is set as text, not a link.
@@ -226,7 +237,5 @@ Meyniel's conjecture) for that reason.
   to be tracked, and has been, twice.
 - Does the `.sty` want the lab controls too (so a preprint can be ablated),
   or is that lab-only machinery?
-- Does `Ligatures=Rare` belong in the functional register at all? The
-  lab can answer it: make it a control in 04 and look.
 - Should `build.sh` learn a two-pass mode? Bibliography (1) and a real
   theorem index both want it. The one-run rule has been cheap so far.

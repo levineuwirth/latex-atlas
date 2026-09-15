@@ -49,10 +49,17 @@
 \usepackage[tracking=true,protrusion=false,expansion=false]{microtype}
 
 \defaultfontfeatures{Renderer=HarfBuzz}
+% The period's ct and st ties, live in EB Garamond; or the common ligatures
+% only, which is all a class asks of a font. Appended to this font's
+% defaults so the fallback branch below is untouched. The one place the
+% plain variant would otherwise not be exactly what article gives.
+\atlascontrol{ligatures}{
+  \defaultfontfeatures+[EB Garamond]{Ligatures=Rare}
+}{}
 \IfFontExistsTF{EB Garamond}{
   \setmainfont{EB Garamond}[
     Numbers={OldStyle,Proportional},
-    Ligatures={TeX,Common,Rare}
+    Ligatures={TeX,Common}
   ]
 }{
   \setmainfont{TeX Gyre Pagella}[
@@ -230,11 +237,13 @@ Scholium).
 
 \vspace{0.6em}
 \footnotesize\noindent
-The leaf before the propositions of 04, and the same stock. The Argument
-stands where the abstract does and says what the treatise shews; the Table
-gives every proposition its statement, where a list of theorems gives its
-number and its name; the imprint puts the year at the foot, where the class
-puts the date under the author. The page numbers are set by hand.
+The leaf before a treatise of which 04 shews a single page, on the same
+stock; 04 numbers its three propositions to stand alone, and this Table
+numbers the six of the whole. The Argument stands where the abstract does
+and says what the treatise shews; the Table gives every proposition its
+statement, where a list of theorems gives its number and its name; the
+imprint puts the year at the foot, where the class puts the date under the
+author. The page numbers are set by hand.
 
 \medskip\noindent\itshape\atlasstamp
 \normalfont\normalsize
