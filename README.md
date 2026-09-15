@@ -228,10 +228,11 @@ to the apparatus —
 ```
 
 — then `TEXINPUTS=path/to/latex-atlas/sty: lualatex` twice. The bracket
-names the counter the environment steps. A manuscript's `[T1]{fontenc}`
-and `amssymb` lines come out (unicode-math has the symbols). The header
-of the file says what it sets; `HANDOFF.md` records what dressing the
-first real preprint taught it.
+names the counter the environment steps. A manuscript's `[T1]{fontenc}`,
+`lmodern` and `amssymb` lines come out (unicode-math has the symbols;
+`mathtools` may stay). The header of the file says what it sets;
+`HANDOFF.md` records what dressing the first two real preprints taught
+it — seven things from a 12-page paper, nine more from a 35-page one.
 
 `bound/treatise.tex` gathers 07, 04 and 08 into one PDF with pdfpages,
 as printed: the proof that made the seams visible and the style

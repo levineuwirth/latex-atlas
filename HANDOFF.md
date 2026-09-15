@@ -1,17 +1,18 @@
 # latex-atlas — handoff
 
 Written 2026-09-15 at the end of the session that gave build.sh its
-declared passes, biber and -j, and added the bibliography. Read the
-README first; this file is what the README does not say: why things are
-the way they are, what the lab has shown so far, what bit us, and what to
-do next.
+declared passes, biber and -j, and added the bibliography; extended
+2026-09-16 by the sessions that began the graduation and dressed the
+second manuscript. Read the README first; this file is what the README
+does not say: why things are the way they are, what the lab has shown so
+far, what bit us, and what to do next.
 
 ---
 
 ## Where it stands
 
-`main` at the commit that adds `sty/atlas.sty` v0 and `bound/treatise.tex`
-(after `70307c3`, the 08 review fixes), remote
+`main` at `78cfebe` (atlas.sty after the second manuscript) plus this
+handoff, remote
 `ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
 clean. Eight plates, 59 PDFs from `./build.sh --ablate` in ~2 min
 sequential or **16 s with `-j`**; every preview byte-reproducible from a
@@ -22,7 +23,12 @@ manuscript — `~/Repos/research/meyniel/paper/branch-capture-paper.tex`,
 `amsart`, 12 pages — with nine lines injected into its preamble and its
 body untouched; the result is in `build/branch-capture-dressed.pdf`
 (gitignored: no manuscript text enters this repo). See "The style" below
-for the recipe and what the manuscript found.
+for the recipe and what the manuscript found. **The second manuscript**
+(`near-critical-growing-radius-domination-paper.tex`, 35 pages, 2597
+lines: `mathtools`, `booktabs` tables, `align`, `\keywords`, hand-set
+DOIs) was dressed on 2026-09-16 by the same recipe and found nine more
+things (one by the article test it prompted), all fixed in `78cfebe`; `build/near-critical-dressed.pdf`,
+`-dressed-plain.pdf`, `-original.pdf`.
 
 | plate | register | controls |
 |---|---|---|
@@ -41,7 +47,8 @@ handoff; `c5a3983` previews in EB Garamond and the retunes; `9e12c60`
 plate 07; `9aa387f` second handoff; `10debf3` review fixes (07's note
 reconciled with 04, `ligatures` made a control in 07); `fda9b1a` the
 build.sh decision recorded; `44293b1` build.sh implemented; `520b085`
-plate 08.
+plate 08; `0205a62` atlas.sty v0, the bound proof, the first dressed
+preprint; `78cfebe` what the second manuscript found.
 
 ## The decision
 
@@ -417,8 +424,10 @@ scratch — never in the research repo):
 
 ```sh
 cp ~/Repos/research/meyniel/paper/branch-capture-paper.tex work.tex
-# 1. remove \usepackage[T1]{fontenc}
-# 2. amsmath,amssymb,amsthm -> amsmath,amsthm   (unicode-math has the symbols)
+# 1. remove \usepackage[T1]{fontenc}   (and \usepackage{lmodern} if present:
+#    the second manuscript had it; the same pdflatex-only pair)
+# 2. amsmath,amssymb,amsthm -> amsmath,amsthm   (unicode-math has the symbols;
+#    mathtools stays, the sty silences unicode-math's two notes about it)
 # 3. before \begin{document}:
 #    \usepackage{atlas}
 #    \AtlasProposition{theorem}{Theorem}[theorem]
@@ -434,8 +443,9 @@ TEXINPUTS=~/Repos/personal/latex-atlas/sty: lualatex work.tex   # twice
 
 The bracket is the counter the environment steps (the shared one for
 `[theorem]`-style sharing); without it the environment is unnumbered.
-Output: 13 pages A4 against the original's 12 letter, zero warnings,
-every number and cross-reference identical to the `amsart` build.
+Output: 13 pages A4 against the original's 12 letter (12 since the node
+renderer, below), zero warnings, every number and cross-reference
+identical to the `amsart` build.
 
 **What the manuscript found that eight plates could not.** Each is fixed
 in v0 and each is a gotcha for anything built on the same pieces:
@@ -465,8 +475,86 @@ in v0 and each is a gotcha for anything built on the same pieces:
   manuscript's captions as given; the period word is the author's
   decision in the source. 04 may say Scholium because 04 is the source.
 
-**To judge, not yet judged:** the reading experience — 13 pages of 11 pt
-EB Garamond on parchment is a denser, quieter page than `amsart`'s.
+**What the second manuscript found** (2026-09-16, the same recipe with
+`lmodern` also removed; 36 pages A4 against 35 letter, zero warnings, all
+141 `\newlabel`s and 16 `\bibcite`s identical to the `pdflatex` build in
+both editions; the first manuscript re-dressed afterwards as a regression
+check is now 12 pages against its 12, zero warnings, 17 labels identical).
+Each fixed in `78cfebe`:
+
+- **HarfBuzz cost protrusion and expansion, and nobody had chosen it.**
+  Every plate says `Renderer=HarfBuzz` and
+  `protrusion=false,expansion=false` because 01 did, and no comment or
+  commit says why. The manuscript set eight overfull lines, up to 17 pt,
+  on the 402 pt measure — long inline formulae that pdflatex's Latin
+  Modern absorbed with expansion. Under `Renderer=Node` with both on:
+  none, same page count, and the title leaf compared under both renderers
+  keeps tracking, small capitals, old-style figures and the ct/st ties.
+  The sty is on the node renderer; the plates are not (eight files and
+  every preview), see Outstanding.
+- **Garamond-Math lacks 54 of unicode-math's symbols, and a missing glyph
+  is a log line, not an error.** The manuscript's four `\sharp`s came out
+  as nothing. Found by setting every command of `unicode-math-table.tex`
+  (accents with an argument, one `\par` per line — the "Missing
+  character" lines are logged at the paragraph, so one paragraph per
+  symbol is what makes them attributable) under each font and reading the
+  logs: the ≗ ≜ ≝ family, the card suits, the accidentals, ⪋ ⪌ ⪕ ⪖,
+  the checkmark, the maltese cross, five bold sans-serif Greek. All in
+  Pagella Math, so `\setmathfont{TeX Gyre Pagella Math}[range={…}]`
+  after the main font. luaotfload's `fallback=` feature was tried first
+  and does not reach math fonts. A `fontloader.to_table` cmap dump was
+  tried before that and lied (it missed the alphabet letters the font
+  reaches through alternate unicodes): the engine's log is the only
+  ground truth for coverage.
+- **`mathtools` before `unicode-math` gives two warnings at
+  `\begin{document}`** — mathtools keeps `\overbracket`, unicode-math
+  takes `\coloneqq` and three siblings. Both are unicode-math's decisions,
+  made because the sty loaded it; `warnings-off={mathtools-colon,
+  mathtools-overbracket}` by `\PassOptionsToPackage`.
+- **`\maketitle` dropped amsart's first-page footnotes.** `\keywords`,
+  `\subjclass` and `\thanks` go to the foot of page 1 unmarked, through
+  `\@adminfootnotes`; v0's leaf printed none of them. Now set as amsart
+  sets them, minus the date, which the leaf gives. article's `\thanks`
+  (symbol marks in the author line, `\@thanks` after) go through too.
+- **hyperref wraps `\maketitle`** to run the *unpatched* footnote
+  commands inside it, because its footnote anchors need a mark these
+  footnotes never get. `\renewcommand{\maketitle}` threw that wrapper
+  away, and the first keywords footnote warned "Ignoring empty anchor".
+  Do what the wrapper did: `\let\@footnotetext\H@@footnotetext` inside
+  the group.
+- **No space after the Argument.** amsart's `\@maketitle` ends with
+  `\vskip 34pt−\baselineskip` after the abstract; v0 ended with the box.
+  The first manuscript hid it — its body opens with `\section`, which
+  brings its own space — the second opens with a `\noindent` paragraph
+  and ran straight on from the abstract's last line.
+- **article's order never printed the Argument.** `\maketitle` then
+  `abstract` fills the box after the only place that emptied it. As amsart
+  does for a late abstract, `\end{abstract}` now sets it when
+  `\maketitle` has already run. (Found by the article test for `\thanks`,
+  not by the manuscript; the sty claims article.)
+- **`\href` text is text.** The manuscript hand-sets its DOIs as
+  `\href{https://doi.org/…}{10.1016/…}`, and the link text took the
+  old-style figures: "IO.IOI6", the very thing 08 recorded. 08's own DOIs
+  escaped only because `\url` sets its digits in math mode. The driver's
+  `\hyper@linkurl{text}{url}` is the one place `\href` and `\url` both
+  pass through, so the sty wraps it: the text of an external link takes
+  lining figures. Prose and internal `\ref` links are untouched; a link
+  text of words has no figures to change.
+- **A table's figures are lining and tabular** (03's rule) in every
+  `tabular`, `tabular*`, `tabularx`, `longtable`, by an `env/…/begin`
+  hook. The manuscript's diagnostic table has an `h` column of integers
+  in text beside three columns of values in math: old-style proportional
+  beside lining tabular in one table, until this.
+
+Seen and left alone, as the manuscript's own: amsart's `\paragraph` is
+`\normalfont` run-in with no space above, so "Act I: …" is invisible as a
+head in the original too. The sty voices `\section` and `\subsection`
+and not `\paragraph`; whether it should (italic run-in, after 04's
+scholia) is a register question, with the caveat in the first list that a
+run-in head before a proposition is deferred into the statement.
+
+**To judge, not yet judged:** the reading experience — 12 and 36 pages of
+11 pt EB Garamond on parchment is a denser, quieter page than `amsart`'s.
 Whether that is right for a preprint is the author's call. The `plain`
 edition exists for the other answer.
 
@@ -475,32 +563,43 @@ edition exists for the other answer.
 The graduation is the main line now; the lab continues beside it in
 both registers.
 
-1. **Read the dressed preprint** (`build/branch-capture-dressed.pdf`,
-   rebuild with the recipe) and decide the register questions the style
-   cannot: page density, parchment vs `plain` for the website, whether
-   Remark stays Remark in the sources.
-2. **A second manuscript.** The other three in `~/Repos/research/meyniel/
-   paper/` are longer (1500–2600 lines) and may carry figures, tables and
-   `align` blocks the first did not; each will find something v0 missed,
-   as the first found seven things. Same recipe, same rule: a copy in
-   scratch, nothing in the research repo, nothing of theirs committed here.
-3. **08's biblatex style into the `.sty`** as `atlas.bbx`/`atlas.cbx`
+1. **Read the dressed preprints** (`build/branch-capture-dressed.pdf`,
+   `build/near-critical-dressed.pdf`; rebuild with the recipe) and decide
+   the register questions the style cannot: page density, parchment vs
+   `plain` for the website, whether Remark stays Remark in the sources,
+   whether `\paragraph` gets a voice, whether a manuscript's `\url`
+   should leave typewriter (08 says yes for biblatex; the sty does not
+   touch `\url`'s font, only its figures, which were lining already).
+2. **The third and fourth manuscripts.** `ball-occupation-under-coarse-
+   projections.tex` (1817 lines) and `timed-guarding-in-degree-reduction-
+   clouds.tex` (1513) remain; the second found nine things after the
+   first found seven, so expect more. Same recipe, same rule: a copy in
+   scratch, nothing in the research repo, nothing of theirs committed
+   here. Before the dressed build, grep the log for `Missing character`
+   as well as `Warning` and `Overfull`: a missing glyph is silent.
+3. **Should the plates move to the node renderer?** The sty did (see the
+   second manuscript's first finding); the plates still say HarfBuzz,
+   with protrusion and expansion off, and the previews are the HarfBuzz
+   renderings. Nothing in a one-page plate needs expansion, so this is a
+   consistency question, not a defect; if done, it is eight files and a
+   full preview regeneration in one commit.
+4. **08's biblatex style into the `.sty`** as `atlas.bbx`/`atlas.cbx`
    with the dress moved in from 08's preamble — the first manuscript
    whose bibliography is a `.bib` will want it. Then `\cite` in a dressed
    manuscript can become name-and-year without touching its body.
-4. **Colophon and errata slip** — now the treatise's last leaf after 08 as
+5. **Colophon and errata slip** — now the treatise's last leaf after 08 as
    much as a lab plate: fonts/engine/date/git hash (needs `--shell-escape`
    or a build-time `\def`; decide which), an errata slip as revision
    notes. Keep distinct from 07's imprint (imprint = title leaf, colophon =
    last leaf).
-5. **Fold-out plate** — a landscape leaf for a wide table; the longer
+6. **Fold-out plate** — a landscape leaf for a wide table; the longer
    manuscripts may need it.
-6. **Marginal figures** — small graph drawings in the scholia margin, the
+7. **Marginal figures** — small graph drawings in the scholia margin, the
    natural sequel to 02 + 05.
-7. **Should the `.sty` carry lab controls** so a dressed preprint can be
+8. **Should the `.sty` carry lab controls** so a dressed preprint can be
    ablated? Cheap to add (the block is eight lines) and it would let the
    register questions in 1 be answered by looking rather than arguing.
-8. **CSS counterparts for the Hakyll site.** Separate repo when it happens.
+9. **CSS counterparts for the Hakyll site.** Separate repo when it happens.
 
 The `treatise.tex` sample document proposed after the bound proof (04
 grown to its six propositions) is no longer needed: a real preprint is
