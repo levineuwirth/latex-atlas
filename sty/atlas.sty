@@ -21,9 +21,11 @@
 % the proposition apparatus of 04 (centred head, attribution beneath,
 % italic statement, Demonstration, Q.E.D., run-in definitions and
 % scholia), a running head under a hair rule and a centred folio, and 08's
-% "The Authorities" head and small type for the reference list.
-% Bibliography *entries* are left as the manuscript sets them; 08's
-% biblatex style graduates separately.
+% "The Authorities" head and small type for the reference list. On call:
+% \AtlasTable, a Table of the Propositions with real pages from the .aux
+% (two passes), and \AtlasColophon, a colophon leaf naming faces, engine,
+% sources and revision. Bibliography *entries* are left as the manuscript
+% sets them; 08's biblatex style graduates separately.
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{atlas}[2026/09/16 v0 latex-atlas graduated treatments]
 
@@ -105,6 +107,10 @@
   \definecolor{parchment}{HTML}{F5ECDB}
   \definecolor{ink}{HTML}{241F19}
 \fi
+% The second colour of 01, here equal to the ink -- 01's own ablation -- so
+% that a layer over this file can set it red and every head, rule and
+% running head follows without a further edit.
+\colorlet{rubric}{ink}
 \pagecolor{parchment}
 \color{ink}
 \geometry{a4paper,top=30mm,bottom=30mm,left=34mm,right=34mm,headheight=14pt,headsep=8mm}
@@ -133,11 +139,11 @@
 \AddToHook{env/longtable/begin}{\addfontfeature{Numbers={Lining,Tabular}}}
 
 % --- heads ----------------------------------------------------------------------
-% \atlas@head[note]{text}: centred spaced small capitals, with an italic note
-% beneath if given. 04's \prophead.
+% \atlas@head[note]{text}: centred spaced small capitals in the rubric, with
+% an italic note beneath if given. 04's \prophead.
 \NewDocumentCommand{\atlas@head}{o m}{%
   \par\addvspace{1.1em plus .3em}%
-  \centerline{\small\textls[120]{\textsc{#2}}}%
+  \centerline{\small\textcolor{rubric}{\textls[120]{\textsc{#2}}}}%
   \IfValueT{#1}{\nobreak\vspace{.1em}\centerline{\footnotesize\itshape #1}}%
   \nobreak\vspace{.3em}%
   % Stay in vertical mode and let the next paragraph start flush, as a
@@ -151,7 +157,7 @@
 % would otherwise be deferred into the statement's first line.
 \def\section{\@startsection{section}{1}%
   \z@{1.4em\@plus .5em}{.7em}%
-  {\normalfont\small\centering\scshape}}
+  {\normalfont\small\centering\scshape\color{rubric}}}
 \def\subsection{\@startsection{subsection}{2}%
   \z@{.9em\@plus .4em}{.3em}%
   {\normalfont\itshape}}
@@ -162,13 +168,14 @@
 % re-dress that environment in place. Arguments: the environment, its
 % caption, and in brackets the counter it steps (the shared one, for
 % [theorem]-style sharing); without the bracket the environment is
-% unnumbered, as remark* is.
+% unnumbered, as remark* is. Captions are the manuscript's own: prose may
+% cross-refer to a kind by name, so a style does not rename one.
 %   \AtlasProposition{theorem}{Theorem}[theorem]   centred head, attribution
 %                                                  beneath, italic statement
 %   \AtlasDefinition{definition}{Definition}[theorem]  run-in small-capital
 %                                                  head, upright body
-%   \AtlasScholium{remark}{Scholium}[theorem]      run-in head, body set small
-%   \AtlasScholium{remark*}{Scholium}              the same, unnumbered
+%   \AtlasScholium{remark}{Remark}[theorem]        run-in head, body set small
+%   \AtlasScholium{remark*}{Remark}                the same, unnumbered
 % The counter is stepped before the head is set, outside every box and
 % group: \refstepcounter inside \centerline or \textls leaves \@currentlabel
 % behind when the box closes, and \label then records the section.
@@ -178,6 +185,7 @@
 \NewDocumentCommand{\AtlasProposition}{m m o}{%
   \RenewDocumentEnvironment{#1}{o}
     {\atlas@step[#3]%
+     \atlas@writeprop{\IfValueTF{#3}{#2~\csname the#1\endcsname}{#2}}{\IfValueTF{##1}{##1}{}}%
      \atlas@head[##1]{#2\atlas@number{#1}[#3].}\itshape\ignorespaces}
     {\par}}
 \NewDocumentCommand{\atlas@runin}{m o}{%
@@ -196,12 +204,41 @@
 \renewcommand{\proofname}{Demonstration}
 \renewcommand{\qedsymbol}{\textls[60]{\textsc{q.e.d.}}}
 
+% --- the Table of the Propositions ---------------------------------------------------
+% What 07 could only hand-set. Every \AtlasProposition environment writes
+% one line to the .aux (kind and number, the name the manuscript gave,
+% the page); \AtlasTable, placed where the author wants the index, prints
+% them on the second pass under 07's head, with real pages. Statements are
+% not captured, so the table gives kind, number and name. Nothing is
+% printed unless \AtlasTable is called.
+\newtoks\atlas@proptoks
+\newif\ifatlas@hastable
+\newcommand{\atlas@tableline}[3]{%
+  \global\atlas@hastabletrue
+  \global\atlas@proptoks\expandafter{\the\atlas@proptoks\atlas@tableentry{#1}{#2}{#3}}}
+% A table line with a right-set page: the ToC idiom, without its dots.
+\newcommand{\atlas@tableentry}[3]{%
+  {\par\noindent\hangindent=1.5em\hangafter=1
+   \rightskip=2.55em plus 1em \parfillskip=-\rightskip
+   \textls[70]{\textsc{#1.}}\ \textit{#2}%
+   \nobreak\hfill\nobreak\hbox to 1.55em{\hfil #3}\par}%
+  \vspace{0.3em}}
+\newcommand{\atlas@writeprop}[2]{%
+  \protected@write\@auxout{}{\string\atlas@tableline{#1}{#2}{\thepage}}}
+\newcommand{\AtlasTable}{%
+  \ifatlas@hastable
+    \atlas@head{A Table of the Propositions.}%
+    \small\the\atlas@proptoks\normalsize
+  \fi}
+
 % --- the title leaf --------------------------------------------------------------
 % After 07: the title in spaced capitals, the author set off by "by", the
 % address and date small, a double rule; then The Argument in the full
 % measure. Reads amsart's \@title, \authors, \addresses, \@date, and article's
 % \@author if amsart is not the class. The abstract is boxed as amsart does,
-% so the source order (abstract before \maketitle) is kept.
+% so the source order (abstract before \maketitle) is kept. The leaf is in
+% pieces -- \atlas@titleblock, \atlas@titleleaf, \maketitle -- so that a
+% layer over this file can put more on the leaf without repeating it.
 \providecommand{\authors}{\@author}
 \providecommand{\addresses}{}
 \providecommand{\shorttitle}{\@title}
@@ -221,8 +258,28 @@
     \box\atlas@abstractbox\prevdepth\z@
     \dimen@34\p@ \advance\dimen@-\baselineskip \vskip\dimen@\relax
   \fi}
-\renewcommand{\maketitle}{%
-  \thispagestyle{empty}%
+% The block: title, author, address, date, double rule.
+\newcommand{\atlas@titleblock}{%
+  \begin{center}
+    % A manuscript's hand-placed \\ was set for its own class's measure;
+    % in spaced capitals the title is let to flow. Redefined here, inside
+    % center, which has just made \\ its own.
+    {\Large\def\\{\unskip\space\ignorespaces}%
+     \color{rubric}\textls[160]{\MakeUppercase{\@title}}}\par
+    \vspace{1.2em}
+    {\small by}\par
+    \vspace{0.3em}
+    {\small\textls[140]{\textsc{\authors}}}\par
+    \addresses
+    \vspace{0.3em}
+    {\small\@date}\par
+    \vspace{1.2em}
+    \textcolor{rubric}{\rule{0.45\linewidth}{0.8pt}}\par\nointerlineskip
+    \vspace{1.6pt}\textcolor{rubric}{\rule{0.45\linewidth}{0.3pt}}\par
+  \end{center}}
+% The leaf: the block with the class's first-page footnotes, then the
+% Argument.
+\newcommand{\atlas@titleleaf}{%
   \begingroup
   \def\address##1##2{{\small\itshape ##2}\par}%
   \def\curraddr##1##2{}\def\email##1##2{}\def\urladdr##1##2{}%
@@ -242,33 +299,20 @@
   % article's \thanks: a symbol mark in the author line, the text as a
   % footnote after the leaf, as its \maketitle does.
   \renewcommand\thefootnote{\@fnsymbol\c@footnote}%
-  \begin{center}
-    % A manuscript's hand-placed \\ was set for its own class's measure;
-    % in spaced capitals the title is let to flow. Redefined here, inside
-    % center, which has just made \\ its own.
-    {\Large\def\\{\unskip\space\ignorespaces}%
-     \textls[160]{\MakeUppercase{\@title}}}\par
-    \vspace{1.2em}
-    {\small by}\par
-    \vspace{0.3em}
-    {\small\textls[140]{\textsc{\authors}}}\par
-    \addresses
-    \vspace{0.3em}
-    {\small\@date}\par
-    \vspace{1.2em}
-    \rule{0.45\linewidth}{0.8pt}\par\nointerlineskip
-    \vspace{1.6pt}\rule{0.45\linewidth}{0.3pt}\par
-  \end{center}
+  \atlas@titleblock
   \@ifundefined{@thanks}{}{\@thanks\global\let\@thanks\@empty}%
   \endgroup
-  \atlas@setabstract
+  \atlas@setabstract}
+\renewcommand{\maketitle}{%
+  \thispagestyle{empty}%
+  \atlas@titleleaf
   \markboth{\shorttitle}{\shorttitle}%
   \global\let\maketitle\relax}
 
 % --- running head and folio ------------------------------------------------------
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[C]{\small\textls[90]{\textsc{\shorttitle}}}
+\fancyhead[C]{\small\textcolor{rubric}{\textls[90]{\textsc{\shorttitle}}}}
 \fancyfoot[C]{\footnotesize\itshape --- \thepage\ ---}
 \renewcommand{\headrulewidth}{0.35pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -283,5 +327,41 @@
 \@ifundefined{@setaddresses}{}{\renewcommand{\@setaddresses}{}}
 \@ifundefined{bibliofont}{}{\renewcommand{\bibliofont}{\small}}
 \renewcommand{\refname}{The Authorities}
+
+% --- the colophon --------------------------------------------------------------------
+% \AtlasColophon sets a last leaf naming the faces, the engine and its
+% version, the sources and their revision: a reproducibility statement in
+% the period's place for one. \atlasrevision and \atlassources may be \def'd
+% on the command line (no shell escape) or in the preamble. A layer may
+% redefine \atlas@colophon@ornament (a short rule here) and add a sentence
+% through \atlas@colophon@sheet (empty here). Add \AtEndDocument{\AtlasColophon}
+% to the injected preamble to use it.
+\providecommand{\atlasrevision}{unrecorded}
+\providecommand{\atlassources}{the author's sources}
+\newcommand{\atlas@colophon@ornament}{\textcolor{rubric}{\rule{22mm}{0.3pt}}}
+\newcommand{\atlas@colophon@sheet}{}
+\newcommand{\atlas@luatexversion}{%
+  \directlua{local v = status.luatex_version
+    tex.print((v // 100) .. "." .. (v - (v // 100) * 100) .. "." .. status.luatex_revision)}}
+\newcommand{\AtlasColophon}{%
+  \clearpage\thispagestyle{empty}%
+  \vspace*{\fill}
+  \begin{center}
+    \atlas@colophon@ornament\par
+    \vspace{2em}
+    {\small\textcolor{rubric}{\textls[130]{\textsc{Colophon.}}}}\par
+    \vspace{1em}
+    \begin{minipage}{0.7\linewidth}\small\centering
+      This edition of the preprint was set in EB~Garamond, with
+      Garamond-Math for the mathematics, by LuaTeX (\atlas@luatexversion),
+      from \atlassources{} at revision \texttt{\atlasrevision}, on
+      \@date. \atlas@colophon@sheet
+      The propositions are numbered as the author left them. Nothing in
+      the mathematics has been altered by the dress.
+    \end{minipage}\par
+    \vspace{2em}
+    \atlas@colophon@ornament\par
+  \end{center}
+  \vspace*{\fill}}
 
 \endinput

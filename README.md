@@ -234,6 +234,16 @@ names the counter the environment steps. A manuscript's `[T1]{fontenc}`,
 `HANDOFF.md` records what dressing the first two real preprints taught
 it — seven things from a 12-page paper, nine more from a 35-page one.
 
+On call, `\AtlasTable` prints a Table of the Propositions with real page
+numbers from the `.aux` (two passes) and `\AtlasColophon` a colophon leaf
+naming faces, engine, sources and revision.
+
+`sty/atlas-grand.sty` is the other register: load it in place of `atlas`
+and every costume device the lab has goes on at once — rubric, glossed
+margin, initials, framed title leaf with the Table, fleurons, the hand
+press and its foxed laid paper, an ornamented colophon. Three passes. It
+is there to find the limit, not to post.
+
 `bound/treatise.tex` gathers 07, 04 and 08 into one PDF with pdfpages,
 as printed: the proof that made the seams visible and the style
 necessary.

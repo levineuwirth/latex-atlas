@@ -3,18 +3,18 @@
 % device the lab has over a running manuscript, at once, to see where the
 % limit is. Load it in place of atlas (it loads atlas itself), last in the
 % preamble; name the theorem environments with \AtlasProposition etc. as for
-% atlas; add \AtEndDocument{\AtlasColophon} if a colophon leaf is wanted.
+% atlas; add \AtEndDocument{\AtlasColophon} for the colophon leaf.
 %
-% Over atlas it sets: a second colour (rubric) for heads, running head and
-% initials; a broad outer margin with the propositions' names glossed in it
-% (02); a dropped three-line initial at the first paragraph after every
+% Over atlas it sets: the rubric red, so every head, rule and running head
+% that atlas sets in the rubric token turns (01); 02's broad outer margin,
+% with the propositions' names glossed in it instead of set beneath their
+% heads; a dropped three-line initial at the first paragraph after every
 % section head (01); a title leaf of its own, framed with corner pieces
-% (05), with The Argument, a Table of the Propositions read from the .aux
-% with real pages (what 07 could not do), fleurons and the imprint (07);
-% roman section numerals; a fleuron before every section; the hand press
-% (06): baseline scatter and ink squash on text lines, laid paper and
-% foxing beneath every page; and a colophon leaf naming the faces, the
-% engine, the sources and their revision. Two passes for the Table.
+% (05), carrying the Argument, atlas's Table of the Propositions (07, with
+% real pages), fleurons and the imprint; roman section numerals; a fleuron
+% before every section; the hand press (06): baseline scatter and ink squash
+% on text lines, laid paper and foxing beneath every page; and ornaments and
+% a sentence on the sheet for atlas's colophon. Three passes: the Table.
 %
 % Options: plain and rareligatures pass through to atlas. Nothing here is
 % meant for a preprint one would post; that is what atlas is for.
@@ -31,6 +31,7 @@
 \RequirePackage{luacode}
 
 % --- the second colour ---------------------------------------------------------
+% atlas sets rubric equal to ink; here it is red, and everything follows.
 \ifatlas@plain
   \definecolor{rubric}{HTML}{000000}
   \definecolor{glossink}{HTML}{000000}
@@ -45,21 +46,16 @@
 \geometry{a4paper,twoside,top=30mm,bottom=32mm,inner=26mm,outer=54mm,
   marginparwidth=36mm,marginparsep=6mm,headheight=14pt,headsep=8mm}
 
-% --- heads in rubric; section numerals roman ----------------------------------------
+% --- heads: the note goes to the margin as a gloss (02); numerals roman ---------------
 \RenewDocumentCommand{\atlas@head}{o m}{%
   \par\addvspace{1.1em plus .3em}%
   \centerline{\small\textcolor{rubric}{\textls[120]{\textsc{#2}}}}%
-  % The note goes to the margin, as a gloss (02), rather than beneath.
   \IfValueT{#1}{\marginpar{\footnotesize\raggedright\itshape\color{glossink}#1}}%
   \nobreak\vspace{.3em}%
   \@afterindentfalse\@afterheading}
-\def\section{\@startsection{section}{1}%
-  \z@{1.4em\@plus .5em}{.7em}%
-  {\normalfont\small\centering\scshape\color{rubric}}}
 \renewcommand{\thesection}{\Roman{section}}
-\fancyhead[C]{\small\textcolor{rubric}{\textls[90]{\textsc{\shorttitle}}}}
 
-% --- a fleuron before every section ---------------------------------------------
+% --- a fleuron before every section; an initial after every section head (01) -----
 \newcommand{\atlas@fleuron}{%
   \par\addvspace{1.2em}\centerline{\pgfornament[width=18mm,color=rubric]{71}}\par}
 % \section and \subsection are wrapped rather than hooked: a cmd/.../after
@@ -77,11 +73,10 @@
   \IfBooleanTF{#1}{\atlas@grand@subsection*{#3}}
     {\IfValueTF{#2}{\atlas@grand@subsection[#2]{#3}}{\atlas@grand@subsection{#3}}}%
   \ifatlas@initialpending\atlas@arminitial\fi}
-
-% --- a dropped initial after every section head (01) ---------------------------
-% Armed by the section hook; a subsection head that follows re-arms it; it
-% fires at the next paragraph whose first token is a letter, and grabs the
-% first word. Anything else (a \label, an environment) disarms it quietly.
+% Armed by the section wrapper; a subsection head that follows re-arms it;
+% it fires at the next paragraph whose first token is a letter, and grabs
+% the first word. A leading \label is stepped over; anything else (an
+% environment, mathematics) disarms it quietly.
 \newif\ifatlas@initialpending
 \newcommand{\atlas@arminitial}{%
   \everypar{\everypar{}%
@@ -102,39 +97,9 @@
       \global\atlas@initialpendingfalse
     \fi
   \fi}
-% A paragraph that opens with \label{...} still gets its initial.
 \def\atlas@initial@skiplabel\label#1{\label{#1}\atlas@initial@try}
 \def\atlas@initial@grab#1#2 {%
   \lettrine[lines=3,loversize=0.08,findent=0.35em,nindent=0em]{\textcolor{rubric}{#1}}{#2} }
-
-% --- the Table of the Propositions, from the .aux ------------------------------------
-% Every apparatus environment writes one line; the second pass prints them
-% with real pages. Statements cannot be captured, so the table gives the
-% kind, the number and the name the manuscript gave.
-\newtoks\atlas@proptoks
-\newif\ifatlas@hastable
-\newcommand{\atlas@tableline}[3]{%
-  \global\atlas@hastabletrue
-  \global\atlas@proptoks\expandafter{\the\atlas@proptoks\atlas@tableentry{#1}{#2}{#3}}}
-\newcommand{\atlas@tableentry}[3]{%
-  {\par\noindent\hangindent=1.5em\hangafter=1
-   \rightskip=2.55em plus 1em \parfillskip=-\rightskip
-   \textls[70]{\textsc{#1.}}\ \textit{#2}%
-   \nobreak\hfill\nobreak\hbox to 1.55em{\hfil #3}\par}%
-  \vspace{0.3em}}
-\newcommand{\atlas@writeprop}[2]{%
-  \protected@write\@auxout{}{\string\atlas@tableline{#1}{#2}{\thepage}}}
-\RenewDocumentCommand{\AtlasProposition}{m m o}{%
-  \RenewDocumentEnvironment{#1}{o}
-    {\atlas@step[#3]%
-     \atlas@writeprop{\IfValueTF{#3}{#2~\csname the#1\endcsname}{#2}}{\IfValueTF{##1}{##1}{}}%
-     \atlas@head[##1]{#2\atlas@number{#1}[#3].}\itshape\ignorespaces}
-    {\par}}
-\newcommand{\AtlasTable}{%
-  \ifatlas@hastable
-    \atlas@head{A Table of the Propositions.}%
-    \small\the\atlas@proptoks\normalsize
-  \fi}
 
 % --- the title leaf (07), framed (05), on a page of its own ---------------------------
 \newif\ifatlas@titleleaf
@@ -145,36 +110,21 @@
     \vspace{0.3em}
     \textls[90]{\textsc{mmxxvi.}}\par
   \end{center}}
+% A long Table runs the front matter onto a second leaf; the frame follows
+% (the flag is up until the \clearpage) and so must the empty page style,
+% hence \pagestyle rather than \thispagestyle, restored afterwards.
 \renewcommand{\maketitle}{%
   \global\atlas@titleleaftrue
-  \thispagestyle{empty}%
-  \begingroup
-  \def\address##1##2{{\small\itshape ##2}\par}%
-  \def\curraddr##1##2{}\def\email##1##2{}\def\urladdr##1##2{}%
-  \def\and{\ and\ }%
-  \begin{center}
-    \vspace*{6mm}
-    {\Large\def\\{\unskip\space\ignorespaces}%
-     \color{rubric}\textls[160]{\MakeUppercase{\@title}}}\par
-    \vspace{1.2em}
-    {\small by}\par
-    \vspace{0.3em}
-    {\small\textls[140]{\textsc{\authors}}}\par
-    \addresses
-    \vspace{0.3em}
-    {\small\@date}\par
-    \vspace{1.2em}
-    \textcolor{rubric}{\rule{0.45\linewidth}{0.8pt}}\par\nointerlineskip
-    \vspace{1.6pt}\textcolor{rubric}{\rule{0.45\linewidth}{0.3pt}}\par
-  \end{center}
-  \endgroup
-  \ifvoid\atlas@abstractbox\else\box\atlas@abstractbox\fi
+  \pagestyle{empty}%
+  \vspace*{6mm}%
+  \atlas@titleleaf
   \atlas@fleuron
   \AtlasTable
   \vfill
   \AtlasImprint
   \clearpage
   \global\atlas@titleleaffalse
+  \pagestyle{fancy}%
   \markboth{\shorttitle}{\shorttitle}%
   \global\let\maketitle\relax}
 
@@ -227,7 +177,6 @@ local function rnd()
   return seed / 1073741824 - 1
 end
 local GLYPH, HLIST, VLIST = node.id("glyph"), node.id("hlist"), node.id("vlist")
-local MATH = node.id("math")
 -- Is this glyph's font a math font? Read once per font id.
 local mathfont = {}
 local function is_math(fid)
@@ -276,36 +225,14 @@ end
 \end{luacode*}
 \ifatlas@plain\directlua{atlas.jitter, atlas.inkspread, atlas.inking = 0, 0, 0}\fi
 
-% --- the colophon leaf -------------------------------------------------------------
-% \AtlasColophon sets the last leaf. \atlasrevision (the sources' commit)
-% and \atlassources may be \def'd on the command line or in the preamble.
-\providecommand{\atlasrevision}{unrecorded}
-\providecommand{\atlassources}{the author's sources}
-\newcommand{\AtlasColophon}{%
-  \clearpage\thispagestyle{empty}%
-  \vspace*{\fill}
-  \begin{center}
-    \pgfornament[width=22mm,color=rubric]{88}\par
-    \vspace{2em}
-    {\small\textcolor{rubric}{\textls[130]{\textsc{Colophon.}}}}\par
-    \vspace{1em}
-    \begin{minipage}{0.7\linewidth}\small\centering
-      This edition of the preprint was set in EB~Garamond, with
-      Garamond-Math for the mathematics, by LuaTeX
-      (\directlua{local v = status.luatex_version
-         tex.print((v // 100) .. "." .. (v - (v // 100) * 100) .. "." .. status.luatex_revision)}),
-      from \atlassources{} at revision \texttt{\atlasrevision}, on
-      \@date. The paper is laid, foxed and darkened at the edges by
-      computation; the impression of a hand press is counterfeited after
-      the paragraphs are set, by scattering the baselines of the type and
-      swelling its outline with ink, line by line, in a fixed and
-      repeatable order. The propositions are numbered as the author left
-      them. Nothing in the mathematics has been altered by the dress.
-    \end{minipage}\par
-    \vspace{2em}
-    \pgfornament[width=22mm,color=rubric,symmetry=h]{88}\par
-  \end{center}
-  \vspace*{\fill}
-  \AtlasImprint}
+% --- the colophon: atlas's, with ornaments and a sentence on the sheet ---------------
+\renewcommand{\atlas@colophon@ornament}{\pgfornament[width=22mm,color=rubric]{88}}
+\renewcommand{\atlas@colophon@sheet}{%
+  The paper is laid, foxed and darkened at the edges by computation; the
+  impression of a hand press is counterfeited after the paragraphs are set,
+  by scattering the baselines of the type and swelling its outline with
+  ink, line by line, in a fixed and repeatable order.}
+\let\atlas@grand@colophon\AtlasColophon
+\renewcommand{\AtlasColophon}{\atlas@grand@colophon\AtlasImprint}
 
 \endinput

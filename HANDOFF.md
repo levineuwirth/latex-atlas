@@ -11,8 +11,8 @@ far, what bit us, and what to do next.
 
 ## Where it stands
 
-`main` at `78cfebe` (atlas.sty after the second manuscript) plus this
-handoff, remote
+`main` at the merge of branch `grandeur` (atlas-grand.sty, and the pieces
+it sent down into atlas.sty) after `08a8ba0`, remote
 `ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
 clean. Eight plates, 59 PDFs from `./build.sh --ablate` in ~2 min
 sequential or **16 s with `-j`**; every preview byte-reproducible from a
@@ -558,13 +558,69 @@ run-in head before a proposition is deferred into the statement.
 Whether that is right for a preprint is the author's call. The `plain`
 edition exists for the other answer.
 
+## The grand edition: `sty/atlas-grand.sty`
+
+Built 2026-09-16 on a branch while the second manuscript was being
+dressed, then merged. It loads `atlas` and lays every costume device the
+lab has over a running manuscript at once, to see where the limit is: the
+rubric red (01), 02's broad outer margin with the propositions' names
+glossed in it, a dropped initial after every section head (01), a framed
+title leaf of its own (05) carrying the Argument, the Table of the
+Propositions, fleurons and the imprint (07), roman section numerals, a
+fleuron before every section, 06's press and sheet under every page, and
+ornaments on the colophon. Load it in place of `atlas`, same recipe, three
+passes; `\AtEndDocument{\AtlasColophon}` for the last leaf. Nothing in it
+is for a preprint one would post. Outputs: `build/branch-capture-grand.pdf`
+(15 pp), `build/near-critical-grand.pdf` (40 pp: the 44-entry Table runs
+the framed front matter onto a second leaf).
+
+**What moved down into `atlas.sty` at the merge**, being functional:
+
+- `rubric` is a colour token in `atlas.sty`, **equal to ink** — plate 01's
+  own ablation — and every head, rule and running head is set in it, so a
+  layer turns the whole apparatus red with one `\definecolor`.
+- `\AtlasTable`: every `\AtlasProposition` environment writes kind, number,
+  name and page to the `.aux`; `\AtlasTable` prints them under 07's head
+  with real pages on the second pass. Nothing prints unless called. This
+  is what 07 could only hand-set.
+- `\AtlasColophon`: a last leaf naming faces, LuaTeX version, sources and
+  revision (`\atlasrevision`, `\atlassources`, `\def`'d on the command line
+  — no shell escape). Plain rules in `atlas`; the grand layer swaps in
+  ornaments and adds its sentence on the sheet through two hooks.
+- The title leaf is in pieces — `\atlas@titleblock`, `\atlas@titleleaf`,
+  `\maketitle` — so a layer arranges the leaf without repeating the
+  footnote and hyperref handling the second manuscript added.
+
+**What stays in the grand layer**, being costume or needing its geometry:
+the margin gloss (needs 02's page), the initials, the frame, the fleurons,
+the imprint, roman numerals, the press and the sheet.
+
+**Two things it taught**, both gotchas now:
+
+- `cmd/section/after` hooks fire *before* a `\@startsection` command
+  reads its argument; `\section` and `\subsection` are wrapped with
+  `\RenewDocumentCommand{...}{s o m}` instead.
+- A `\futurelet` inside `\if…\fi` peeks at its own `\fi`; the peek runs
+  after `\expandafter` has removed the conditional. (The initial mechanism
+  peeks at the first token of the paragraph after a section head, grabs
+  the word if it is a letter, steps over a leading `\label`, and disarms
+  quietly on anything else.)
+
+**Judgement recorded:** the *type* devices — initials, rubric, glossed
+margin, the Table, the colophon — read as a designed book; the *sheet*
+devices — foxing, laid lines, ink squash — read as a facsimile, and on a
+screen a foxing spot beside a formula looks like dirt. That is where the
+limit is: the grand edition is at its best exactly where it stops
+pretending to be old paper.
+
 ## Outstanding, in rough order
 
 The graduation is the main line now; the lab continues beside it in
 both registers.
 
 1. **Read the dressed preprints** (`build/branch-capture-dressed.pdf`,
-   `build/near-critical-dressed.pdf`; rebuild with the recipe) and decide
+   `build/near-critical-dressed.pdf`, and the two `-grand` editions;
+   rebuild with the recipe) and decide
    the register questions the style cannot: page density, parchment vs
    `plain` for the website, whether Remark stays Remark in the sources,
    whether `\paragraph` gets a voice, whether a manuscript's `\url`
@@ -587,11 +643,9 @@ both registers.
    with the dress moved in from 08's preamble — the first manuscript
    whose bibliography is a `.bib` will want it. Then `\cite` in a dressed
    manuscript can become name-and-year without touching its body.
-5. **Colophon and errata slip** — now the treatise's last leaf after 08 as
-   much as a lab plate: fonts/engine/date/git hash (needs `--shell-escape`
-   or a build-time `\def`; decide which), an errata slip as revision
-   notes. Keep distinct from 07's imprint (imprint = title leaf, colophon =
-   last leaf).
+5. **Errata slip** as revision notes — the colophon exists now
+   (`\AtlasColophon`); the slip is the remaining half. Keep distinct from
+   07's imprint (imprint = title leaf, colophon = last leaf).
 6. **Fold-out plate** — a landscape leaf for a wide table; the longer
    manuscripts may need it.
 7. **Marginal figures** — small graph drawings in the scholia margin, the
@@ -617,4 +671,4 @@ before they were set.
 ## Open questions
 
 - Track this file, or gitignore it as the Forgejo notes are? It is written
-  to be tracked, and has been, four times.
+  to be tracked, and has been, five times.
