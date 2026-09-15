@@ -9,7 +9,8 @@ the lab has shown so far, what bit us, and what to do next.
 
 ## Where it stands
 
-`main` at the review-fixes commit after `9aa387f`, remote
+`main` at the commit that records the build.sh decision (after
+`10debf3`, the review fixes), remote
 `ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
 clean. Seven plates, 52 PDFs from `./build.sh --ablate` in ~50 s, every
 preview byte-reproducible from a clean build (verified twice on
@@ -195,17 +196,88 @@ Things that cost time once and should not cost it twice.
   (`{Scholium.}{Remark}`) because the modern list would name amsthm's
   Remark, as 04's ablation does.
 
+## Decided: build.sh grows passes, biber and -j
+
+Decided 2026-09-15 between the author and the reviewing session, after
+weighing (a) keeping one run and hand-setting the bibliography, (b) an
+explicit per-plate opt-in, (c) latexmk for everything. **(b)**, because the
+one-run rule has been information, not overhead — it caught
+`remember picture` and `\today` — and should stay the default with every
+exception declared in the file that needs it; and because the bibliography
+plate's deliverable is a biblatex style for the `.sty`, which cannot be
+developed hand-set. latexmk was rejected for hiding the pass count and
+adding Perl for 45 variants that don't need it. Not yet implemented; this
+is the spec.
+
+**Magic comments**, in the header next to `%!TEX program = lualatex`,
+discovered by grep exactly as controls are:
+
+```latex
+%!ATLAS passes=2
+%!ATLAS biber
+```
+
+- `passes=N` (default 1): `compile` runs lualatex N times with the same
+  jobname and output directory. `biber` runs
+  `biber --input-directory "$outdir" --output-directory "$outdir" "$job"`
+  after the first pass (it reads `$outdir/$job.bcf`, finds `$job.bib` in
+  the input directory, writes `$job.bbl`). Halt on the first failing
+  step. Append each pass's stdout to `$outdir/$job.stdout.txt`; send
+  biber's to `$outdir/$job.biber.txt` (it also leaves `$job.blg`).
+- Variants inherit the plate's passes and biber: `-jobname` already keeps
+  every variant's `.aux`, `.bcf`, `.bbl` apart, so nothing else changes.
+  A variant whose control turns the bibliography off still runs the extra
+  passes; harmless, and the plate says `passes=2` on purpose.
+- The **`.bib` lives inside the plate** in a `filecontents*` block, so the
+  file stays standalone (a stated invariant) and each variant writes its
+  own copy:
+
+  ```latex
+  \begin{filecontents*}[overwrite]{\jobname.bib}
+  @article{...}
+  \end{filecontents*}
+  ...
+  \addbibresource{\jobname.bib}
+  ```
+
+  `filecontents*` works before `\documentclass`; with `-output-directory`
+  the `\openout` lands in `$outdir`, which is why biber needs
+  `--input-directory`. Expect biblatex's "Please (re)run Biber" warning
+  after pass 1; `-halt-on-error` ignores warnings.
+- **`-j N`**: `./build.sh -j4 --ablate`; bare `-j` means `nproc`. Default
+  stays sequential so output order is stable. POSIX sh has no exported
+  functions, so build the job list as lines (`file|job|outdir|omit`),
+  pipe to `xargs -P N -L1 ./build.sh --one`, and let `--one` call
+  `compile` and print its own `OK`/`FAIL` line. Tee the lines to a temp
+  file; the summary greps `^FAIL` from it and exits 1 if any (xargs
+  itself returns 123). A bibliography plate with five controls is
+  7 variants × (2 lualatex + biber) ≈ 21 processes, ≈ +15 s sequential;
+  `-j` is the answer if the full build ever stops feeling free.
+- **Reproducibility is unaffected**: biber's `.bbl` is deterministic for
+  a given `.bib` and version, and pass 2 reads only what pass 1 wrote.
+  Verify as before — clean build, `./preview.sh`, clean tree — before
+  committing the first two-pass plate's previews.
+- What this does not buy: 07 stays hand-set. A second pass only reads
+  numbers that exist on the page, and 07's treatise is not on it.
+
 ## Outstanding, in rough order
 
 Ideas raised and agreed worth trying. The first feeds the preprint style
 directly; the rest are lab material.
 
-1. **Bibliography** — a period reference list in biblatex: hanging entries,
-   small-caps authors, old-style years, no naked URLs. Functional; the
-   `.sty` cannot ship without it. Note biblatex wants biber and a second
-   run; either `build.sh` grows a two-pass mode for plates that declare
-   it, or the plate hand-sets the entries as 07 hand-sets its page
-   numbers. Decide before starting.
+0. **build.sh: passes, biber, -j** — implement the decided spec above.
+   Small, and 1 depends on it. Prove it on 07 first (`passes=2`, no
+   biber, output identical) before writing the plate that needs it.
+1. **Bibliography (08)** — a period reference list in biblatex, the style
+   written as a real `.bbx`/`.cbx` pair inside the plate (or a `.sty`-bound
+   file once the graduation starts): hanging entries, small-caps authors,
+   old-style years, no naked URLs, against `biblatex`'s `numeric` default.
+   Candidate controls: hanging, authors (small caps vs plain), years
+   (old-style vs lining), urls (DOI as text vs naked URL), and paper.
+   Functional; the `.sty` cannot ship without it. Entries: the six
+   attributions already on 04 and 07 (Nowakowski–Winkler, Quilliot,
+   Berarducci–Intrigila, Aigner–Fromme, Schröder, Frankl for Meyniel), so
+   the three plates cite one book.
 2. **Colophon and errata slip** — fonts/engine/date/git hash (needs
    `--shell-escape` or a build-time `\def`; decide which), and an errata
    slip as revision notes. Rhymes with the site's colophon page and with
@@ -237,5 +309,3 @@ Meyniel's conjecture) for that reason.
   to be tracked, and has been, twice.
 - Does the `.sty` want the lab controls too (so a preprint can be ablated),
   or is that lab-only machinery?
-- Should `build.sh` learn a two-pass mode? Bibliography (1) and a real
-  theorem index both want it. The one-run rule has been cheap so far.
