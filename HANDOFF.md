@@ -1,22 +1,23 @@
 # latex-atlas — handoff
 
-Written 2026-09-15 at the end of the session that moved the previews to
-EB Garamond and added the front matter. Read the README first; this file
-is what the README does not say: why things are the way they are, what
-the lab has shown so far, what bit us, and what to do next.
+Written 2026-09-15 at the end of the session that gave build.sh its
+declared passes, biber and -j, and added the bibliography. Read the
+README first; this file is what the README does not say: why things are
+the way they are, what the lab has shown so far, what bit us, and what to
+do next.
 
 ---
 
 ## Where it stands
 
-`main` at the commit that records the build.sh decision (after
-`10debf3`, the review fixes), remote
-`ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
-clean. Seven plates, 52 PDFs from `./build.sh --ablate` in ~50 s, every
-preview byte-reproducible from a clean build (verified twice on
-2026-09-15, once by the author's review session:
-`rm -rf build && ./build.sh --ablate && ./preview.sh && ./gallery.sh`
-left the tree clean).
+`main` at `520b085` (plate 08) or the handoff commit after it, remote
+`ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`, not
+pushed this session. Tree clean. Eight plates, 59 PDFs from
+`./build.sh --ablate` in ~2 min sequential or **16 s with `-j`** on the
+16-core machine; every preview byte-reproducible from a clean build
+(verified 2026-09-15 after 08:
+`rm -rf build && ./build.sh -j --ablate && ./preview.sh && ./gallery.sh`
+left all 59 PNGs identical and the tree clean).
 
 | plate | register | controls |
 |---|---|---|
@@ -27,12 +28,15 @@ left the tree clean).
 | 05 engraved graph plate | both | paper, taper, matching, stipple, frame, lettering |
 | 06 hand-press impression | costume | paper, jitter, inkspread, inking, laid, foxing |
 | 07 front matter | both | ligatures, paper, imprint, title, argument, table, fleuron |
+| 08 bibliography | functional | oldstyle, paper, names, smallcaps, doi |
 
 Commits so far: `69a8fec` initial three plates; `01858bd` tint notes;
 `60f0dc2` the lab plus retrofits; `8171c63` plates 04–06; `af94c05` first
 handoff; `c5a3983` previews in EB Garamond and the retunes; `9e12c60`
-plate 07; `9aa387f` second handoff; then the review fixes (07's note
-reconciled with 04, `ligatures` made a control in 07, this file).
+plate 07; `9aa387f` second handoff; `10debf3` review fixes (07's note
+reconciled with 04, `ligatures` made a control in 07); `fda9b1a` the
+build.sh decision recorded; `44293b1` build.sh implemented; `520b085`
+plate 08.
 
 ## The decision
 
@@ -87,7 +91,7 @@ Look at `preview/ablate/` before building more; these are the findings.
   now sits in 05 and 07 too: 05's caption `$Aa$` labels had been Latin
   Modern Math inside an EB Garamond italic caption.
 - **Paper tint** ablates cleanly everywhere and every plate looks fine on
-  white. 07 takes 04's tint exactly, being the same book — the first
+  white. 07 and 08 take 04's tint exactly, being the same book — the first
   shared tint. When the `.sty` comes, one token will do.
 - **EB Garamond takes less ink than Pagella.** Its hairlines are finer
   and its x-height smaller, so 06's squash tuned on Pagella (0.09 ± 0.07
@@ -115,6 +119,38 @@ Look at `preview/ablate/` before building more; these are the findings.
   `article` front page and "Liſt of Theorems" with an st-tie is not.
   `07 --no-ligatures` is the comparison; a functional `.sty` will likely
   want `Rare` off, and now there is a plate to point at.
+- **biblatex's default DOI and URL are the worst thing on any plain
+  variant** (`08 --no-doi`, `08 --plain`): both in typewriter, the URL a
+  repeat of the DOI, and the `url` package's stretchable break points
+  turn "10.1016/0166-218X(84)90073-8" into "10 . 1016 / 0166 - 218X(84 )
+  90073 - 8" on a justified line. Three lines per entry against two. The
+  `.sty` wants `url=false` and the DOI as text whatever else it does.
+- **The structure and the dress of a reference list are separable**, and
+  the lab shows them separately: `08 --no-names` is biblatex's numeric
+  style with small caps, old-style figures and the text DOI kept, so it
+  shows what the `.bbx`/`.cbx` alone contribute (the hang, the inverted
+  initials, "vol.", no quotation marks, no "In:", the head, the cite
+  form). This is why the three dress controls are preamble code rather
+  than bbx options: an option of the atlas bbx would be an error under
+  numeric, and a bbx that carried the dress could only be *undone* by a
+  control. When the style graduates, the dress moves into the bbx.
+- **Old-style figures in a reference list** (`08 --no-oldstyle`): with
+  lining figures every "vol. 8 (1984), pp. 1–12" and every DOI stands
+  up out of the line; with old-style they sit in it. The list is the
+  densest ground of figures in a paper, which is why 08 is the plate
+  where figures are a control and why the control covers the whole leaf
+  (the cites carry years too). EB Garamond's *default* figures are
+  lining (checked), so the modern default is honestly "ask for nothing".
+- **A `.cbx` can reproduce 04's hand-set attribution exactly.**
+  `\parencite{nowakowski1983,quilliot1983}` prints "(Nowakowski and
+  Winkler; Quilliot, 1983)" because the cbx holds each entry's year back
+  until the next entry says whether it changes. For the `.sty`: 04's
+  `\begin{Theorem}[…]` attributions can become cites.
+- **Three passes, not two, for a quiet biblatex log.** The page is
+  complete after pass 2 (verified: pass 2 and pass 3 PNGs identical), but
+  pass 2 writes `\abx@aux@defaultrefcontext` lines to the `.aux` that
+  pass 1 did not, and biblatex asks to rerun. 08 declares `passes=3`
+  and says why in its header.
 
 ## Re-read before touching the plates
 
@@ -125,7 +161,7 @@ Things that cost time once and should not cost it twice.
   `\atlascontrol{<name>}` with angle brackets is safe. Names are
   lower-case letters, digits, hyphens.
 - **The lab block is inlined in every plate, identically.** That is the
-  price of standalone files. If it changes, change it in all seven.
+  price of standalone files. If it changes, change it in all eight.
 - **`\newcommand{\foo}[1]{#1}` inside a control argument works** — `#`
   survives xparse's `+m` grabbing. Verified.
 - **`\makeatletter` must sit outside `\atlascontrol`.** The argument is
@@ -164,7 +200,7 @@ Things that cost time once and should not cost it twice.
   renderings. Pagella stays as the fallback via `\IfFontExistsTF`; a
   machine without the fonts builds fine but its previews will differ
   from the committed ones, so don't commit previews from such a machine.
-- **`preview/` is ~6 MB** (45 ablations at 100 dpi, 52 PNGs in all). Kept full-size so
+- **`preview/` is ~8 MB** (51 ablations at 100 dpi, 59 PNGs in all). Kept full-size so
   clicking through is worth it. If the repo grows past ~15 plates, drop
   the ablations to 60 dpi in `preview.sh` (one number) and regenerate.
 - **`vintage-latex` lives in `~/scratch/tmp/vintage-latex`**, a scratch
@@ -174,6 +210,31 @@ Things that cost time once and should not cost it twice.
   the scratch directory, compile each, crop with `pdftoppm -x -y -W -H`
   at 100 and 300 dpi, and `magick … -append` the crops into one stack.
   That is how 06's amplitudes were chosen; ten minutes, no guessing.
+- **`%!ATLAS` lines must start the line** (`grep '^%!ATLAS …'`), so put
+  them in the header next to `%!TEX program`, never indented or in prose.
+  A plate that says `passes=2` and needs it will still build fine under
+  `passes=1`; the difference is the output, so check the preview.
+- **`-output-directory` is also searched for input.** Files a plate
+  writes with `filecontents*` land in `build/` (or `build/ablate/`) and
+  `\input`, `\IfFileExists`, `bibstyle=` and `\addbibresource` all find
+  them there; biber does not, hence `--input-directory`. Name every such
+  file under `\jobname` so parallel variants never write the same file.
+- **`\usepackage[bibstyle=\jobname]{biblatex}` works**, inside an
+  `\atlascontrol` argument too: LaTeX `\xdef`s the option list, so
+  `\jobname` becomes the plain string before biblatex sees it.
+- **`\bibstring` is not available in `\defbibheading`** (it is an
+  entry-context command; "Undefined control sequence" at
+  `\printbibliography`). biblatex exports only `\bibname`, `\refname`
+  and `\biblistname` from its strings, so 08's bbx redefines the
+  `references` string and heads the list with `\refname`.
+- **`\ifcurrentname{author}`** is how a name format or a delimiter applies
+  to authors and not editors: 08 uses it for the comma before "and" in
+  inverted names and for the small capitals. Without it the editors came
+  out "J. Koslowski, and A. Melton" and in small caps.
+- **`giveninits=true` conflicts with `uniquename=full`** (biblatex warns
+  and downgrades); say `uniquename=init` in the cbx.
+- **A `#1` in a `\DeclareFieldFormat` inside a control argument is fine**,
+  as `\newcommand` was; 08's `doi` control does it.
 
 ## Notes on 07
 
@@ -196,7 +257,7 @@ Things that cost time once and should not cost it twice.
   (`{Scholium.}{Remark}`) because the modern list would name amsthm's
   Remark, as 04's ablation does.
 
-## Decided: build.sh grows passes, biber and -j
+## build.sh: passes, biber and -j (decided, then implemented)
 
 Decided 2026-09-15 between the author and the reviewing session, after
 weighing (a) keeping one run and hand-setting the bibliography, (b) an
@@ -206,8 +267,18 @@ one-run rule has been information, not overhead — it caught
 exception declared in the file that needs it; and because the bibliography
 plate's deliverable is a biblatex style for the `.sty`, which cannot be
 developed hand-set. latexmk was rejected for hiding the pass count and
-adding Perl for 45 variants that don't need it. Not yet implemented; this
-is the spec.
+adding Perl for 45 variants that don't need it.
+
+**Implemented in `44293b1`** as specified below, and proved on 07 before
+08 existed: with `passes=2` added to 07's header all nine previews were
+byte-identical to the committed ones and the PDFs differed only in
+`/CreationDate` and the `/ID` derived from it; the header was then
+removed. Small departures from the spec as written: `-j N` is accepted
+beside `-jN`; the sequential default also goes through
+`xargs -P 1`, so there is one code path; `--one` takes the single
+`file|job|outdir|omit` argument and exits with the compile's status;
+`<job>.stdout.txt` is truncated at the start of each compile and then
+appended per pass; an empty selection is not an error.
 
 **Magic comments**, in the header next to `%!TEX program = lualatex`,
 discovered by grep exactly as controls are:
@@ -260,52 +331,75 @@ discovered by grep exactly as controls are:
 - What this does not buy: 07 stays hand-set. A second pass only reads
   numbers that exist on the page, and 07's treatise is not on it.
 
+## Notes on 08
+
+- Five controls, but not the five the previous handoff proposed:
+  `hanging` and `urls` became `names` and `doi`. A hang without a label
+  is what every unlabelled list has, so "no hanging" has no honest
+  default; the honest comparison is the numeric style whole, labels and
+  cites together, and that is `names`. `urls` was named for the wrong
+  side ("without urls" would *add* them); `doi` is the treatment, the
+  identifier as a word of the text.
+- `initials` (inverted names cut to initials against "Martin Aigner and
+  Michael Fromme") and roman volume numbers ("vol. viii.") were
+  considered and left out: the first is structural and lives in the bbx,
+  the second is costume that would earn a variant only if someone wants
+  it. Either would be a ten-minute control.
+- The bbx keeps the year after the journal, "vol. 8 (1984)", not the
+  Royal-Society form with the year after the names. With author-year
+  cites the latter is arguably more logical; it is one macro
+  (`author/editor+date` from `standard.bbx`) if the author wants to try
+  it.
+- Small caps are on the author's family name only, in the list only; the
+  text's cites stay in the text face as 04's attributions do. With
+  `\textls[50]`, as every small-cap line in the repo is tracked.
+- 08 follows 07's numbering of the six propositions (the Problem is
+  Prop. VI.), not 04's; the plate says so.
+- Quilliot is the 1983 thèse d'État, which is what 04's "Quilliot, 1983"
+  points at; his 1978 thèse de 3e cycle has the same result and is
+  what some texts cite. Frankl (1987) is where Meyniel's Problem was
+  first printed; Meyniel himself has no entry, as the handoff asked.
+- The three `filecontents*` blocks use `[overwrite,nowarn]`, not the
+  spec's `[overwrite]` alone: `nowarn` only silences "file exists,
+  overwriting" on the second and third pass.
+
 ## Outstanding, in rough order
 
-Ideas raised and agreed worth trying. The first feeds the preprint style
-directly; the rest are lab material.
+Ideas raised and agreed worth trying. Items 0 and 1 of the previous list
+(build.sh, the bibliography) are done; the rest are lab material until
+the graduation.
 
-0. **build.sh: passes, biber, -j** — implement the decided spec above.
-   Small, and 1 depends on it. Prove it on 07 first (`passes=2`, no
-   biber, output identical) before writing the plate that needs it.
-1. **Bibliography (08)** — a period reference list in biblatex, the style
-   written as a real `.bbx`/`.cbx` pair inside the plate (or a `.sty`-bound
-   file once the graduation starts): hanging entries, small-caps authors,
-   old-style years, no naked URLs, against `biblatex`'s `numeric` default.
-   Candidate controls: hanging, authors (small caps vs plain), years
-   (old-style vs lining), urls (DOI as text vs naked URL), and paper.
-   Functional; the `.sty` cannot ship without it. Entries: the six
-   attributions already on 04 and 07 (Nowakowski–Winkler, Quilliot,
-   Berarducci–Intrigila, Aigner–Fromme, Schröder, Frankl for Meyniel), so
-   the three plates cite one book.
-2. **Colophon and errata slip** — fonts/engine/date/git hash (needs
+1. **Colophon and errata slip** — fonts/engine/date/git hash (needs
    `--shell-escape` or a build-time `\def`; decide which), and an errata
    slip as revision notes. Rhymes with the site's colophon page and with
    07's imprint; keep the two distinct (imprint = title leaf, colophon =
    last leaf).
-3. **Fold-out plate** — a landscape leaf for a wide table, "Plate II, to
+2. **Fold-out plate** — a landscape leaf for a wide table, "Plate II, to
    face p. 12". Period convention with a modern use.
-4. **Marginal figures** — small graph drawings in the scholia margin, the
+3. **Marginal figures** — small graph drawings in the scholia margin, the
    natural sequel to 02 + 05 for a graph-theory paper.
-5. **Screen vs print edition** from one source (parchment on a display,
+4. **Screen vs print edition** from one source (parchment on a display,
    white for print/arXiv). Probably the first real `.sty` option.
-6. **The `.sty` graduation** itself — `\usepackage[rubric,scholia,plain]{atlas}`
-   or similar. 04 + 07 now give a complete treatise skeleton (front
-   matter, apparatus); with 1 it could be tried. The tokens that survive
-   ablation across plates (paper, ink, rubric) become the package's
-   tokens.
-7. **CSS counterparts for the Hakyll site** so an HTML preprint matches
+5. **The `.sty` graduation** itself — `\usepackage[rubric,scholia,plain]{atlas}`
+   or similar. 04 + 07 + 08 now give a complete treatise skeleton (front
+   matter, apparatus, authorities), so it could be tried. The tokens that
+   survive ablation across plates (paper, ink, rubric) become the
+   package's tokens; 08's bbx/cbx become `atlas.bbx`/`atlas.cbx` with
+   the dress moved in, and 04's attributions become cites.
+6. **CSS counterparts for the Hakyll site** so an HTML preprint matches
    its PDF. Separate repo when it happens.
 
 The site export path is unchanged: sources in `~/Repos/research/meyniel`,
 `make export` to `levineuwirth.org`. No `~/universum` material enters
-this repo; 04's and 07's content is textbook cops-and-robber
-(Nowakowski–Winkler, Berarducci–Intrigila, Aigner–Fromme, Schröder,
-Meyniel's conjecture) for that reason.
+this repo; 04's, 07's and 08's content is textbook cops-and-robber
+(Nowakowski–Winkler, Quilliot, Berarducci–Intrigila, Aigner–Fromme,
+Schröder, Frankl for Meyniel) for that reason, and 08's five DOIs
+(Quilliot's thesis has none) were checked against doi.org and Crossref
+before they were set.
 
 ## Open questions
 
 - Track this file, or gitignore it as the Forgejo notes are? It is written
-  to be tracked, and has been, twice.
+  to be tracked, and has been, three times.
 - Does the `.sty` want the lab controls too (so a preprint can be ablated),
   or is that lab-only machinery?
