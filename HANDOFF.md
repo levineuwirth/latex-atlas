@@ -450,6 +450,8 @@ cp ~/Repos/research/meyniel/paper/branch-capture-paper.tex work.tex
 #    \AtlasProposition{question}{Question}[theorem]
 #    \AtlasDefinition{definition}{Definition}[theorem]
 #    \AtlasScholium{remark}{Remark}[theorem]
+#    \AtlasSplitTitle    only if the title's \\ introduces a subtitle
+#                        (ball-occupation); a \\ that breaks a phrase flows
 #    \AtlasScholium{remark*}{Remark}
 TEXINPUTS=~/Repos/personal/latex-atlas/sty: lualatex work.tex   # twice
 ```
@@ -598,19 +600,20 @@ before, clean, labels identical). Each fixed in `02d7008`:
   amsart or article, amsthm, cleveref, `\newtheorem{theorem}{Theorem}
   [section]`, `\newtheorem{lemma}[theorem]{Lemma}`, a lemma with a
   `\label`, `\cref` of it. Upstream.
-- **A title's `\\` is a subtitle as often as a line break.** The first
-  manuscript broke its title for amsart's measure and v0 let it flow;
-  the third names a subtitle after its `\\`, and flowing ran "…Coarse
-  Graph Projections Degree Reduction, Square-Root Hard Families…" into
-  one title. A style cannot tell the two apart. The block is now split at
-  the author's first `\\`: capitals before it, what follows in italic
-  beneath, as 07 sets its "or," line — the period's own answer, the
-  qualifying clause in a second voice. Applied to all four: the first
-  reads "…AND STATIC COVERAGE / *in Tree-Ball Geometry*", the second
-  "…CRITICAL WINDOW FOR / *Growing-Radius Domination in Random Regular
-  Graphs*". That last ends the capitals on "for"; if the author would
-  rather it flowed, the `\\` comes out of the source, and the title
-  flows. The source decides, not a heuristic.
+- **A title's `\\` is a subtitle as often as a line break** — and a style
+  cannot tell which. The first manuscript broke its title for amsart's
+  measure; the third names a subtitle after its `\\`, and flowing ran
+  "…Coarse Graph Projections Degree Reduction, Square-Root Hard
+  Families…" into one title. The thread that found it split every title
+  at the first `\\` (capitals, then italic beneath, as 07's "or," line);
+  the review counted: of three titles with a `\\`, two were line breaks,
+  and the second manuscript's capitals ended on "FOR". So the split is
+  now **`\AtlasSplitTitle`, a declaration in the injected preamble**, and
+  the default is to flow in balanced capitals. The person injecting the
+  nine lines can see which the author meant; the recipe below says so.
+  Applied: ball-occupation split, the other three flow (near-critical in
+  three lines breaking at phrase boundaries, thanks to the finite-stretch
+  centring found in the same round).
 - **Centred capitals with fil stretch leave one word on the last line.**
   "TIMED GUARDING IN DEGREE-REDUCTION / CLOUDS": with `\centering`'s fil
   every line is equally good and TeX fills the first. The title paragraph
@@ -718,6 +721,20 @@ the framed front matter onto a second leaf).
 the margin gloss (needs 02's page), the initials, the frame, the fleurons,
 the imprint, roman numerals, the press and the sheet.
 
+**Review findings on the third round**, gotchas now:
+
+- amsart declares the document's first page `plain` at class load; its own
+  `\maketitle` overrides that with `firstpage`. The `atlas` leaf's
+  `\thispagestyle{empty}` beats it; the grand leaf had switched to
+  `\pagestyle{empty}` for its continuation leaves and so carried a bare
+  folio "1" under the footnotes on both grand editions for a round. Both
+  are set now.
+- `build/` holds the dressed manuscripts, and `preview.sh` rendered
+  every `build/*.pdf` — twelve manuscript PNGs appeared in `preview/`,
+  untracked, one `git add -A` from the repo. `preview.sh` now matches
+  `build/[0-9][0-9]-*.pdf` only. The rule stands: nothing of a manuscript
+  reaches a committed path.
+
 **Five things it taught**, all gotchas now (the last three from the
 third and fourth manuscripts, fixed in `5ea3f92` and `02d7008`):
 
@@ -777,10 +794,7 @@ both registers.
    stays Remark in the sources, whether `\paragraph` gets a voice,
    whether a manuscript's `\url` should leave typewriter (08 says yes for
    biblatex; the sty scales the typewriter to the text face now and does
-   not change it), whether the italic line under the capitals is wanted
-   where the title's `\\` was a line break and not a subtitle (the
-   second manuscript ends its capitals on "for"; taking the `\\` out of
-   the source is the other answer), and whether the plain-text arXiv
+   not change it), and whether the plain-text arXiv
    numbers in a hand-set bibliography should be lining (they are
    old-style; the `\href`ed ones beside them are lining).
 2. **Tell the author about cleveref.** Under TeX Live 2026, `\cref` of a
@@ -825,4 +839,4 @@ before they were set.
 ## Open questions
 
 - Track this file, or gitignore it as the Forgejo notes are? It is written
-  to be tracked, and has been, five times.
+  to be tracked, and has been, six times.

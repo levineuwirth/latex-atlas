@@ -127,9 +127,11 @@
 % leaves are ragged-bottom while they last: the class is flush-bottom, and
 % a middle leaf of Table lines, which have no stretch, cannot be filled and
 % was reported underfull; the last leaf has its \vfill before the imprint.
+% amsart declares the document's first page plain at class load (its own
+% \maketitle overrides that); \pagestyle alone does not, so both are set.
 \renewcommand{\maketitle}{%
   \global\atlas@titleleaftrue
-  \pagestyle{empty}%
+  \thispagestyle{empty}\pagestyle{empty}%
   \let\atlas@grand@textbottom\@textbottom
   \raggedbottom
   \vspace*{6mm}%

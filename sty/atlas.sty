@@ -18,8 +18,9 @@
 % expansion, a third pass of line breaking (\emergencystretch) and a break
 % after a dash between letters, the parchment stock and ink of 04/07/08
 % and their geometry on A4, spaced small-capital heads for sections, a
-% title leaf after 07 (the title in balanced spaced capitals, what follows
-% the author's first \\ in italic beneath it, "The Argument" in place of
+% title leaf after 07 (the title in balanced spaced capitals -- or, with
+% \AtlasSplitTitle, what follows its first \\ in italic beneath -- "The
+% Argument" in place of
 % the abstract, the class's first-page footnotes -- keywords, subject
 % class, \thanks -- beneath), the proposition apparatus of 04 (centred
 % head, attribution beneath, italic statement, Demonstration, Q.E.D.,
@@ -334,13 +335,16 @@
     \unvbox\atlas@abstractbox
     \dimen@34\p@ \advance\dimen@-\baselineskip \vskip\dimen@\relax
   \fi}
-% The title is split at the author's first \\: what precedes it is the
-% title, in spaced capitals; what follows is set beneath it in italic, as
-% 07 sets its "or," line. One manuscript broke its title there for
-% amsart's measure and another named a subtitle there, and a style cannot
-% tell the two apart; the period set both this way, the qualifying clause
-% in a second voice under the capitals. A further \\ in the subtitle
+% A title's \\ is a line break as often as a subtitle: of four
+% manuscripts, one named a subtitle there and two broke a phrase for
+% amsart's measure ("...Critical Window for" / "Growing-Radius..."). A style
+% cannot tell the two apart; the person injecting the preamble can. By
+% default the title flows, in balanced capitals. \AtlasSplitTitle, in the
+% injected preamble, sets what follows the first \\ beneath the capitals
+% in italic, as 07 sets its "or," line; a further \\ in the subtitle
 % breaks its line as written (center's own \\).
+\newif\ifatlas@splittitle
+\newcommand{\AtlasSplitTitle}{\atlas@splittitletrue}
 \def\atlas@splittitle#1\\#2\atlas@stop{%
   \atlas@settitle#1\atlas@mark\atlas@stop
   \atlas@setsubtitle#2\atlas@mark\atlas@stop}
@@ -348,14 +352,21 @@
 \def\atlas@setsubtitle#1\atlas@mark#2\atlas@stop{\def\atlas@titlesub{#1}}
 % The block: title, subtitle, author, address, date, double rule.
 \newcommand{\atlas@titleblock}{%
-  \expandafter\atlas@splittitle\@title\atlas@mark\\\atlas@stop
+  \ifatlas@splittitle
+    \expandafter\atlas@splittitle\@title\atlas@mark\\\atlas@stop
+  \else
+    \let\atlas@titlemain\@title \let\atlas@titlesub\@empty
+  \fi
   \begin{center}
     % The capitals are centred with finite stretch at either side, not
     % center's fil: with fil every line is equally good and TeX fills the
     % first, leaving one word on the last ("... DEGREE-REDUCTION" / "CLOUDS");
     % with a finite amount a short last line costs badness, and the lines
     % come out balanced.
+    % When the title flows, its \\ becomes a space; center has just made
+    % \\ its own, so the redefinition sits here, inside.
     {\Large\color{rubric}%
+     \ifatlas@splittitle\else\def\\{\unskip\space\ignorespaces}\fi
      \leftskip\z@\@plus.5\hsize \rightskip\leftskip \parfillskip\z@
      \textls[160]{\MakeUppercase{\atlas@titlemain}}\par}
     \ifx\atlas@titlesub\@empty\else

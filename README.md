@@ -225,6 +225,7 @@ to the apparatus —
 \AtlasProposition{lemma}{Lemma}[theorem]
 \AtlasDefinition{definition}{Definition}[theorem]
 \AtlasScholium{remark}{Remark}[theorem]
+\AtlasSplitTitle   % only if the title's \\ introduces a subtitle
 ```
 
 — then `TEXINPUTS=path/to/latex-atlas/sty: lualatex` twice, or as
