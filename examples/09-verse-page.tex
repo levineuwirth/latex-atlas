@@ -1,0 +1,234 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas 09: a page of verse, as a book of poems sets one. The poem is
+% a block centred on its longest line, each line flush within it and a
+% run-over hanging; a two-line initial opens it; the title in spaced small
+% capitals; every fifth line numbered in the margin; the source set small
+% and right under the last line; a tailpiece. Against each, what the
+% article class and its verse environment give: a poem indented at the
+% left margin, a bold title, no initial, no numbers, the source as a
+% paragraph, white space. The text is Herbert's "Vertue" (The Temple,
+% 1633), in its spelling; its indented short lines are content, kept in
+% every variant.
+%
+% The verse machinery is the plate's own, not verse.sty's (not installed
+% here, and its verse environment would replace the kernel's, the honest
+% default): every line ends with \\, stanzas are separated by a blank
+% line, a stanza is one paragraph so an initial can span two lines, and
+% each line is outdented from a hanging \leftskip so that only a run-over
+% keeps the hang. See the block's comment for what \\ does and why there
+% is no \everypar.
+\documentclass[11pt]{article}
+
+\usepackage{iftex}
+\ifLuaTeX\else
+  \PackageError{latex-atlas}{This example requires LuaLaTeX}
+    {Run lualatex, not pdflatex.}
+\fi
+
+% --- lab controls ---------------------------------------------------------
+% \atlascontrol{<name>}{<treatment>}{<modern default>} sets the treatment
+% unless <name> is in \atlasomit, a comma list build.sh --ablate passes on
+% the command line. \atlasstamp records the controls at the foot of the plate
+% so every variant names itself. Identical in every example, by design.
+\ExplSyntaxOn
+\providecommand{\atlasomit}{}
+\clist_new:N \l_atlas_omit_clist
+\clist_new:N \g_atlas_seen_clist
+\clist_set:Ne \l_atlas_omit_clist { \atlasomit }
+\NewDocumentCommand{\atlascontrol}{ m +m +m }
+  {
+    \clist_gput_right:Nn \g_atlas_seen_clist { #1 }
+    \clist_if_in:NnTF \l_atlas_omit_clist { #1 } { #3 } { #2 }
+  }
+\NewDocumentCommand{\atlasstamp}{}
+  {
+    \clist_remove_duplicates:N \g_atlas_seen_clist
+    Controls:~\clist_use:Nn \g_atlas_seen_clist { ,~ }.
+    \clist_if_empty:NF \l_atlas_omit_clist
+      { ~This~impression~sets~\clist_use:Nn \l_atlas_omit_clist { ,~ }~to~the~modern~default. }
+  }
+\ExplSyntaxOff
+% --------------------------------------------------------------------------
+
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{pgfornament}
+\usepackage[tracking=true,protrusion=true,expansion=true]{microtype}
+
+\defaultfontfeatures{Renderer=Node}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common,Rare}
+  ]
+}{
+  \setmainfont{TeX Gyre Pagella}[
+    Numbers={OldStyle,Proportional},
+    Ligatures={TeX,Common}
+  ]
+}
+
+% The book's stock: 04/07/08's, a book of poems being a book.
+\atlascontrol{paper}{
+  \definecolor{parchment}{HTML}{F5ECDB}
+  \definecolor{ink}{HTML}{241F19}
+  \definecolor{glossink}{HTML}{5A4A3A}
+}{
+  \definecolor{parchment}{HTML}{FFFFFF}
+  \definecolor{ink}{HTML}{000000}
+  \definecolor{glossink}{HTML}{000000}
+}
+% The second colour, for the title and the initial; or the ink.
+\atlascontrol{rubric}{
+  \definecolor{rubric}{HTML}{9E2B25}
+}{
+  \colorlet{rubric}{ink}
+}
+\pagecolor{parchment}
+\color{ink}
+\geometry{a5paper,top=24mm,bottom=24mm,left=22mm,right=22mm}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+% --- the poem block -----------------------------------------------------------
+% Every line ends with \\, stanzas are separated by a blank line, a stanza
+% is one paragraph. \\ does the work: it counts the line, sets its number,
+% and then either breaks the line -- a \null before the outdent, because
+% glue at the head of a line after a forced break is discarded -- or, if a
+% blank line follows, ends the stanza and sets the stanza space itself.
+% The first line of a stanza is outdented by a negative \parindent. No
+% \everypar: any user \everypar, even \relax, loses the \parskip between
+% paragraphs in a minipage under the 2021+ kernel, which is why the stanza
+% space is explicit here and \parskip is zero.
+\makeatletter
+\newlength{\poemwidth}
+\newlength{\poemhang}\setlength{\poemhang}{1.5em}
+\newlength{\stanzaskip}
+\newcounter{poemline}
+% \poemblock{longest line}: the width the block is measured by.
+\newcommand{\poemblock}[1]{\settowidth{\poemwidth}{#1}}
+% Every fifth line numbered at the block's right edge, small and quiet; or
+% nothing. Set at the line's end, so it needs no hook at its start.
+\atlascontrol{numbers}{
+  \newcommand{\poemnumber}{%
+    \ifnum\numexpr\value{poemline}/5*5\relax=\value{poemline}\relax
+      \hskip\z@\@plus1fill\rlap{\hskip1.4em{\tiny\itshape\color{glossink}\arabic{poemline}}}\fi}
+}{
+  \newcommand{\poemnumber}{}
+}
+% The block centred on its longest line, as a book of poems sets it; or
+% the poem at the left margin, indented the 1.5 em the verse environment
+% indents it.
+\atlascontrol{block}{
+  \newcommand{\poemopen}{\begin{center}\begin{minipage}[t]{\poemwidth}}
+  \newcommand{\poemclose}{\end{minipage}\end{center}}
+}{
+  \newcommand{\poemopen}{\par\noindent\hspace*{1.5em}\begin{minipage}[t]{\dimexpr\linewidth-1.5em\relax}}
+  \newcommand{\poemclose}{\end{minipage}\par}
+}
+\def\poem@eol{\@ifnextchar\par{\poem@stanzaend}{\newline\null\hskip-\poemhang\ignorespaces}}
+\def\poem@stanzaend\par{\par\vskip\stanzaskip}
+\newenvironment{poem}{%
+  \par\addvspace{1.2em}\setcounter{poemline}{0}%
+  % The stanza space is a line, measured here, where \baselineskip is the
+  % text's (in the preamble it is still zero).
+  \setlength{\stanzaskip}{\baselineskip}%
+  \poemopen
+    \parindent-\poemhang \parskip\z@
+    \leftskip\poemhang \rightskip\z@\@plus1fil \parfillskip\z@
+    \def\\{\unskip\stepcounter{poemline}\poemnumber\poem@eol}%
+    \def\vin{\hspace*{2em}}%
+    \ignorespaces}
+  {\par\poemclose}
+\makeatother
+
+% The title in spaced small capitals, centred, in the rubric; or as the
+% class heads a section, bold and flush left.
+\atlascontrol{title}{
+  \newcommand{\poemtitle}[1]{%
+    \par\addvspace{1em}\centerline{\small\textcolor{rubric}{\textls[130]{\textsc{#1}}}}\par}
+}{
+  \newcommand{\poemtitle}[1]{\par\addvspace{1em}{\noindent\Large\bfseries #1\par}}
+}
+% A two-line initial on the first line; or the first letter as set. Not
+% lettrine, whose own \par and \noindent throw away the block's outdent:
+% the first two lines hang by the initial's width (\hangafter=-2, which
+% composes with the block's \leftskip and per-line outdent on every line),
+% the letter is sized by measurement so its height spans the two lines,
+% and is set into the hang on the second line's baseline; the rest of the
+% word in small capitals, as lettrine sets it.
+\makeatletter
+\newsavebox{\ini@box}\newlength{\ini@target}
+\newcommand{\ini@findent}{0.3em}
+\atlascontrol{initial}{
+  \newcommand{\incipit}[2]{%
+    \leavevmode
+    \settoheight{\ini@target}{#1}%
+    \setlength{\ini@target}{\dimexpr\baselineskip+1.05\ini@target\relax}%
+    \sbox\ini@box{\fontsize{10pt}{10pt}\selectfont #1}%
+    \sbox\ini@box{\fontsize{\fpeval{10*\strip@pt\ini@target/\strip@pt\dimexpr\ht\ini@box\relax}pt}{0pt}\selectfont\color{rubric}#1}%
+    \hangindent\dimexpr\wd\ini@box+\ini@findent\relax \hangafter-2
+    \llap{\smash{\raisebox{-\baselineskip}{\usebox\ini@box}}\hskip\ini@findent}%
+    {\scshape #2}}
+}{
+  \newcommand{\incipit}[2]{#1#2}
+}
+\makeatother
+% The source under the last line, small, italic, set right; or the same
+% words as a paragraph.
+\atlascontrol{attribution}{
+  \newcommand{\attribution}[1]{\par\vspace{0.6em}{\raggedleft\small\itshape #1\par}}
+}{
+  \newcommand{\attribution}[1]{\par\vspace{0.6em}{\noindent #1\par}}
+}
+% A tailpiece after the poem; or the white space alone.
+\atlascontrol{tailpiece}{
+  \newcommand{\tailpiece}{\par\vspace{1.4em}\centerline{\pgfornament[width=20mm,color=rubric]{87}}\par}
+}{
+  \newcommand{\tailpiece}{\par\vspace{1.4em}}
+}
+
+\begin{document}
+
+\vspace*{6mm}
+\poemtitle{Vertue}
+
+\poemblock{Sweet spring, full of sweet dayes and roses,}
+\begin{poem}
+\incipit{S}{weet} day, so cool, so calm, so bright,\\
+The bridall of the earth and skie:\\
+The dew shall weep thy fall to night;\\
+\vin For thou must die.\\
+
+Sweet rose, whose hue angrie and brave\\
+Bids the rash gazer wipe his eye:\\
+Thy root is ever in its grave,\\
+\vin And thou must die.\\
+
+Sweet spring, full of sweet dayes and roses,\\
+A box where sweets compacted lie;\\
+My musick shows ye have your closes,\\
+\vin And all must die.\\
+
+Onely a sweet and vertuous soul,\\
+Like season'd timber, never gives;\\
+But though the whole world turn to coal,\\
+\vin Then chiefly lives.\\
+\end{poem}
+\attribution{George Herbert, \textit{The Temple}, 1633.}
+\tailpiece
+
+\vfill
+\footnotesize\noindent
+A poem is a block, not a paragraph: centred on its longest line, each
+line flush within it, a run-over hanging, the stanza one paragraph so
+that an initial may span two lines. The indented fourth lines are
+Herbert's own and are kept in every variant. Numbers every fifth line are
+the scholarly edition's; the initial, the rubric and the tailpiece are
+the private press's.
+
+\medskip\noindent\itshape\atlasstamp
+
+\end{document}

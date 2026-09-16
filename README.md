@@ -19,8 +19,8 @@ toward reusable website preprint styles.
 | 01 rubricated incipit | 02 marginal scholia | 03 hatched bar chart |
 | [![04](preview/04-propositions.png)](examples/04-propositions.tex) | [![05](preview/05-engraved-graph-plate.png)](examples/05-engraved-graph-plate.tex) | [![06](preview/06-hand-press-impression.png)](examples/06-hand-press-impression.tex) |
 | 04 propositions | 05 engraved graph plate | 06 hand-press impression |
-| [![07](preview/07-front-matter.png)](examples/07-front-matter.tex) | [![08](preview/08-bibliography.png)](examples/08-bibliography.tex) | |
-| 07 front matter | 08 bibliography | |
+| [![07](preview/07-front-matter.png)](examples/07-front-matter.tex) | [![08](preview/08-bibliography.png)](examples/08-bibliography.tex) | [![09](preview/09-verse-page.png)](examples/09-verse-page.tex) |
+| 07 front matter | 08 bibliography | 09 verse page |
 
 ## Examples
 
@@ -34,6 +34,7 @@ toward reusable website preprint styles.
 | 06 | `06-hand-press-impression.tex` | the hand press, counterfeited in a LuaTeX callback: baseline scatter, ink squash, uneven inking, laid paper, foxing | paper, jitter, inkspread, inking, laid, foxing |
 | 07 | `07-front-matter.tex` | the leaf before 04: a period title block against `\maketitle`, *The Argument* against the abstract, a Table of the Propositions with their statements against a list of theorems, fleurons, the imprint against the date; the period's ct/st ties against the common ligatures | ligatures, paper, imprint, title, argument, table, fleuron |
 | 08 | `08-bibliography.tex` | the last leaf of 04 and 07: the authorities cited by name and year and listed under the name, by a real `.bbx`/`.cbx` written in the plate, against biblatex's numeric default; small-capital family names, old-style figures for the whole leaf, the DOI as text without the URL | oldstyle, paper, names, smallcaps, doi |
+| 09 | `09-verse-page.tex` | a page of verse as a book of poems sets one: the block centred on its longest line against the class's indented `verse`, a two-line initial, the title in small capitals, every fifth line numbered, the source set right, a tailpiece; Herbert's *Vertue* (1633) | paper, rubric, numbers, block, title, initial, attribution, tailpiece |
 
 Every control has a *modern default*: what you get from the document
 class, the plotting library, or the engine when you do nothing. The
@@ -208,6 +209,23 @@ it needs beyond the TeX distribution it writes itself, as 08 writes its
 | ![without smallcaps](preview/ablate/08-bibliography--no-smallcaps.png) | ![without doi](preview/ablate/08-bibliography--no-doi.png) | ![plain](preview/ablate/08-bibliography--plain.png) | |
 | without smallcaps | without doi | plain | |
 
+### 09 verse page
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| [![full](preview/09-verse-page.png)](examples/09-verse-page.tex) | ![without paper](preview/ablate/09-verse-page--no-paper.png) | ![without rubric](preview/ablate/09-verse-page--no-rubric.png) | ![without numbers](preview/ablate/09-verse-page--no-numbers.png) |
+| full | without paper | without rubric | without numbers |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without block](preview/ablate/09-verse-page--no-block.png) | ![without title](preview/ablate/09-verse-page--no-title.png) | ![without initial](preview/ablate/09-verse-page--no-initial.png) | ![without attribution](preview/ablate/09-verse-page--no-attribution.png) |
+| without block | without title | without initial | without attribution |
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| ![without tailpiece](preview/ablate/09-verse-page--no-tailpiece.png) | ![plain](preview/ablate/09-verse-page--plain.png) | | |
+| without tailpiece | plain | | |
+
 <!-- lab:end -->
 
 ## The style
@@ -247,6 +265,16 @@ and every costume device the lab has goes on at once — rubric, glossed
 margin, initials, framed title leaf with the Table, fleurons, the hand
 press and its foxed laid paper, an ornamented colophon. Three passes. It
 is there to find the limit, not to post.
+
+`sty/atlas-verse.sty` is verse over either: `\begin{poem}…\end{poem}` with
+every line ending in `\\`, a `poem*` for shaped verse, `\poemtitle`,
+`\attribution`, `\tailpiece`, a Contents and a sorted Index of First
+Lines from the `.aux`, initials and numbers on under `atlas-grand`.
+`bound/temple.tex` is its proof: four poems of Herbert's *The Temple*
+(1633) as a seven-leaf chapbook — `TEXINPUTS=sty: lualatex
+-output-directory=build bound/temple.tex`, three passes. The author's own
+poems are dressed the way the manuscripts are: on a copy in scratch,
+output to `build/`, nothing committed.
 
 `bound/treatise.tex` gathers 07, 04 and 08 into one PDF with pdfpages,
 as printed: the proof that made the seams visible and the style
