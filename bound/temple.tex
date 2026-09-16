@@ -1,0 +1,130 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% latex-atlas: a chapbook proof. Four poems from George Herbert's The Temple
+% (1633), in the spelling of the first edition, set with atlas-grand and
+% atlas-verse: a framed title leaf with the Contents, one poem to a leaf,
+% each opened by a two-line initial, every fifth line numbered, a tailpiece,
+% an Index of First Lines, a colophon. "Easter Wings" is shaped verse and
+% takes the centred block. The text is public domain; it stands in for the
+% author's own poems, which are dressed on copies in scratch and never here.
+%
+%   TEXINPUTS=sty: lualatex -output-directory=build bound/temple.tex   (x3)
+\documentclass[11pt]{article}
+\usepackage{atlas-grand}
+\usepackage{atlas-verse}
+\AtlasPoemsOnNewPages
+\title{The Temple}
+\author{George Herbert}
+\date{1633}
+\providecommand{\atlassources}{the text of the first edition, 1633}
+\AtEndDocument{\AtlasFirstLines\AtlasColophon}
+
+\begin{document}
+\maketitle
+
+\poemtitle{Vertue}
+\poemblock{Sweet spring, full of sweet dayes and roses,}
+\begin{poem}[Sweet day, so cool, so calm, so bright,]
+Sweet day, so cool, so calm, so bright,\\
+The bridall of the earth and skie:\\
+The dew shall weep thy fall to night;\\
+\vin For thou must die.\\
+
+Sweet rose, whose hue angrie and brave\\
+Bids the rash gazer wipe his eye:\\
+Thy root is ever in its grave,\\
+\vin And thou must die.\\
+
+Sweet spring, full of sweet dayes and roses,\\
+A box where sweets compacted lie;\\
+My musick shows ye have your closes,\\
+\vin And all must die.\\
+
+Onely a sweet and vertuous soul,\\
+Like season'd timber, never gives;\\
+But though the whole world turn to coal,\\
+\vin Then chiefly lives.\\
+\end{poem}
+\tailpiece
+
+\poemtitle{The Pulley}
+\poemblock{Then beautie flow'd, then wisdome, honour, pleasure:}
+\begin{poem}[When God at first made man,]
+When God at first made man,\\
+Having a glasse of blessings standing by;\\
+Let us (said he) poure on him all we can:\\
+Let the worlds riches, which dispersed lie,\\
+\vin Contract into a span.\\
+
+So strength first made a way;\\
+Then beautie flow'd, then wisdome, honour, pleasure:\\
+When almost all was out, God made a stay,\\
+Perceiving that alone of all his treasure\\
+\vin Rest in the bottome lay.\\
+
+For if I should (said he)\\
+Bestow this jewell also on my creature,\\
+He would adore my gifts in stead of me,\\
+And rest in Nature, not the God of Nature:\\
+\vin So both should losers be.\\
+
+Yet let him keep the rest,\\
+But keep them with repining restlesnesse:\\
+Let him be rich and wearie, that at least,\\
+If goodnesse leade him not, yet wearinesse\\
+\vin May tosse him to my breast.\\
+\end{poem}
+\tailpiece
+
+\poemtitle{Prayer}
+\poemblock{The six-daies world transposing in an houre,}
+\begin{poem}[Prayer the Churches banquet, Angels age,]
+Prayer the Churches banquet, Angels age,\\
+Gods breath in man returning to his birth,\\
+The soul in paraphrase, heart in pilgrimage,\\
+The Christian plummet sounding heav'n and earth;\\
+
+Engine against th' Almightie, sinners towre,\\
+Reversed thunder, Christ-side-piercing spear,\\
+The six-daies world transposing in an houre,\\
+A kinde of tune, which all things heare and fear;\\
+
+Softnesse, and peace, and joy, and love, and blisse,\\
+Exalted Manna, gladnesse of the best,\\
+Heaven in ordinarie, man well drest,\\
+The milkie way, the bird of Paradise,\\
+
+Church-bels beyond the starres heard, the souls bloud,\\
+The land of spices; something understood.\\
+\end{poem}
+\tailpiece
+
+\poemtitle{Easter Wings}
+\poemblock{Then shall the fall further the flight in me.}
+\begin{poem*}[Lord, who createdst man in wealth and store,]
+Lord, who createdst man in wealth and store,\\
+Though foolishly he lost the same,\\
+Decaying more and more,\\
+Till he became\\
+Most poore:\\
+With thee\\
+O let me rise\\
+As larks, harmoniously,\\
+And sing this day thy victories:\\
+Then shall the fall further the flight in me.\\
+
+My tender age in sorrow did beginne:\\
+And still with sicknesses and shame\\
+Thou didst so punish sinne,\\
+That I became\\
+Most thinne.\\
+With thee\\
+Let me combine,\\
+And feel this day thy victorie:\\
+For, if I imp my wing on thine,\\
+Affliction shall advance the flight in me.\\
+\end{poem*}
+\attribution{The Temple: Sacred Poems and Private Ejaculations, Cambridge, 1633.}
+\tailpiece
+
+\end{document}

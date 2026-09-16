@@ -1,0 +1,211 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% atlas-verse.sty: verse over atlas or atlas-grand. Load it after whichever
+% of the two the book uses; it takes faces, stock, page, running head,
+% folio, title leaf, imprint and colophon from them and adds what a book
+% of poems needs:
+%
+%   \poemblock{longest line}      the width the next block is measured by
+%   \begin{poem}[first line]      the block: every line ends with \\, stanzas
+%     ...                          are separated by a blank line; \vin indents
+%   \end{poem}                     a line; the optional first line goes to
+%                                  the Index of First Lines
+%   \begin{poem*} ... \end{poem*}  the same with every line centred, for a
+%                                  shaped poem (Herbert's "Easter Wings")
+%   \poemtitle{Title}              in the rubric, spaced small capitals;
+%                                  recorded for the Contents with its page
+%   \attribution{text}             small, italic, set right under the poem
+%   \tailpiece                     an ornament after the poem
+%   \AtlasContents                 the poems and their pages (2 passes)
+%   \AtlasFirstLines               the first lines, sorted, with pages
+%   \AtlasPoemsOnNewPages          every \poemtitle starts a leaf
+%   \AtlasVerseInitials            a two-line initial opens every poem
+%   \AtlasVerseNumbers{n}          every n-th line numbered (0: none)
+%
+% The block is plate 09's: a stanza is one paragraph so an initial can span
+% two lines; \\ counts the line, sets its number, and breaks the line or,
+% before a blank line, ends the stanza and sets the stanza space itself;
+% first lines are outdented by a negative \parindent; no \everypar (any
+% user \everypar loses \parskip in a minipage under the 2021+ kernel). The
+% initial is by \hangindent, not lettrine, whose own \par and \noindent
+% discard the block's outdent.
+%
+% With atlas-grand beneath, the title leaf carries the Contents and the
+% initials and numbers are on; with atlas alone the leaf is plain and both
+% are off until asked for. The poems' text is never in this repository:
+% the sample is Herbert (1633); the author's own poems are dressed on
+% copies in scratch, as the manuscripts are.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{atlas-verse}[2026/09/16 latex-atlas: verse]
+
+\@ifpackageloaded{atlas}{}{\PackageError{atlas-verse}{Load atlas or atlas-grand first}{}}
+\RequirePackage{pgfornament}
+\RequirePackage{luacode}
+\providecolor{glossink}{HTML}{5A4A3A}
+\renewcommand{\atlas@colophon@what}{of the poems}
+\renewcommand{\atlas@colophon@matter}{The poems are as the author left
+  them, in their spelling and their lines. Nothing in them has been altered
+  by the dress.}
+
+% --- switches ----------------------------------------------------------------------
+\newif\ifverse@newpages
+\newif\ifverse@initials
+\newcount\verse@every \verse@every=0
+\newcommand{\AtlasPoemsOnNewPages}{\verse@newpagestrue}
+\newcommand{\AtlasVerseInitials}{\verse@initialstrue}
+\newcommand{\AtlasVerseNumbers}[1]{\verse@every=#1\relax}
+\@ifpackageloaded{atlas-grand}{\verse@initialstrue \verse@every=5 }{}
+
+% --- the block (plate 09) -----------------------------------------------------------
+\newlength{\poemwidth}
+\newlength{\poemhang}\setlength{\poemhang}{1.5em}
+\newlength{\stanzaskip}
+\newcounter{poemline}
+\newcommand{\poemblock}[1]{\settowidth{\poemwidth}{#1}}
+\newcommand{\poemnumber}{%
+  \ifnum\verse@every>0
+    \ifnum\numexpr\value{poemline}/\verse@every*\verse@every\relax=\value{poemline}\relax
+      \hskip\z@\@plus1fill\rlap{\hskip1.4em{\tiny\itshape\color{glossink}\arabic{poemline}}}%
+    \fi
+  \fi}
+\def\verse@eol{\@ifnextchar\par{\verse@stanzaend}{\newline\null\hskip-\poemhang\ignorespaces}}
+\def\verse@stanzaend\par{\par\vskip\stanzaskip}
+\def\verse@ceol{\@ifnextchar\par{\verse@stanzaend}{\newline\ignorespaces}}
+\newcommand{\verse@open}{%
+  \par\addvspace{1.2em}\setcounter{poemline}{0}%
+  \setlength{\stanzaskip}{\baselineskip}%
+  \begin{center}\begin{minipage}[t]{\poemwidth}%
+    \parskip\z@ \def\vin{\hspace*{2em}}}
+\newcommand{\verse@close}{\par\end{minipage}\end{center}}
+% [first line] for the index; the block, flush lines, hanging run-overs.
+\NewDocumentEnvironment{poem}{o}
+  {\IfValueT{#1}{\verse@writefirst{#1}}%
+   \verse@open
+    \parindent-\poemhang \leftskip\poemhang \rightskip\z@\@plus1fil \parfillskip\z@
+    \def\\{\unskip\stepcounter{poemline}\poemnumber\verse@eol}%
+    \ifverse@initials\expandafter\verse@initial@try\else\expandafter\ignorespaces\fi}
+  {\verse@close}
+% Every line centred within the block, for shaped verse; no hang, no
+% outdent, no initial.
+\NewDocumentEnvironment{poem*}{o}
+  {\IfValueT{#1}{\verse@writefirst{#1}}%
+   \verse@open
+    \parindent\z@ \leftskip\z@\@plus1fil \rightskip\z@\@plus1fil \parfillskip\z@
+    \def\\{\unskip\stepcounter{poemline}\verse@ceol}%
+    \ignorespaces}
+  {\verse@close}
+
+% --- the initial ---------------------------------------------------------------------
+% Sized by measurement to span two lines, set into a hang of its width on
+% the second line's baseline, the rest of the word in small capitals.
+\newsavebox{\verse@inibox}\newlength{\verse@initarget}
+\newcommand{\verse@findent}{0.3em}
+\newcommand{\incipit}[2]{%
+  \leavevmode
+  \settoheight{\verse@initarget}{#1}%
+  \setlength{\verse@initarget}{\dimexpr\baselineskip+1.05\verse@initarget\relax}%
+  \sbox\verse@inibox{\fontsize{10pt}{10pt}\selectfont #1}%
+  \sbox\verse@inibox{\fontsize{\fpeval{10*\strip@pt\verse@initarget/\strip@pt\dimexpr\ht\verse@inibox\relax}pt}{0pt}\selectfont\color{rubric}#1}%
+  \hangindent\dimexpr\wd\verse@inibox+\verse@findent\relax \hangafter-2
+  \llap{\smash{\raisebox{-\baselineskip}{\usebox\verse@inibox}}\hskip\verse@findent}%
+  {\scshape #2}}
+% Automatic: peek at the poem's first token; a letter opens the poem with
+% \incipit on its word; anything else (a macro, a brace) is left alone.
+% Spaces after \begin{poem} are eaten first, one at a time, so the peek
+% sees the poem's first token; it runs after the caller's \fi is gone.
+\def\verse@initial@try{\futurelet\verse@next\verse@initial@sp}
+\def\verse@initial@sp{%
+  \ifx\verse@next\@sptoken
+    \expandafter\verse@eatspace
+  \else
+    \expandafter\verse@initial@check
+  \fi}
+\expandafter\def\expandafter\verse@eatspace\space{\verse@initial@try}
+\def\verse@initial@check{%
+  \ifcat\noexpand\verse@next a%
+    \expandafter\verse@initial@grab
+  \fi}
+\def\verse@initial@grab#1#2 {\incipit{#1}{#2} }
+
+% --- the title, the attribution, the tailpiece ---------------------------------------
+\newcounter{poem}
+\newcommand{\poemtitle}[1]{%
+  \ifverse@newpages\clearpage\fi
+  \refstepcounter{poem}%
+  \verse@writepoem{#1}%
+  \par\addvspace{2.2em plus .5em}%
+  \centerline{\small\textcolor{rubric}{\textls[130]{\textsc{#1}}}}%
+  \nobreak\vspace{.2em}}
+\newcommand{\attribution}[1]{\par\vspace{0.6em}{\raggedleft\small\itshape #1\par}}
+\newcommand{\tailpiece}{\par\vspace{1.4em}\centerline{\pgfornament[width=20mm,color=rubric]{87}}\par}
+
+% --- Contents and the Index of First Lines, from the .aux -----------------------------
+% The Contents in order of appearance; the Index sorted by a Lua table at
+% print time, so the order is the alphabet's, not the book's.
+\newtoks\verse@contents
+\newif\ifverse@hascontents
+\newcommand{\verse@contentsline}[2]{%
+  \global\verse@hascontentstrue
+  \global\verse@contents\expandafter{\the\verse@contents\verse@tableentry{#1}{#2}}}
+\newcommand{\verse@tableentry}[2]{%
+  {\par\noindent\hangindent=1.5em\hangafter=1
+   \rightskip=2.55em plus 1em \parfillskip=-\rightskip
+   \textit{#1}\nobreak\hfill\nobreak\hbox to 1.55em{\hfil #2}\par}%
+  \vspace{0.25em}}
+\newcommand{\verse@writepoem}[1]{%
+  \protected@write\@auxout{}{\string\verse@contentsline{#1}{\thepage}}}
+\newcommand{\AtlasContents}{%
+  \ifverse@hascontents
+    \atlas@head{The Poems.}%
+    \small\the\verse@contents\normalsize
+  \fi}
+\begin{luacode*}
+atlas = atlas or {}
+atlas.firstlines = {}
+function atlas.addfirstline(text, page)
+  atlas.firstlines[#atlas.firstlines + 1] = { text = text, page = page }
+end
+-- Sort by the line with articles and quotation marks set aside, as an index
+-- does, then hand each back to TeX as \verse@tableentry{line}{page}.
+function atlas.printfirstlines()
+  local function key(s)
+    s = s:lower():gsub("^[\"'%(%[]+", ""):gsub("^%s+", "")
+    s = s:gsub("^the%s+", ""):gsub("^an?%s+", ""):gsub("^o%s+", "")
+    return s
+  end
+  table.sort(atlas.firstlines, function(a, b) return key(a.text) < key(b.text) end)
+  for _, e in ipairs(atlas.firstlines) do
+    tex.print("\\verseTableEntry{" .. e.text .. "}{" .. e.page .. "}")
+  end
+end
+\end{luacode*}
+\newcommand{\verse@firstline}[2]{%
+  \directlua{atlas.addfirstline("\luaescapestring{\unexpanded{#1}}", "\luaescapestring{#2}")}}
+\newcommand{\verse@writefirst}[1]{%
+  \protected@write\@auxout{}{\string\verse@firstline{#1}{\thepage}}}
+% What Lua prints back is read with the document's catcodes, where @ is
+% not a letter, so the two names it uses carry none.
+\let\verseTableEntry\verse@tableentry
+\newcommand{\AtlasFirstLines}{%
+  \directlua{if next(atlas.firstlines) then tex.print("\\verseHaveFirstLines") end}}
+\newcommand{\verseHaveFirstLines}{%
+  \ifverse@newpages\clearpage\fi
+  \atlas@head{Index of First Lines.}%
+  \begingroup\small\directlua{atlas.printfirstlines()}\endgroup\normalsize}
+
+% --- the leaf ---------------------------------------------------------------------------
+% With atlas-grand beneath, its \maketitle already prints \AtlasTable on the
+% leaf; the Contents follow it. With atlas alone, the leaf gets the
+% Contents after the block.
+\@ifpackageloaded{atlas-grand}{%
+  \let\verse@AtlasTable\AtlasTable
+  \renewcommand{\AtlasTable}{\verse@AtlasTable\AtlasContents}%
+}{%
+  \renewcommand{\maketitle}{%
+    \thispagestyle{empty}%
+    \atlas@titleleaf
+    \AtlasContents
+    \markboth{\shorttitle}{\shorttitle}%
+    \global\let\maketitle\relax}%
+}
+
+\endinput

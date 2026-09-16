@@ -287,8 +287,10 @@
     {\atlas@step{#1}[#3][##1]\small
      \atlas@runin{#2\atlas@number{#1}[#3]}[##1]\ignorespaces}
     {\par}}
-\renewcommand{\proofname}{Demonstration}
-\renewcommand{\qedsymbol}{\textls[60]{\textsc{q.e.d.}}}
+% Both belong to amsthm; a book of poems has neither, so they are provided
+% before they are renewed.
+\providecommand{\proofname}{}\renewcommand{\proofname}{Demonstration}
+\providecommand{\qedsymbol}{}\renewcommand{\qedsymbol}{\textls[60]{\textsc{q.e.d.}}}
 
 % --- the Table of the Propositions ---------------------------------------------------
 % What 07 could only hand-set. Every \AtlasProposition environment writes
@@ -460,6 +462,10 @@
 \providecommand{\atlassources}{the author's sources}
 \newcommand{\atlas@colophon@ornament}{\textcolor{rubric}{\rule{22mm}{0.3pt}}}
 \newcommand{\atlas@colophon@sheet}{}
+\newcommand{\atlas@colophon@what}{of the preprint}
+\newcommand{\atlas@colophon@matter}{The propositions are numbered as the
+  author left them. Nothing in the mathematics has been altered by the
+  dress.}
 \newcommand{\atlas@luatexversion}{%
   \directlua{local v = status.luatex_version
     tex.print((v // 100) .. "." .. (v - (v // 100) * 100) .. "." .. status.luatex_revision)}}
@@ -472,12 +478,11 @@
     {\small\textcolor{rubric}{\textls[130]{\textsc{Colophon.}}}}\par
     \vspace{1em}
     \begin{minipage}{0.7\linewidth}\small\centering
-      This edition of the preprint was set in EB~Garamond, with
+      This edition \atlas@colophon@what{} was set in EB~Garamond, with
       Garamond-Math for the mathematics, by LuaTeX (\atlas@luatexversion),
       from \atlassources{} at revision \texttt{\atlasrevision}, on
       \@date. \atlas@colophon@sheet
-      The propositions are numbered as the author left them. Nothing in
-      the mathematics has been altered by the dress.
+      \atlas@colophon@matter
     \end{minipage}\par
     \vspace{2em}
     \atlas@colophon@ornament\par

@@ -789,10 +789,96 @@ screen a foxing spot beside a formula looks like dirt. That is where the
 limit is: the grand edition is at its best exactly where it stops
 pretending to be old paper.
 
+## Verse: plate 09, `sty/atlas-verse.sty`, `bound/temple.tex`
+
+Begun 2026-09-16 at the author's turn toward poetry, with the grand
+register as the destination: the author's own poems, eventually, dressed
+as the manuscripts were — on copies in scratch, output to `build/`,
+nothing committed, and nothing from `~/universum` ever read into this
+repo. The lab text is Herbert's *The Temple* (1633), public domain, in
+its spelling.
+
+**Plate 09** isolates what verse needs and prose does not: the block
+centred on its longest line (against the class's `verse`, which indents
+at the margin), a two-line initial, the title in small capitals, every
+fifth line numbered at the block's edge, the source set right, a
+tailpiece; `rubric` and `paper` as always. Eight controls; the indented
+short lines are Herbert's and stay in every variant.
+
+**The block** is the plate's own, not `verse.sty`'s (not installed here —
+`texlive-humanities` — and it would replace the kernel's environment,
+which is the honest default). Convention: **every line ends with `\\`**,
+stanzas are separated by a blank line, a stanza is one paragraph. `\\`
+counts the line, sets its number, and either breaks the line or, seeing
+the `\par` a blank line leaves (`\@ifnextchar\par`), ends the stanza and
+sets the stanza space itself. First lines are outdented by a negative
+`\parindent`; run-overs keep the `\leftskip` hang; `\vin` indents a
+line; `poem*` centres every line for shaped verse (*Easter Wings*).
+
+**What it cost to learn**, gotchas now:
+
+- **Any user `\everypar`, even `\relax`, loses the `\parskip` between
+  paragraphs inside a minipage** under the 2021+ kernel (tested: cases
+  A–G in scratch). The block therefore has no `\everypar`; the stanza
+  space is explicit and `\parskip` is zero.
+- **Glue at the head of a line after a forced break is discarded**, so an
+  outdent after `\newline` needs a `\null` before it.
+- **lettrine issues its own `\par` and `\noindent`**, which throw away
+  anything set before it at paragraph start; in a `\leftskip` block its
+  first line came out 1.5 em short and wrapped after one word. The initial
+  is by `\hangindent`/`\hangafter=-2` instead, sized by measurement
+  (`\fpeval`) so its cap height spans two lines, set on the second line's
+  baseline; it composes with the block's outdent on every line.
+- **`\stanzaskip` cannot be set from `\baselineskip` in the preamble**
+  (zero there); it is measured at `\begin{poem}`.
+- **What Lua `tex.print`s is read with the document's catcodes**, where
+  `@` is not a letter: "@havefirstlines" appeared on the page. The two
+  names Lua hands back are `@`-free (`\verseTableEntry`,
+  `\verseHaveFirstLines`).
+- **`atlas.sty` renewed `\proofname` and `\qedsymbol` unconditionally**;
+  the first non-amsthm document broke on it. Both are `\providecommand`ed
+  first now.
+- An end-of-line space inside `\ifnum … \llap{…}\fi` shifted every
+  numbered line by a word space; `\relax` closes the number.
+
+**`atlas-verse.sty`** loads over `atlas` or `atlas-grand`: `poem`/`poem*`,
+`\poemblock`, `\poemtitle` (recorded for the Contents), `\attribution`,
+`\tailpiece`, `\AtlasContents`, `\AtlasFirstLines` (sorted in Lua, with
+articles set aside, as an index does), `\AtlasPoemsOnNewPages`,
+`\AtlasVerseInitials`, `\AtlasVerseNumbers{n}`; under grand the initials
+and numbers are on and the Contents join the title leaf. The initial is
+automatic: the poem's first token is peeked (spaces eaten first, one at a
+time) and, if a letter, its word is opened with `\incipit`.
+
+**`bound/temple.tex`**: *Vertue*, *The Pulley*, *Prayer*, *Easter Wings*
+as a seven-leaf chapbook in grand — framed title leaf with the Contents,
+a poem to a leaf, Index of First Lines, colophon ("this edition of the
+poems"). Zero warnings, three passes. `build/temple.pdf`.
+
+**To the author's poems**: the recipe is the manuscripts', shorter. A
+copy of the poems in scratch as a LaTeX file — `\poemtitle`, `\poemblock`
+with the longest line, `\begin{poem}[first line]`, lines ending in `\\`,
+blank lines between stanzas, `\vin` where a line is indented — with
+`\usepackage{atlas-grand}\usepackage{atlas-verse}` and the four lines of
+`temple.tex`'s preamble; `TEXINPUTS=sty:`, three passes, output to
+`build/`. Grandness per instance: `\AtlasVerseNumbers{0}` for no numbers,
+plain `atlas` beneath for a quiet edition, and the per-device grand
+options still to be built.
+
 ## Outstanding, in rough order
 
 The graduation is the main line now; the lab continues beside it in
-both registers.
+both registers. Verse joined it on 2026-09-16 (plate 09, `atlas-verse`,
+the Herbert chapbook), and the author's poems are its destination.
+
+0. **The author's poems, dressed** — the recipe is under "Verse"; on a
+   copy in scratch, nothing committed. The first real book will find what
+   Herbert's four leaves did not (long poems across pages, epigraphs,
+   dedications, dates under poems, sections within a book, a poem whose
+   longest line is longer than the measure). Fix generically in
+   `atlas-verse.sty`; record as the manuscripts' findings are recorded.
+0a. **Per-device grand options** (`nosheet`, `noinitials`, `noframe` …),
+   so that grandness is a scale an instance sets, as decided.
 
 1. **The register questions are decided** (author, 2026-09-16, after
    reading all twelve editions): *parchment is the site edition*, `plain`
@@ -847,4 +933,4 @@ before they were set.
 ## Open questions
 
 - Track this file, or gitignore it as the Forgejo notes are? It is written
-  to be tracked, and has been, six times.
+  to be tracked, and has been, seven times.
