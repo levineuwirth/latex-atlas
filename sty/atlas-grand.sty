@@ -28,6 +28,7 @@
 \usetikzlibrary{calc}
 \RequirePackage{pgfornament}
 \RequirePackage{lettrine}
+\RequirePackage{needspace}
 \RequirePackage{luacode}
 
 % --- the second colour ---------------------------------------------------------
@@ -60,12 +61,22 @@
   \par\addvspace{1.2em}\centerline{\pgfornament[width=18mm,color=rubric]{71}}\par}
 % \section and \subsection are wrapped rather than hooked: a cmd/.../after
 % hook on a \@startsection command fires before the argument is read.
+% The head asks for its initial's room first: LaTeX keeps one line of the
+% paragraph with a head, and a three-line initial at a head two lines from
+% the foot hung below the page (lettrine's "ATTENTION REQUIRED", twice in
+% each of two manuscripts). Eight lines: the fleuron and its space, the
+% head with its skips, the initial's three. And the head's own \@secpenalty,
+% which invites a page break before a section, is raised for the head that
+% follows a fleuron, or the fleuron is left alone at the foot of the page.
 \let\atlas@grand@section\section
 \RenewDocumentCommand{\section}{s o m}{%
   \everypar{}%
-  \ifnum\value{section}>0 \atlas@fleuron\fi
+  \needspace{8\baselineskip}%
+  \edef\atlas@secpenalty{\the\@secpenalty}%
+  \ifnum\value{section}>0 \atlas@fleuron\@secpenalty\@M\fi
   \IfBooleanTF{#1}{\atlas@grand@section*{#3}}
     {\IfValueTF{#2}{\atlas@grand@section[#2]{#3}}{\atlas@grand@section{#3}}}%
+  \@secpenalty\atlas@secpenalty\relax
   \global\atlas@initialpendingtrue\atlas@arminitial}
 \let\atlas@grand@subsection\subsection
 \RenewDocumentCommand{\subsection}{s o m}{%
@@ -112,10 +123,15 @@
   \end{center}}
 % A long Table runs the front matter onto a second leaf; the frame follows
 % (the flag is up until the \clearpage) and so must the empty page style,
-% hence \pagestyle rather than \thispagestyle, restored afterwards.
+% hence \pagestyle rather than \thispagestyle, restored afterwards. The
+% leaves are ragged-bottom while they last: the class is flush-bottom, and
+% a middle leaf of Table lines, which have no stretch, cannot be filled and
+% was reported underfull; the last leaf has its \vfill before the imprint.
 \renewcommand{\maketitle}{%
   \global\atlas@titleleaftrue
   \pagestyle{empty}%
+  \let\atlas@grand@textbottom\@textbottom
+  \raggedbottom
   \vspace*{6mm}%
   \atlas@titleleaf
   \atlas@fleuron
@@ -123,6 +139,7 @@
   \vfill
   \AtlasImprint
   \clearpage
+  \global\let\@textbottom\atlas@grand@textbottom
   \global\atlas@titleleaffalse
   \pagestyle{fancy}%
   \markboth{\shorttitle}{\shorttitle}%
