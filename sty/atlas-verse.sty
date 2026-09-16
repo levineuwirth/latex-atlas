@@ -19,15 +19,20 @@
 %   \AtlasFirstLines               the first lines, sorted, with pages
 %   \AtlasPoemsOnNewPages          every \poemtitle starts a leaf
 %   \AtlasVerseInitials            a two-line initial opens every poem
-%   \AtlasVerseNumbers{n}          every n-th line numbered (0: none)
+%   \AtlasVerseNumbers{n}          every n-th line numbered (0: none);
+%                                  not in poem*, whose centring a number
+%                                  would break
+%   \atlassetdate                  the colophon's "on <date>" (\def it on
+%                                  the command line; default \today)
 %
-% The block is plate 09's: a stanza is one paragraph so an initial can span
+% The block descends from plate 09's, without its minipage, so a poem can
+% break across leaves: a stanza is one paragraph so an initial can span
 % two lines; \\ counts the line, sets its number, and breaks the line or,
-% before a blank line, ends the stanza and sets the stanza space itself;
-% first lines are outdented by a negative \parindent; no \everypar (any
-% user \everypar loses \parskip in a minipage under the 2021+ kernel). The
-% initial is by \hangindent, not lettrine, whose own \par and \noindent
-% discard the block's outdent.
+% before a blank line, ends the stanza and sets the stanza space itself,
+% or, before \end, ends the poem; first lines are outdented by a negative
+% \parindent; a stanza whose lines run over the block is warned of, which
+% ragged right would otherwise hide. The initial is by \hangindent, not
+% lettrine, whose own \par and \noindent discard the block's outdent.
 %
 % With atlas-grand beneath, the title leaf carries the Contents and the
 % initials and numbers are on; with atlas alone the leaf is plain and both
@@ -42,6 +47,8 @@
 \RequirePackage{luacode}
 \providecolor{glossink}{HTML}{5A4A3A}
 \renewcommand{\atlas@colophon@what}{of the poems}
+\providecommand{\atlassetdate}{\today}
+\renewcommand{\atlas@colophon@when}{\atlassetdate}
 \renewcommand{\atlas@colophon@matter}{The poems are as the author left
   them, in their spelling and their lines. Nothing in them has been altered
   by the dress.}
@@ -55,11 +62,23 @@
 \newcommand{\AtlasVerseNumbers}[1]{\verse@every=#1\relax}
 \@ifpackageloaded{atlas-grand}{\verse@initialstrue \verse@every=5 }{}
 
-% --- the block (plate 09) -----------------------------------------------------------
+% --- the block --------------------------------------------------------------------
+% Plate 09's block, without its minipage: the poem is ordinary paragraphs
+% centred by \leftskip and \rightskip (offset = (\linewidth - \poemwidth)/2,
+% the hang added on the left), so a long poem breaks across leaves at a
+% stanza end (the stanza space is the natural break; \interlinepenalty
+% holds a stanza together). A block wider than the measure is set at the
+% measure, with a warning, and its long lines run over and hang. The line
+% numbers keep the block's edge: the line's fill beats \rightskip's fil.
 \newlength{\poemwidth}
 \newlength{\poemhang}\setlength{\poemhang}{1.5em}
 \newlength{\stanzaskip}
+% A dimen, not a \newlength skip: \rightskip<skip register>\@plus1fil
+% takes the register as the whole glue and typesets "plus1fil".
+\newdimen\verse@offset
 \newcounter{poemline}
+\newcount\verse@stanzastart
+\newcount\verse@over
 \newcommand{\poemblock}[1]{\settowidth{\poemwidth}{#1}}
 \newcommand{\poemnumber}{%
   \ifnum\verse@every>0
@@ -67,29 +86,55 @@
       \hskip\z@\@plus1fill\rlap{\hskip1.4em{\tiny\itshape\color{glossink}\arabic{poemline}}}%
     \fi
   \fi}
-\def\verse@eol{\@ifnextchar\par{\verse@stanzaend}{\newline\null\hskip-\poemhang\ignorespaces}}
-\def\verse@stanzaend\par{\par\vskip\stanzaskip}
-\def\verse@ceol{\@ifnextchar\par{\verse@stanzaend}{\newline\ignorespaces}}
+% Overflow is silent under ragged right, so it is counted: after a
+% stanza's \par, \prevgraf is the lines TeX set and the block knows how
+% many it was given; the difference is a warning. \prevgraf reads 0 inside
+% \write (TeX's mode is 0 there), so it is kept in a count first.
+\newcommand{\verse@checkstanza}{%
+  \verse@over=\prevgraf
+  \advance\verse@over by -\value{poemline}\advance\verse@over by \verse@stanzastart
+  \ifnum\verse@over>0
+    \PackageWarning{atlas-verse}{\the\verse@over\space line(s) of the stanza
+      ending at line \arabic{poemline} run over the block}%
+  \fi
+  \verse@stanzastart=\value{poemline}}
+% \\ counts the line, sets its number, then: before a blank line, ends the
+% stanza; before \end, ends the poem (no empty last line); else breaks.
+\def\verse@eol{\@ifnextchar\par{\verse@stanzaend}{\@ifnextchar\end{\verse@poemend}{\newline\null\hskip-\poemhang\ignorespaces}}}
+\def\verse@ceol{\@ifnextchar\par{\verse@stanzaend}{\@ifnextchar\end{\verse@poemend}{\newline\ignorespaces}}}
+\def\verse@stanzaend\par{\par\verse@checkstanza\vskip\stanzaskip}
+\def\verse@poemend{\par\verse@checkstanza}
+\newcommand{\verse@setoffset}{%
+  \ifdim\poemwidth>\linewidth
+    \PackageWarning{atlas-verse}{The block is wider than the measure
+      (\the\poemwidth\space against \the\linewidth); set at the measure}%
+    \setlength{\verse@offset}{\z@}%
+  \else
+    \setlength{\verse@offset}{\dimexpr(\linewidth-\poemwidth)/2\relax}%
+  \fi}
 \newcommand{\verse@open}{%
-  \par\addvspace{1.2em}\setcounter{poemline}{0}%
+  \par\addvspace{1.2em}\setcounter{poemline}{0}\verse@stanzastart=0
   \setlength{\stanzaskip}{\baselineskip}%
-  \begin{center}\begin{minipage}[t]{\poemwidth}%
-    \parskip\z@ \def\vin{\hspace*{2em}}}
-\newcommand{\verse@close}{\par\end{minipage}\end{center}}
-% [first line] for the index; the block, flush lines, hanging run-overs.
+  \verse@setoffset
+  \begingroup
+    \parskip\z@ \interlinepenalty=300 \def\vin{\hspace*{2em}}}
+\newcommand{\verse@close}{\par\endgroup}
+% [first line] for the index; flush lines, hanging run-overs.
 \NewDocumentEnvironment{poem}{o}
   {\IfValueT{#1}{\verse@writefirst{#1}}%
    \verse@open
-    \parindent-\poemhang \leftskip\poemhang \rightskip\z@\@plus1fil \parfillskip\z@
+    \parindent-\poemhang
+    \leftskip\dimexpr\verse@offset+\poemhang\relax \rightskip\verse@offset\@plus1fil \parfillskip\z@
     \def\\{\unskip\stepcounter{poemline}\poemnumber\verse@eol}%
     \ifverse@initials\expandafter\verse@initial@try\else\expandafter\ignorespaces\fi}
   {\verse@close}
 % Every line centred within the block, for shaped verse; no hang, no
-% outdent, no initial.
+% outdent, no initial, and no numbers: a fill-glue number would break the
+% centring, so \AtlasVerseNumbers does not reach poem*.
 \NewDocumentEnvironment{poem*}{o}
   {\IfValueT{#1}{\verse@writefirst{#1}}%
    \verse@open
-    \parindent\z@ \leftskip\z@\@plus1fil \rightskip\z@\@plus1fil \parfillskip\z@
+    \parindent\z@ \leftskip\verse@offset\@plus1fil \rightskip\verse@offset\@plus1fil \parfillskip\z@
     \def\\{\unskip\stepcounter{poemline}\verse@ceol}%
     \ignorespaces}
   {\verse@close}
@@ -124,7 +169,15 @@
   \ifcat\noexpand\verse@next a%
     \expandafter\verse@initial@grab
   \fi}
-\def\verse@initial@grab#1#2 {\incipit{#1}{#2} }
+% The word is grabbed to the next space; a one-word line ("Lord,\\")
+% brings its \\ along, so the grab is split at the first \\ (a macro
+% here, so it delimits by name) and the \\ is put back after the small
+% capitals close.
+\def\verse@initial@grab#1#2 {\verse@initial@split{#1}#2\\\verse@stop}
+\def\verse@initial@split#1#2\\#3\verse@stop{%
+  \incipit{#1}{#2}%
+  \ifx\verse@stop#3\verse@stop\space\else\verse@initial@rest#3\verse@stop\fi}
+\def\verse@initial@rest#1\\\verse@stop{\\}
 
 % --- the title, the attribution, the tailpiece ---------------------------------------
 \newcounter{poem}
@@ -135,7 +188,11 @@
   \par\addvspace{2.2em plus .5em}%
   \centerline{\small\textcolor{rubric}{\textls[130]{\textsc{#1}}}}%
   \nobreak\vspace{.2em}}
-\newcommand{\attribution}[1]{\par\vspace{0.6em}{\raggedleft\small\itshape #1\par}}
+% Hung on the block's right edge, not the measure's: a book hangs it there.
+\newcommand{\attribution}[1]{%
+  \par\vspace{0.6em}\verse@setoffset
+  {\leftskip\verse@offset\@plus1fil \rightskip\verse@offset \parfillskip\z@
+   \noindent\small\itshape #1\par}}
 \newcommand{\tailpiece}{\par\vspace{1.4em}\centerline{\pgfornament[width=20mm,color=rubric]{87}}\par}
 
 % --- Contents and the Index of First Lines, from the .aux -----------------------------

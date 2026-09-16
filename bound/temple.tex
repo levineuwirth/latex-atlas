@@ -8,7 +8,15 @@
 % takes the centred block. The text is public domain; it stands in for the
 % author's own poems, which are dressed on copies in scratch and never here.
 %
-%   TEXINPUTS=sty: lualatex -output-directory=build bound/temple.tex   (x3)
+%   TEXINPUTS=sty: lualatex -output-directory=build \
+%     "\def\atlasrevision{$(git rev-parse --short HEAD)}\def\atlassetdate{16 September 2026}\input{bound/temple.tex}"
+%   three times. The revision is this repository's; the date is the
+%   setting's, not the poems' (the colophon says "on <date>").
+%
+% Each \poemblock names the poem's longest line, measured: a shorter one
+% sets the block too narrow and the long lines run over silently under
+% ragged right -- the style warns of it now, but the source should be
+% right.
 \documentclass[11pt]{article}
 \usepackage{atlas-grand}
 \usepackage{atlas-verse}
@@ -77,7 +85,7 @@ If goodnesse leade him not, yet wearinesse\\
 \tailpiece
 
 \poemtitle{Prayer}
-\poemblock{The six-daies world transposing in an houre,}
+\poemblock{Church-bels beyond the starres heard, the souls bloud,}
 \begin{poem}[Prayer the Churches banquet, Angels age,]
 Prayer the Churches banquet, Angels age,\\
 Gods breath in man returning to his birth,\\
@@ -100,7 +108,7 @@ The land of spices; something understood.\\
 \tailpiece
 
 \poemtitle{Easter Wings}
-\poemblock{Then shall the fall further the flight in me.}
+\poemblock{Lord, who createdst man in wealth and store,}
 \begin{poem*}[Lord, who createdst man in wealth and store,]
 Lord, who createdst man in wealth and store,\\
 Though foolishly he lost the same,\\

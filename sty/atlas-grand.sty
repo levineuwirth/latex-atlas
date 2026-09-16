@@ -46,6 +46,11 @@
 % --- the page: 02's broad outer margin, twoside ----------------------------------
 \geometry{a4paper,twoside,top=30mm,bottom=32mm,inner=26mm,outer=54mm,
   marginparwidth=36mm,marginparsep=6mm,headheight=14pt,headsep=8mm}
+% fancyhdr froze \headwidth at atlas's measure when atlas said
+% \pagestyle{fancy}; the narrower block here needs it recomputed, or the
+% head rule overhangs the outer margin and head and folio sit 6 mm off the
+% block's axis (found by the verse review, after three rounds of looking).
+\fancyhfoffset{0pt}
 
 % --- heads: the note goes to the margin as a gloss (02); numerals roman ---------------
 \RenewDocumentCommand{\atlas@head}{o m}{%
@@ -250,7 +255,7 @@ end
   The paper is laid, foxed and darkened at the edges by computation; the
   impression of a hand press is counterfeited after the paragraphs are set,
   by scattering the baselines of the type and swelling its outline with
-  ink, line by line, in a fixed and repeatable order.}
+  ink, line by line, in a fixed and repeatable order.\space}
 \let\atlas@grand@colophon\AtlasColophon
 \renewcommand{\AtlasColophon}{\atlas@grand@colophon\AtlasImprint}
 

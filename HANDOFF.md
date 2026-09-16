@@ -841,6 +841,50 @@ line; `poem*` centres every line for shaped verse (*Easter Wings*).
 - An end-of-line space inside `\ifnum … \llap{…}\fi` shifted every
   numbered line by a word space; `\relax` closes the number.
 
+**The verse review** (the other thread reviewed this session's work,
+2026-09-16 — the roles reversed, and the loop caught the same kind of
+thing it always has), seven findings, all applied:
+
+- **Overflow is silent under ragged right.** Two `\poemblock` lines in
+  `temple.tex` named the wrong longest line; four lines of *Prayer* and
+  the first of *Easter Wings* ran over and read as intentional indents,
+  and "zero warnings" saw nothing. Now `\\` counts the stanza's lines and
+  after its `\par` compares `\prevgraf` (the lines TeX set) with the
+  count; the difference is a `\PackageWarning`. **`\prevgraf` reads 0
+  inside `\write`** (TeX's mode is 0 there), so it goes into a count
+  first. Tested: 2/1/1/1 on the narrow block, 0 on the right one.
+- **A `\\` before `\end{poem}` made an empty last line** — one
+  `\baselineskip` of air under every poem, in the plate too. `\\` now
+  peeks for `\end` as it peeks for `\par`.
+- **fancyhdr freezes `\headwidth`** at the measure in force when
+  `\pagestyle{fancy}` is said. atlas says it at 142 mm; grand then narrows
+  the block to 130 mm, and every grand page since the first merge had its
+  head rule overhanging the outer margin and head and folio 6 mm off the
+  block's axis — the twelve dressed editions included. `\fancyhfoffset{0pt}`
+  after grand's `\geometry`. Three rounds of looking missed it.
+- **A control word eats the space after it**: `\atlas@colophon@sheet`
+  followed by a newline gave "order.The propositions" in every grand
+  colophon. The sheet sentence ends with `\space`; atlas prints the two
+  hooks with nothing between.
+- The colophon's "on `\@date`" was the poems' date (1633); a
+  `\atlas@colophon@when` hook, `\atlassetdate` in verse (default
+  `\today`; `\def` it on the command line for a reproducible book).
+- **The block is no longer a minipage**, so a poem can break across
+  leaves: ordinary paragraphs centred by `\leftskip`/`\rightskip` at
+  `(\linewidth-\poemwidth)/2` (plus the hang on the left), stanza ends
+  the natural break, `\interlinepenalty` holding a stanza. A block wider
+  than the measure is set at the measure with a warning. Plate 09 keeps
+  its minipage — a one-page specimen — and says so.
+- **`\newlength` makes a skip register**, and `\rightskip<skip>\@plus1fil`
+  takes the register as the whole glue and typesets "plus1fil" — found
+  while applying the block change, when the checker fired on the *right*
+  widths: the lines were justified and wrapping. `\newdimen` for the offset.
+- Also: a one-word first line ("Lord,\\") had its `\\` swallowed into the
+  initial's small capitals — the grab now splits at `\\` and puts it back;
+  the attribution hangs on the block, not the measure; `poem*` takes no
+  numbers (a fill-glue number would break its centring), documented; 09's
+  no-block default is now the class's own `\leftmargini`, not 1.5 em.
+
 **`atlas-verse.sty`** loads over `atlas` or `atlas-grand`: `poem`/`poem*`,
 `\poemblock`, `\poemtitle` (recorded for the Contents), `\attribution`,
 `\tailpiece`, `\AtlasContents`, `\AtlasFirstLines` (sorted in Lua, with
@@ -861,7 +905,9 @@ with the longest line, `\begin{poem}[first line]`, lines ending in `\\`,
 blank lines between stanzas, `\vin` where a line is indented — with
 `\usepackage{atlas-grand}\usepackage{atlas-verse}` and the four lines of
 `temple.tex`'s preamble; `TEXINPUTS=sty:`, three passes, output to
-`build/`. Grandness per instance: `\AtlasVerseNumbers{0}` for no numbers,
+`build/`, with `\def\atlasrevision{…}\def\atlassetdate{…}` on the
+command line as `temple.tex`'s header shows. Measure each `\poemblock`
+line honestly — the style now warns when one is too short. Grandness per instance: `\AtlasVerseNumbers{0}` for no numbers,
 plain `atlas` beneath for a quiet edition, and the per-device grand
 options still to be built.
 
@@ -875,8 +921,9 @@ the Herbert chapbook), and the author's poems are its destination.
    copy in scratch, nothing committed. The first real book will find what
    Herbert's four leaves did not (long poems across pages, epigraphs,
    dedications, dates under poems, sections within a book, a poem whose
-   longest line is longer than the measure). Fix generically in
-   `atlas-verse.sty`; record as the manuscripts' findings are recorded.
+   longest line is longer than the measure — the last two are handled
+   now, untested on a real book). Fix generically in `atlas-verse.sty`;
+   record as the manuscripts' findings are recorded.
 0a. **Per-device grand options** (`nosheet`, `noinitials`, `noframe` …),
    so that grandness is a scale an instance sets, as decided.
 
@@ -933,4 +980,4 @@ before they were set.
 ## Open questions
 
 - Track this file, or gitignore it as the Forgejo notes are? It is written
-  to be tracked, and has been, seven times.
+  to be tracked, and has been, eight times.

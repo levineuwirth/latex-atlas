@@ -271,8 +271,9 @@ every line ending in `\\`, a `poem*` for shaped verse, `\poemtitle`,
 `\attribution`, `\tailpiece`, a Contents and a sorted Index of First
 Lines from the `.aux`, initials and numbers on under `atlas-grand`.
 `bound/temple.tex` is its proof: four poems of Herbert's *The Temple*
-(1633) as a seven-leaf chapbook — `TEXINPUTS=sty: lualatex
--output-directory=build bound/temple.tex`, three passes. The author's own
+(1633) as a seven-leaf chapbook — see its header for the command; three
+passes. A poem may break across leaves; a block whose lines run over, or
+that is wider than the measure, is warned of. The author's own
 poems are dressed the way the manuscripts are: on a copy in scratch,
 output to `build/`, nothing committed.
 
