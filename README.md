@@ -73,7 +73,7 @@ the plate that needs both.
 
 Requirements: LuaLaTeX (TeX Live 2026), `fontspec`, `unicode-math`,
 `amsthm`, `geometry`, `microtype`, `xcolor`, `tikz` (+ `calc`,
-`patterns.meta`), `pgfornament`, `fancyhdr`, `lettrine`, `luacode`,
+`patterns.meta`), `pgfornament`, `fancyhdr`, `lettrine`, `needspace`, `luacode`,
 `biblatex` with `biber`.
 EB Garamond and Garamond-Math if present (`texlive-fontsextra`), else
 TeX Gyre Pagella and Pagella Math; the committed previews are the
@@ -227,12 +227,15 @@ to the apparatus —
 \AtlasScholium{remark}{Remark}[theorem]
 ```
 
-— then `TEXINPUTS=path/to/latex-atlas/sty: lualatex` twice. The bracket
+— then `TEXINPUTS=path/to/latex-atlas/sty: lualatex` twice, or as
+often as the original needs (a hyperref `.out` can take three). The bracket
 names the counter the environment steps. A manuscript's `[T1]{fontenc}`,
 `lmodern` and `amssymb` lines come out (unicode-math has the symbols;
 `mathtools` may stay). The header of the file says what it sets;
-`HANDOFF.md` records what dressing the first two real preprints taught
-it — seven things from a 12-page paper, nine more from a 35-page one.
+`HANDOFF.md` records what dressing four real preprints taught it — seven
+things from a 12-page paper, nine more from a 35-page one, nine more
+from a 21- and a 19-page pair (cleveref, a subtitle after `\\`,
+six-name author compounds, file names in typewriter).
 
 On call, `\AtlasTable` prints a Table of the Propositions with real page
 numbers from the `.aux` (two passes) and `\AtlasColophon` a colophon leaf

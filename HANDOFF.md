@@ -3,7 +3,7 @@
 Written 2026-09-15 at the end of the session that gave build.sh its
 declared passes, biber and -j, and added the bibliography; extended
 2026-09-16 by the sessions that began the graduation and dressed the
-second manuscript. Read the README first; this file is what the README
+second manuscript, then the third and fourth. Read the README first; this file is what the README
 does not say: why things are the way they are, what the lab has shown so
 far, what bit us, and what to do next.
 
@@ -11,12 +11,13 @@ far, what bit us, and what to do next.
 
 ## Where it stands
 
-`main` at the merge of branch `grandeur` (atlas-grand.sty, and the pieces
-it sent down into atlas.sty) after `08a8ba0`, remote
-`ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`. Tree
-clean. Eight plates, 59 PDFs from `./build.sh --ablate` in ~2 min
-sequential or **16 s with `-j`**; every preview byte-reproducible from a
-clean build (last verified 2026-09-16 by the reviewing session).
+`main` at `5ea3f92` (atlas-grand.sty after the third and fourth
+manuscripts) plus this handoff, remote
+`ssh://git@git.levineuwirth.org:2222/neuwirth/latex-atlas.git`, not
+pushed. Tree clean. Eight plates, 59 PDFs from `./build.sh --ablate` in
+~2 min sequential or **16 s with `-j`**; every preview byte-reproducible
+from a clean build (last verified 2026-09-16 by the session that dressed
+the third and fourth manuscripts).
 
 **The graduation has begun.** `sty/atlas.sty` v0 dressed a real
 manuscript — `~/Repos/research/meyniel/paper/branch-capture-paper.tex`,
@@ -27,8 +28,18 @@ for the recipe and what the manuscript found. **The second manuscript**
 (`near-critical-growing-radius-domination-paper.tex`, 35 pages, 2597
 lines: `mathtools`, `booktabs` tables, `align`, `\keywords`, hand-set
 DOIs) was dressed on 2026-09-16 by the same recipe and found nine more
-things (one by the article test it prompted), all fixed in `78cfebe`; `build/near-critical-dressed.pdf`,
-`-dressed-plain.pdf`, `-original.pdf`.
+things (one by the article test it prompted), all fixed in `78cfebe`.
+**The third and fourth** (`ball-occupation-under-coarse-projections.tex`,
+21 pages, 1817 lines, and `timed-guarding-in-degree-reduction-clouds.tex`,
+19 pages, 1513 lines: both `cleveref`, a title with a subtitle after
+`\\`, six-name author compounds, `\nolinkurl` file names, a `lemma*`)
+were dressed on 2026-09-16 by the same recipe and found seven more, plus
+two on the page and three in the grand layer, fixed in `02d7008` and
+`5ea3f92`. **All four manuscripts are dressed** and their PDFs are in
+`build/` (gitignored), twelve of them: `<name>-dressed.pdf` (parchment),
+`<name>-plain.pdf` and `<name>-grand.pdf` for `branch-capture`,
+`near-critical`, `ball-occupation` and `timed-guarding`. The recipe is
+reproducible from the sources in a minute; nothing of theirs is here.
 
 | plate | register | controls |
 |---|---|---|
@@ -48,7 +59,9 @@ plate 07; `9aa387f` second handoff; `10debf3` review fixes (07's note
 reconciled with 04, `ligatures` made a control in 07); `fda9b1a` the
 build.sh decision recorded; `44293b1` build.sh implemented; `520b085`
 plate 08; `0205a62` atlas.sty v0, the bound proof, the first dressed
-preprint; `78cfebe` what the second manuscript found.
+preprint; `78cfebe` what the second manuscript found; `3996f95`,
+`d1d73ca` the grand edition and its merge; `02d7008` what the third and
+fourth manuscripts found; `5ea3f92` what they taught the grand layer.
 
 ## The decision
 
@@ -442,7 +455,10 @@ TEXINPUTS=~/Repos/personal/latex-atlas/sty: lualatex work.tex   # twice
 ```
 
 The bracket is the counter the environment steps (the shared one for
-`[theorem]`-style sharing); without it the environment is unnumbered.
+`[theorem]`-style sharing); without it the environment is unnumbered (a
+`\newtheorem*{lemma*}` is `\AtlasProposition{lemma*}{Lemma}`). Run it
+as many times as the original needs: the third manuscript's `.out`
+changes on the second pass under pdflatex too, so it takes three.
 Output: 13 pages A4 against the original's 12 letter (12 since the node
 renderer, below), zero warnings, every number and cross-reference
 identical to the `amsart` build.
@@ -553,6 +569,113 @@ and not `\paragraph`; whether it should (italic run-in, after 04's
 scholia) is a register question, with the caveat in the first list that a
 run-in head before a proposition is deferred into the statement.
 
+**What the third and fourth manuscripts found** (2026-09-16, the same
+recipe, three passes; 21 pages A4 against 21 letter and 20 against 19,
+zero warnings, zero missing characters, no overfull line in either
+edition against the originals' none; every `\newlabel` and `\bibcite`
+— 94 and 119 entries — agrees with the pdflatex build in number, name,
+anchor and cleveref type, the page field excepted, in both editions; the
+first two manuscripts re-dressed afterwards are 12 and 36 pages as
+before, clean, labels identical). Each fixed in `02d7008`:
+
+- **cleveref and nameref read amsthm's `\@thm`, and the apparatus
+  bypasses it.** cleveref's own amsthm patch calls
+  `\refstepcounter[lemma]{theorem}` so a shared-counter environment is
+  typed by its name; nameref's patch of `\@begintheorem` calls
+  `\NR@gettitle{name}` so `\nameref` gives the theorem's name, and the
+  third field of every theorem's `\newlabel` carries it. The apparatus
+  did neither: the first two manuscripts' `.aux` diffs had the section
+  title in that field (the previous thread compared numbers and anchors
+  and did not see it). `\atlas@step{env}[counter][name]` now does both,
+  each only if its package is loaded. **Not the style's, but the
+  author's to know:** TeX Live 2026's kernel first-aid for cleveref
+  (`latex2e-first-aid-for-external-files.ltx`, `label` hook) re-derives
+  the label type from `\@currentcounter` at every `\label`, so under
+  amsart *and* under article, original or dressed, `\cref` of a lemma
+  that shares the theorem counter says "Theorem 4.1". The two
+  manuscripts `\cref` only theorems, sections, equations and items, so
+  nothing shows; a `\cref{lem:…}` would. Reproduced in eight lines:
+  amsart or article, amsthm, cleveref, `\newtheorem{theorem}{Theorem}
+  [section]`, `\newtheorem{lemma}[theorem]{Lemma}`, a lemma with a
+  `\label`, `\cref` of it. Upstream.
+- **A title's `\\` is a subtitle as often as a line break.** The first
+  manuscript broke its title for amsart's measure and v0 let it flow;
+  the third names a subtitle after its `\\`, and flowing ran "…Coarse
+  Graph Projections Degree Reduction, Square-Root Hard Families…" into
+  one title. A style cannot tell the two apart. The block is now split at
+  the author's first `\\`: capitals before it, what follows in italic
+  beneath, as 07 sets its "or," line — the period's own answer, the
+  qualifying clause in a second voice. Applied to all four: the first
+  reads "…AND STATIC COVERAGE / *in Tree-Ball Geometry*", the second
+  "…CRITICAL WINDOW FOR / *Growing-Radius Domination in Random Regular
+  Graphs*". That last ends the capitals on "for"; if the author would
+  rather it flowed, the `\\` comes out of the source, and the title
+  flows. The source decides, not a heuristic.
+- **Centred capitals with fil stretch leave one word on the last line.**
+  "TIMED GUARDING IN DEGREE-REDUCTION / CLOUDS": with `\centering`'s fil
+  every line is equally good and TeX fills the first. The title paragraph
+  now has finite stretch at either side (`0pt plus .5\hsize`, `\parfillskip`
+  zero), so a short last line costs badness and the lines balance:
+  "TIMED GUARDING IN / DEGREE-REDUCTION CLOUDS". The interword spaces take
+  a share of the stretch in proportion to their own, which is small; it
+  does not show.
+- **TeX breaks after a hyphen and never after an en dash.** The empty
+  discretionary TeX inserts after `\hyphenchar` is the only such
+  break; a six-name compound (Bose–Esperet–Hodor–Joret–Micek–Rambaud)
+  is one unbreakable word of 150 pt, and on the 402 pt measure the
+  paragraph had no feasible first line — 42 pt overfull. pdflatex's 469 pt
+  measure hid it (the same paragraph, no break either, fitted). A node
+  filter in `pre_linebreak_filter`, registered after luaotfload's so it
+  sees the dash luaotfload made from `--`, puts a penalty of
+  `\exhyphenpenalty` after an en or em dash that stands between two
+  letters (`\lccode` nonzero on both sides, kerns skipped); a dash beside
+  a figure or a space is left alone. Four of the eight overfull lines
+  were this.
+- **`\emergencystretch` is zero in amsart, so a mathematical paragraph
+  gets no third pass.** An inline formula of 100 pt before its full stop,
+  the line that ends at "with" 60 pt short: no feasible break at
+  `\tolerance` 200, and TeX sets the overfull line rather than the loose
+  one. 2 em is set: the smallest of 1, 1.5, 2, 2.5, 3, 4 em that set both
+  manuscripts without an overfull line (1 and 1.5 leave one; from 3 em,
+  paragraphs that had set well come out loose — two underfull at 3, four
+  at 4; `\sloppy` is 3 em). The one line it rescues is logged
+  `Underfull \hbox (badness 1755)`, as it should be: a formula half the
+  measure, set inline, is the author's to display.
+- **url's default breaks a file name after its full stop and not at its
+  hyphens.** `\nolinkurl{hmghm-exterior-tree-setup.py}` broke as
+  "…setup." / "py" in the original too (url's `\UrlBreaks` has the stop,
+  `\UrlBigBreaks` has `\do@url@hyp`, empty unless the `hyphens` option
+  was given, and hyperref has loaded url before the sty can pass it).
+  The option is the one definition `\def\do@url@hyp{\do\-}`, made if
+  url is loaded. The classic objection — a hyphen at a line end is
+  ambiguous in a URL — is noted and outweighed on this measure.
+- **The manuscript's typewriter read a size larger.** fontspec's default
+  `\ttfamily` is Latin Modern Mono at nominal size; beside EB Garamond's
+  small lowercase it was visibly bigger, and a paragraph of file names set
+  two overfull lines of it (28 and 60 pt). `\setmonofont{Latin Modern
+  Mono}[Scale=MatchLowercase]` — the face is not changed, only sized to
+  the text face's x-height, as fontspec provides for. Whether `\url`
+  should leave typewriter at all stays an open register question.
+
+And two from the page, not from the log:
+
+- **amsart's `\footskip` is 12 pt** and geometry keeps the class's value
+  unless told: the folio sat a line and a half under the last line of a
+  full page, in the first two manuscripts as well, unremarked. `footskip=8mm`
+  is named, the headsep's mirror.
+- **The Argument was a box.** amsart boxes the abstract so that the
+  source order abstract-before-`\maketitle` works, and v0 did the same;
+  a box cannot break across pages. Found by the grand layer (below), fixed
+  in atlas: `\unvbox`, not `\box`. The Argument is prose.
+
+Seen and left alone: the third manuscript's bibliography hand-sets three
+arXiv numbers as `\href` (lining, by the link-text rule) and three as
+plain text (old-style, by the prose rule), in one list; a rule that
+reaches prose would be pattern-matching, and the real answer is 08's
+`.bbx`, where the identifier is a field (Outstanding, below). Both
+manuscripts' `\section*` heads, `enumerate` labels, `\boxed` displays
+and `lemma*` came through as the manuscripts set them.
+
 **To judge, not yet judged:** the reading experience — 12 and 36 pages of
 11 pt EB Garamond on parchment is a denser, quieter page than `amsart`'s.
 Whether that is right for a preprint is the author's call. The `plain`
@@ -595,7 +718,8 @@ the framed front matter onto a second leaf).
 the margin gloss (needs 02's page), the initials, the frame, the fleurons,
 the imprint, roman numerals, the press and the sheet.
 
-**Two things it taught**, both gotchas now:
+**Five things it taught**, all gotchas now (the last three from the
+third and fourth manuscripts, fixed in `5ea3f92` and `02d7008`):
 
 - `cmd/section/after` hooks fire *before* a `\@startsection` command
   reads its argument; `\section` and `\subsection` are wrapped with
@@ -605,6 +729,35 @@ the imprint, roman numerals, the press and the sheet.
   peeks at the first token of the paragraph after a section head, grabs
   the word if it is a letter, steps over a leading `\label`, and disarms
   quietly on anything else.)
+- **A dropped initial needs its three lines with the head.** LaTeX keeps
+  one line of the paragraph with a section head; a head two lines from
+  the foot hung its initial below the page — lettrine's "ATTENTION
+  REQUIRED", twice in each manuscript. The section wrapper now
+  `\needspace{8\baselineskip}` first (fleuron and its space, head and
+  its skips, the initial's three: six was too few, and left the fleuron
+  alone at the foot), and raises `\@secpenalty` for the head that follows
+  a fleuron, since that penalty (−300) invites the page break between
+  them. Requires `needspace`.
+- **The Argument as a box does not fit the framed leaf** once the grand
+  measure (370 pt) has made a long one longer: it went whole to the second
+  leaf and left the first underfull (badness 10000) with the title block
+  and footnotes alone on it. Unboxed in atlas.sty, it breaks across the
+  leaves as prose. amsart's abstract has the same failure.
+- **The front-matter leaves are flush-bottom**, as the class is, and a
+  middle leaf of Table lines has nothing to stretch: underfull. `\maketitle`
+  sets `\raggedbottom` while the leaves last and restores `\@textbottom`
+  after the `\clearpage`; the last leaf has its `\vfill` before the
+  imprint anyway.
+
+Smoke test after these, three passes each with `\atlasrevision` and
+`\atlassources` on the command line: ball-occupation 25 pp, timed-guarding
+23, branch-capture 15, near-critical 40; no warnings, no missing
+characters. Left as the measure's own: two overfull lines of 2.5 pt
+(one a display) in ball-occupation and a display 12 pt wide in
+branch-capture on the 370 pt gloss measure, one loose line in
+timed-guarding (badness 1082), and one loose page where ball-occupation's
+bibliography breaks (badness 1019). A display is the author's width;
+the grand measure is 02's.
 
 **Judgement recorded:** the *type* devices — initials, rubric, glossed
 margin, the Table, the colophon — read as a designed book; the *sheet*
@@ -618,21 +771,22 @@ pretending to be old paper.
 The graduation is the main line now; the lab continues beside it in
 both registers.
 
-1. **Read the dressed preprints** (`build/branch-capture-dressed.pdf`,
-   `build/near-critical-dressed.pdf`, and the two `-grand` editions;
-   rebuild with the recipe) and decide
-   the register questions the style cannot: page density, parchment vs
-   `plain` for the website, whether Remark stays Remark in the sources,
-   whether `\paragraph` gets a voice, whether a manuscript's `\url`
-   should leave typewriter (08 says yes for biblatex; the sty does not
-   touch `\url`'s font, only its figures, which were lining already).
-2. **The third and fourth manuscripts.** `ball-occupation-under-coarse-
-   projections.tex` (1817 lines) and `timed-guarding-in-degree-reduction-
-   clouds.tex` (1513) remain; the second found nine things after the
-   first found seven, so expect more. Same recipe, same rule: a copy in
-   scratch, nothing in the research repo, nothing of theirs committed
-   here. Before the dressed build, grep the log for `Missing character`
-   as well as `Warning` and `Overfull`: a missing glyph is silent.
+1. **Read the dressed preprints** (the twelve PDFs in `build/`; rebuild
+   with the recipe) and decide the register questions the style cannot:
+   page density, parchment vs `plain` for the website, whether Remark
+   stays Remark in the sources, whether `\paragraph` gets a voice,
+   whether a manuscript's `\url` should leave typewriter (08 says yes for
+   biblatex; the sty scales the typewriter to the text face now and does
+   not change it), whether the italic line under the capitals is wanted
+   where the title's `\\` was a line break and not a subtitle (the
+   second manuscript ends its capitals on "for"; taking the `\\` out of
+   the source is the other answer), and whether the plain-text arXiv
+   numbers in a hand-set bibliography should be lining (they are
+   old-style; the `\href`ed ones beside them are lining).
+2. **Tell the author about cleveref.** Under TeX Live 2026, `\cref` of a
+   lemma sharing the theorem counter says "Theorem", in the pdflatex
+   originals as much as in the dress (the kernel first-aid, above). None
+   of the four manuscripts does it yet.
 3. **Should the plates move to the node renderer?** The sty did (see the
    second manuscript's first finding); the plates still say HarfBuzz,
    with protrusion and expansion off, and the previews are the HarfBuzz
