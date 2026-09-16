@@ -25,7 +25,8 @@
 % class, \thanks -- beneath), the proposition apparatus of 04 (centred
 % head, attribution beneath, italic statement, Demonstration, Q.E.D.,
 % run-in definitions and scholia; cleveref and nameref told what amsthm
-% would have told them), a running head under a hair rule and a centred
+% would have told them; \paragraph run in italic), \url in the text face,
+% a running head under a hair rule and a centred
 % folio, and 08's "The Authorities" head and small type for the reference
 % list. On call: \AtlasTable, a Table of the Propositions with real pages
 % from the .aux (two passes), and \AtlasColophon, a colophon leaf naming
@@ -189,6 +190,12 @@
 % / "py" in the original and overran the measure here. Its hyphens option,
 % too late to pass once hyperref has loaded it, is this one definition.
 \@ifpackageloaded{url}{\def\do@url@hyp{\do\-}}{}
+% 08's rule for the address as for the identifier: a \url takes the face
+% around it, not the typewriter. Its digits are set in math mode by url and
+% so come from the math font, lining already; its letters now follow the
+% text. (Decided by the author, 2026-09-16; the typewriter stays for
+% \texttt.)
+\@ifpackageloaded{url}{\urlstyle{same}}{}
 
 % --- tables -----------------------------------------------------------------------
 % 03's finding: a table's figures are lining and tabular, so columns align.
@@ -222,6 +229,12 @@
   {\normalfont\small\centering\scshape\color{rubric}}}
 \def\subsection{\@startsection{subsection}{2}%
   \z@{.9em\@plus .4em}{.3em}%
+  {\normalfont\itshape}}
+% \paragraph keeps amsart's shape -- run in, a word space after -- and takes
+% the subsection's voice, italic; the class had left it in the text face,
+% the one head without one. (Decided by the author, 2026-09-16.)
+\def\paragraph{\@startsection{paragraph}{4}%
+  \z@{.5em\@plus .3em}{-\fontdimen2\font}%
   {\normalfont\itshape}}
 \SetTracking{encoding=*,shape=sc}{120}
 

@@ -224,7 +224,7 @@ to the apparatus —
 \AtlasProposition{theorem}{Theorem}[theorem]
 \AtlasProposition{lemma}{Lemma}[theorem]
 \AtlasDefinition{definition}{Definition}[theorem]
-\AtlasScholium{remark}{Remark}[theorem]
+\AtlasScholium{remark}{Remark}[theorem]   % or Scholium, if the prose allows
 \AtlasSplitTitle   % only if the title's \\ introduces a subtitle
 ```
 

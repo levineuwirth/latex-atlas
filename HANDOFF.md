@@ -450,8 +450,14 @@ cp ~/Repos/research/meyniel/paper/branch-capture-paper.tex work.tex
 #    \AtlasProposition{question}{Question}[theorem]
 #    \AtlasDefinition{definition}{Definition}[theorem]
 #    \AtlasScholium{remark}{Remark}[theorem]
-#    \AtlasSplitTitle    only if the title's \\ introduces a subtitle
-#                        (ball-occupation); a \\ that breaks a phrase flows
+#      -- or {Scholium}, the author's preference for the dressed editions,
+#         ONLY where the prose never writes "Remark~\ref" (grep first: of
+#         the four, only timed-guarding qualifies today); with cleveref add
+#         \crefname{remark}{Scholium}{Scholia} so \cref says it too. The
+#         canonical sources keep Remark.
+#    \AtlasSplitTitle    where the title's \\ introduces a subtitle or a
+#                        qualifying clause (ball-occupation, branch-capture);
+#                        a \\ that breaks a phrase mid-way flows (near-critical)
 #    \AtlasScholium{remark*}{Remark}
 TEXINPUTS=~/Repos/personal/latex-atlas/sty: lualatex work.tex   # twice
 ```
@@ -788,25 +794,27 @@ pretending to be old paper.
 The graduation is the main line now; the lab continues beside it in
 both registers.
 
-1. **Read the dressed preprints** (the twelve PDFs in `build/`; rebuild
-   with the recipe) and decide the register questions the style cannot:
-   page density, parchment vs `plain` for the website, whether Remark
-   stays Remark in the sources, whether `\paragraph` gets a voice,
-   whether a manuscript's `\url` should leave typewriter (08 says yes for
-   biblatex; the sty scales the typewriter to the text face now and does
-   not change it), and whether the plain-text arXiv
-   numbers in a hand-set bibliography should be lining (they are
-   old-style; the `\href`ed ones beside them are lining).
+1. **The register questions are decided** (author, 2026-09-16, after
+   reading all twelve editions): *parchment is the site edition*, `plain`
+   for arXiv and print; density stays; `\paragraph` is run in italic (in
+   the sty); `\url` takes the text face (in the sty); plain-text arXiv
+   numbers in a hand-set bibliography are the author's to wrap in `\href`
+   so they take lining figures like the DOIs beside them; *Scholium* is
+   wanted in the dressed editions where the manuscript's prose permits it
+   (the canonical sources keep Remark) — see the recipe; branch-capture's
+   title splits as well as ball-occupation's; rare ligatures stay off;
+   grandness is a scale for each instance to set, not a binary, so the
+   grand layer keeps every device. Remaining for the author, in the
+   research repo: the arXiv numbers, and "Remark~\ref" → `\Cref` (or the
+   word) in the three manuscripts whose prose names the kind, which is
+   what stands between them and Scholium.
 2. **Tell the author about cleveref.** Under TeX Live 2026, `\cref` of a
    lemma sharing the theorem counter says "Theorem", in the pdflatex
    originals as much as in the dress (the kernel first-aid, above). None
    of the four manuscripts does it yet.
-3. **Should the plates move to the node renderer?** The sty did (see the
-   second manuscript's first finding); the plates still say HarfBuzz,
-   with protrusion and expansion off, and the previews are the HarfBuzz
-   renderings. Nothing in a one-page plate needs expansion, so this is a
-   consistency question, not a defect; if done, it is eight files and a
-   full preview regeneration in one commit.
+3. **The plates are on the node renderer** with protrusion and expansion,
+   as the style is (author's decision; one commit, all 59 previews
+   regenerated, byte-reproducible, zero warnings).
 4. **08's biblatex style into the `.sty`** as `atlas.bbx`/`atlas.cbx`
    with the dress moved in from 08's preamble — the first manuscript
    whose bibliography is a `.bib` will want it. Then `\cite` in a dressed
