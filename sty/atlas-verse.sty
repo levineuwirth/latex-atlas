@@ -4,11 +4,14 @@
 % folio, title leaf, imprint and colophon from them and adds what a book
 % of poems needs:
 %
-%   \poemblock{longest line}      the width the next block is measured by
-%   \begin{poem}[first line]      the block: every line ends with \\, stanzas
+%   \begin{poem}                  the block: every line ends with \\, stanzas
 %     ...                          are separated by a blank line; \vin indents
-%   \end{poem}                     a line; the optional first line goes to
-%                                  the Index of First Lines
+%   \end{poem}                     a line. The poem measures its own lines:
+%                                  the widest is the block, the first goes
+%                                  to the Index of First Lines
+%   \begin{poem}[first line]      an Index entry other than the first line
+%   \poemblock{line}              a block wider than the poem's longest line,
+%                                  for the next poem only
 %   \begin{poem*} ... \end{poem*}  the same with every line centred, for a
 %                                  shaped poem (Herbert's "Easter Wings")
 %   \poemtitle{Title}              in the rubric, spaced small capitals;
@@ -79,7 +82,53 @@
 \newcounter{poemline}
 \newcount\verse@stanzastart
 \newcount\verse@over
-\newcommand{\poemblock}[1]{\settowidth{\poemwidth}{#1}}
+% \poemblock{line} overrides the measured width for the next poem only; a
+% poem measures its own lines otherwise.
+\newif\ifverse@explicitwidth
+\newcommand{\poemblock}[1]{\settowidth{\poemwidth}{#1}\global\verse@explicitwidthtrue}
+% --- measuring the body ---------------------------------------------------------------
+% The environment takes its body as an argument (+b), splits it at \\ and
+% measures each line in a box (\par between stanzas is nothing in a box,
+% \vin is its space); the widest is the block, the first is the Index
+% entry unless [first line] was given. The wrong longest line, which the
+% review found in temple.tex, cannot be named now.
+\newsavebox{\verse@linebox}
+% expl3 names stay inside the block (an underscore outside it is a
+% subscript); the trimmed first line comes out in \verse@firsttext.
+\ExplSyntaxOn
+\tl_new:N \l_verse_first_tl
+\cs_new_protected:Npn \verse@setfirst #1
+  {
+    \tl_set:Nn \l_verse_first_tl {#1}
+    \tl_trim_spaces:N \l_verse_first_tl
+    \tl_gset_eq:NN \verse@firsttext \l_verse_first_tl
+  }
+\ExplSyntaxOff
+\newif\ifverse@firstseen
+\newcommand{\verse@measureone}[1]{%
+  \ifverse@firstseen\else\verse@firstseentrue\verse@setfirst{#1}\fi
+  % \sbox, not \settowidth: a stanza's first line carries the \par before
+  % it, and \settowidth is not \long (a \par in a box is nothing).
+  \sbox\verse@linebox{#1}%
+  \ifverse@explicitwidth\else
+    \ifdim\wd\verse@linebox>\poemwidth \global\poemwidth=\wd\verse@linebox\fi
+  \fi}
+\long\def\verse@measurelines#1\\#2\verse@stop{%
+  \verse@measureone{#1}%
+  \ifx\relax#2\relax\expandafter\@gobble\else\expandafter\@firstofone\fi
+    {\verse@measurelines#2\verse@stop}}
+% \verse@measure{first line or -NoValue-}{body}
+\newcommand{\verse@measure}[2]{%
+  \verse@firstseenfalse
+  \ifverse@explicitwidth\else\global\poemwidth=\z@\fi
+  % Measured even when \poemblock was given: the first line is wanted.
+  % The width and the first line are set globally: the group is for \vin.
+  \begingroup\def\vin{\hspace*{2em}}%
+    \verse@measurelines#2\verse@stop
+  \endgroup
+  \IfValueTF{#1}{\verse@writefirst{#1}}%
+    {\expandafter\verse@writefirst\expandafter{\verse@firsttext}}%
+  \global\verse@explicitwidthfalse}
 \newcommand{\poemnumber}{%
   \ifnum\verse@every>0
     \ifnum\numexpr\value{poemline}/\verse@every*\verse@every\relax=\value{poemline}\relax
@@ -120,23 +169,24 @@
     \parskip\z@ \interlinepenalty=300 \def\vin{\hspace*{2em}}}
 \newcommand{\verse@close}{\par\endgroup}
 % [first line] for the index; flush lines, hanging run-overs.
-\NewDocumentEnvironment{poem}{o}
-  {\IfValueT{#1}{\verse@writefirst{#1}}%
+\NewDocumentEnvironment{poem}{o +b}
+  {\verse@measure{#1}{#2}%
    \verse@open
     \parindent-\poemhang
     \leftskip\dimexpr\verse@offset+\poemhang\relax \rightskip\verse@offset\@plus1fil \parfillskip\z@
     \def\\{\unskip\stepcounter{poemline}\poemnumber\verse@eol}%
-    \ifverse@initials\expandafter\verse@initial@try\else\expandafter\ignorespaces\fi}
+    \ifverse@initials\expandafter\verse@initial@try\else\expandafter\ignorespaces\fi
+    #2}
   {\verse@close}
 % Every line centred within the block, for shaped verse; no hang, no
 % outdent, no initial, and no numbers: a fill-glue number would break the
 % centring, so \AtlasVerseNumbers does not reach poem*.
-\NewDocumentEnvironment{poem*}{o}
-  {\IfValueT{#1}{\verse@writefirst{#1}}%
+\NewDocumentEnvironment{poem*}{o +b}
+  {\verse@measure{#1}{#2}%
    \verse@open
     \parindent\z@ \leftskip\verse@offset\@plus1fil \rightskip\verse@offset\@plus1fil \parfillskip\z@
     \def\\{\unskip\stepcounter{poemline}\verse@ceol}%
-    \ignorespaces}
+    \ignorespaces#2}
   {\verse@close}
 
 % --- the initial ---------------------------------------------------------------------

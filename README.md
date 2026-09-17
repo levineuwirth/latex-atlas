@@ -269,7 +269,11 @@ is there to find the limit, not to post.
 `sty/atlas-verse.sty` is verse over either: `\begin{poem}…\end{poem}` with
 every line ending in `\\`, a `poem*` for shaped verse, `\poemtitle`,
 `\attribution`, `\tailpiece`, a Contents and a sorted Index of First
-Lines from the `.aux`, initials and numbers on under `atlas-grand`.
+Lines from the `.aux`, initials and numbers on under `atlas-grand`. A
+poem measures its own lines — the widest is the block, the first is its
+Index entry — and warns when a stanza runs over. `tools/verse.py` turns
+plain text (`# Title`, blank lines between stanzas, indentation by spaces,
+`@ attribution`, `---` for a tailpiece) into a book ready to build.
 `bound/temple.tex` is its proof: four poems of Herbert's *The Temple*
 (1633) as a seven-leaf chapbook — see its header for the command; three
 passes. A poem may break across leaves; a block whose lines run over, or

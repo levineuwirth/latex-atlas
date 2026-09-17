@@ -899,15 +899,29 @@ as a seven-leaf chapbook in grand — framed title leaf with the Contents,
 a poem to a leaf, Index of First Lines, colophon ("this edition of the
 poems"). Zero warnings, three passes. `build/temple.pdf`.
 
+**Before the author began** (2026-09-17), two things were built so the
+manual steps the review had caught could not recur: **the poem measures
+itself** — the environment takes its body (`+b`), splits it at `\\`,
+measures each line in a box (`\sbox`, which is `\long`; a stanza's first
+line carries the `\par` before it) and takes the widest for the block and
+the first for the Index, `\poemblock` and `[first line]` remaining as
+overrides — and **`tools/verse.py`** converts plain text to a book.
+Three gotchas from the building: `\settowidth` is not `\long`; an expl3
+name used outside `\ExplSyntaxOn` is a subscript (`\verse_first:n`), so
+the block exports a plain name; and anything set inside the measuring
+group is lost at `\endgroup` unless global — the width and the first
+line both were, once.
+
 **To the author's poems**: the recipe is the manuscripts', shorter. A
-copy of the poems in scratch as a LaTeX file — `\poemtitle`, `\poemblock`
-with the longest line, `\begin{poem}[first line]`, lines ending in `\\`,
-blank lines between stanzas, `\vin` where a line is indented — with
+copy of the poems in scratch as a LaTeX file — `\poemtitle`,
+`\begin{poem}`, lines ending in `\\`, blank lines between stanzas,
+`\vin` where a line is indented — or the same made from plain text by
+`tools/verse.py --book "Title" --author … --date … poems.txt` — with
 `\usepackage{atlas-grand}\usepackage{atlas-verse}` and the four lines of
 `temple.tex`'s preamble; `TEXINPUTS=sty:`, three passes, output to
 `build/`, with `\def\atlasrevision{…}\def\atlassetdate{…}` on the
-command line as `temple.tex`'s header shows. Measure each `\poemblock`
-line honestly — the style now warns when one is too short. Grandness per instance: `\AtlasVerseNumbers{0}` for no numbers,
+command line as `temple.tex`'s header shows. Widths and first lines are
+the poem's own now; the style still warns if a stanza runs over. Grandness per instance: `\AtlasVerseNumbers{0}` for no numbers,
 plain `atlas` beneath for a quiet edition, and the per-device grand
 options still to be built.
 

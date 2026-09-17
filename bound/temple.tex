@@ -13,10 +13,9 @@
 %   three times. The revision is this repository's; the date is the
 %   setting's, not the poems' (the colophon says "on <date>").
 %
-% Each \poemblock names the poem's longest line, measured: a shorter one
-% sets the block too narrow and the long lines run over silently under
-% ragged right -- the style warns of it now, but the source should be
-% right.
+% Each poem measures its own lines: the widest is the block, the first
+% goes to the Index. (\poemblock{line} widens a block on purpose; a
+% [first line] on the environment replaces the Index entry.)
 \documentclass[11pt]{article}
 \usepackage{atlas-grand}
 \usepackage{atlas-verse}
@@ -31,8 +30,7 @@
 \maketitle
 
 \poemtitle{Vertue}
-\poemblock{Sweet spring, full of sweet dayes and roses,}
-\begin{poem}[Sweet day, so cool, so calm, so bright,]
+\begin{poem}
 Sweet day, so cool, so calm, so bright,\\
 The bridall of the earth and skie:\\
 The dew shall weep thy fall to night;\\
@@ -56,8 +54,7 @@ But though the whole world turn to coal,\\
 \tailpiece
 
 \poemtitle{The Pulley}
-\poemblock{Then beautie flow'd, then wisdome, honour, pleasure:}
-\begin{poem}[When God at first made man,]
+\begin{poem}
 When God at first made man,\\
 Having a glasse of blessings standing by;\\
 Let us (said he) poure on him all we can:\\
@@ -85,8 +82,7 @@ If goodnesse leade him not, yet wearinesse\\
 \tailpiece
 
 \poemtitle{Prayer}
-\poemblock{Church-bels beyond the starres heard, the souls bloud,}
-\begin{poem}[Prayer the Churches banquet, Angels age,]
+\begin{poem}
 Prayer the Churches banquet, Angels age,\\
 Gods breath in man returning to his birth,\\
 The soul in paraphrase, heart in pilgrimage,\\
@@ -108,8 +104,7 @@ The land of spices; something understood.\\
 \tailpiece
 
 \poemtitle{Easter Wings}
-\poemblock{Lord, who createdst man in wealth and store,}
-\begin{poem*}[Lord, who createdst man in wealth and store,]
+\begin{poem*}
 Lord, who createdst man in wealth and store,\\
 Though foolishly he lost the same,\\
 Decaying more and more,\\
