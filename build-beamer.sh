@@ -8,6 +8,7 @@ handout=0
 grand=0
 euler=0
 crawler=0
+starter=0
 for arg in "$@"; do
   case "$arg" in
     --plain) plain=1 ;;
@@ -15,12 +16,13 @@ for arg in "$@"; do
     --grand) grand=1 ;;
     --euler) euler=1 ;;
     --crawler) crawler=1 ;;
-    -h|--help) echo 'Usage: ./build-beamer.sh [--grand | --euler | --crawler] [--plain] [--handout]'; exit 0 ;;
+    --starter) starter=1 ;;
+    -h|--help) echo 'Usage: ./build-beamer.sh [--grand | --euler | --crawler | --starter] [--plain] [--handout]'; exit 0 ;;
     *) echo "build-beamer.sh: unknown option $arg" >&2; exit 2 ;;
   esac
 done
-if [ "$((grand + euler + crawler))" -gt 1 ]; then
-  echo 'build-beamer.sh: choose one of --grand, --euler, or --crawler' >&2
+if [ "$((grand + euler + crawler + starter))" -gt 1 ]; then
+  echo 'build-beamer.sh: choose one of --grand, --euler, --crawler, or --starter' >&2
   exit 2
 fi
 
@@ -47,6 +49,12 @@ fi
 if [ "$crawler" -eq 1 ]; then
   job=crawler-chronicles
   source=presentations/crawler-chronicles.tex
+  theme=beamerthemeAtlasGrand
+  passes=3
+fi
+if [ "$starter" -eq 1 ]; then
+  job=atlas-starter
+  source=presentations/starter.tex
   theme=beamerthemeAtlasGrand
   passes=3
 fi

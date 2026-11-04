@@ -252,6 +252,35 @@ main-section coverage, PDF page counts, layout and glyph warnings, rendering
 of every presentation page, and text/footers within their page boundaries.
 The audience-facing pacing remains to be judged in an actual presentation.
 
+## Consolidation and the starter deck
+
+The author requested review, commit, and push of the Beamer milestone, then
+extraction of a small starter deck. The milestone is commit `f878b83`, pushed
+to `origin/main` at the existing Forgejo remote. Its review checked the
+sixteen clean specimen build logs, the Euler graph/geometry audit, and frozen
+asset hashes. `.gitattributes` exempts the imported originals and generated
+SVGs from whitespace checks; their serialized whitespace is retained.
+
+`presentations/starter.tex` is the next entry point: a single copyable file
+with an opening, ordinary content, full figure, detail, quiet quotation,
+and closing. Its illustrative chart is inline TikZ; the detail clips the
+same drawing. Replacing two marked commands substitutes real assets. It
+uses AtlasGrand directly, introduces no new theme API, and needs none of
+the specimen/essay assets. It has six frames, seven presentation pages,
+and six handout pages. The quote retains the liked 27/31 pt italic setting.
+
+`./build-beamer.sh --starter` selects it, with independent `--plain` and
+`--handout` options. `tools/preview_starter.py` makes six PNG previews and
+`atlas-starter-overview.pdf`. The shared overview renderer now chooses the
+number of rows from the selection count; existing nine-plate galleries
+keep their previous layout. README begins with the copy/edit/build recipe.
+
+Validation: all four starter variants compile without layout, glyph, or
+other LaTeX warnings; extracted text stays within page boundaries. A copy
+in `/tmp` also builds with only `sty/` added to `TEXINPUTS`. The six-pattern
+overview was visually reviewed, and the existing Euler gallery regenerated
+with its unchanged nine-plate layout.
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its

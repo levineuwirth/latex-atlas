@@ -1,0 +1,146 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Copy this ONE file to start a talk. It needs only the Atlas theme in sty/.
+% In this repo: ./build-beamer.sh --starter [--plain] [--handout]
+% Elsewhere: TEXINPUTS=/path/to/latex-atlas/sty: lualatex talk.tex (three times).
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{AtlasGrand} % Or \usetheme[plain]{AtlasGrand} for black on white.
+
+% EDIT: your metadata. Keep the title short enough for the opening layout.
+\title{One idea, clearly seen}
+\subtitle{A claim, its evidence, and what follows}
+\author{Your name}
+\institute{Your institution}
+\date{\today}
+
+% Local layout choices. Group their use in {...} to restore the theme.
+\newcommand{\TalkQuiet}{%
+  \setbeamertemplate{background canvas}{\color{AtlasPaper}\vrule width\paperwidth height\paperheight}%
+  \setbeamertemplate{footline}{}%
+}
+\newcommand{\TalkWhite}{%
+  \setbeamertemplate{background canvas}{\color{white}\vrule width\paperwidth height\paperheight}%
+  \setbeamertemplate{footline}{}%
+}
+
+% The example chart is illustrative, not a research result. Both views
+% use the SAME drawing; the detail only changes the clipping rectangle.
+% Delete this macro when replacing the two figure commands below.
+\newcommand{\ExampleChart}[1]{%
+  \begin{tikzpicture}[x=10mm,y=7mm,font=\small]
+    \ifnum#1=0\def\leftedge{-.9}\else\def\leftedge{4.5}\fi
+    \begin{scope}
+      \clip (\leftedge,-.8) rectangle (8.5,5.3);
+      \fill[white] (\leftedge,-.8) rectangle (8.5,5.3);
+      \foreach \v in {0,2,4,6,8,10}{
+        \draw[AtlasGold!25!white,line width=.3pt] (0,\v*.45)--(8.2,\v*.45);
+        \node[anchor=east,text=AtlasInk] at (-.1,\v*.45) {\v};
+      }
+      \foreach \x/\label/\v in {1.5/A/4,3.5/B/6,5.5/C/5,7.5/D/9}{
+        \filldraw[fill=AtlasGold!35!white,draw=AtlasInk,line width=.5pt]
+          (\x-.45,0) rectangle (\x+.45,\v*.45);
+        \node[above,text=AtlasInk] at (\x,\v*.45) {\v};
+        \node[below,text=AtlasInk] at (\x,-.12) {\label};
+      }
+      \draw[AtlasInk] (0,0)--(8.2,0);
+    \end{scope}
+    \pgfresetboundingbox
+    \path[use as bounding box] (\leftedge,-.8) rectangle (8.5,5.3);
+  \end{tikzpicture}%
+}
+% EDIT: substitute your own figure and detail. Size each within its slot.
+% Example: \includegraphics[width=148mm,height=65mm,keepaspectratio]{figure.pdf}
+\newcommand{\TalkFigure}{\resizebox{!}{62mm}{\ExampleChart{0}}}
+% Prefer a separately exported panel that retains the axes and legend it needs.
+% Example: \includegraphics[width=57mm,height=50mm,keepaspectratio]{detail.pdf}
+\newcommand{\TalkDetail}{\resizebox{!}{50mm}{\ExampleChart{1}}}
+
+\begin{document}
+
+% 1. OPENING — metadata, generous space, and the dark palette.
+{\AtlasGrandNight
+\begin{frame}[plain,noframenumbering]
+  \centering
+  {\color{AtlasGoldLight}\pgfornament[width=26mm,color=AtlasGoldLight]{71}\par}
+  \bigskip
+  {\color{AtlasIvory}\fontsize{32}{36}\selectfont\scshape\inserttitle\par}
+  \medskip
+  {\color{AtlasIvory}\large\itshape\insertsubtitle\par}
+  \bigskip\bigskip
+  {\color{AtlasGoldLight}\insertauthor\par\smallskip
+    \small\insertinstitute\par\insertdate\par}
+\end{frame}}
+
+% 2. ORDINARY CONTENT — native blocks and speaker-paced reveals.
+% Handout mode displays both items together. Remove [<+->] for a static slide.
+\section{The claim}
+\begin{frame}{Make one comparison worth remembering}
+  \begin{block}{The claim}
+    The final group stands apart from the others.
+  \end{block}
+  \medskip
+  \begin{itemize}[<+->]
+    \item Show the full comparison before drawing attention to a detail.
+    \medskip
+    \item Explain what the difference means, and what it leaves unresolved.
+  \end{itemize}
+  \note{Replace this example claim with yours. Keep the conditions and limits
+    of the claim close to the evidence. This sample uses illustrative values.}
+\end{frame}
+
+% 3. FULL FIGURE — a neutral field preserves source colors and annotations.
+% Plain frames still count as frames unless noframenumbering is specified.
+{\TalkWhite
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west,text=AtlasInk,font=\large\scshape] at
+      ([xshift=8mm,yshift=-5mm]current page.north west) {The full comparison};
+    \node at ([yshift=-1mm]current page.center) {\TalkFigure};
+    \node[anchor=south,text=AtlasInk,text width=143mm,align=center,font=\small] at
+      ([yshift=5mm]current page.south) {Illustrative data\quad /\quad Four groups, one common scale.};
+  \end{tikzpicture}
+\end{frame}}
+
+% 4. ENLARGED DETAIL — use a useful crop, then state its interpretation.
+\section{The evidence}
+\begin{frame}{The last pair makes the difference visible}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.46\textwidth}\centering\TalkDetail\end{column}
+    \begin{column}{.48\textwidth}
+      \AtlasGrandKicker{Read the detail}
+      {\color{AtlasRubric}\fontsize{30}{34}\selectfont $5\longrightarrow9$\par}
+      \medskip
+      Group D is 80\% above group C in this illustrative comparison.\par\medskip
+      \AtlasGrandScholium{The next question}{What mechanism could explain
+        the difference? What evidence would distinguish it from alternatives?}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 5. QUIET QUOTATION — EB Garamond Italic, 27pt with 31pt leading.
+% Add the actual attribution below when quoting someone else's words.
+{\TalkQuiet
+\begin{frame}[plain]
+  \centering
+  {\fontsize{27}{31}\selectfont\itshape
+    Give the evidence room.\\
+    Then give the conclusion a voice.\par}
+  \bigskip\bigskip
+  {\small\color{AtlasGold}\textsc{A pause before the conclusion}\par}
+\end{frame}}
+
+% 6. CLOSING — your takeaway and a useful next step or discussion question.
+{\AtlasGrandNight
+\begin{frame}[plain]
+  \centering
+  {\color{AtlasGoldLight}\small\textls[140]{\textsc{The takeaway}}\par}
+  \bigskip
+  {\color{AtlasIvory}\fontsize{30}{35}\selectfont\scshape
+    Make the comparison count.\par}
+  \bigskip
+  {\color{AtlasIvory}\large One finding. One implication. One next step.\par}
+  \bigskip\bigskip
+  {\color{AtlasGoldLight}\pgfornament[width=26mm,color=AtlasGoldLight]{71}\par}
+\end{frame}}
+
+\end{document}

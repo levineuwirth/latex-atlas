@@ -10,6 +10,44 @@ further exploration will follow what it teaches us. The older plates,
 article styles, and verse work remain available as experiments, rather
 than a roadmap or constraints on the new work.
 
+## Start a talk
+
+Copy [presentations/starter.tex](presentations/starter.tex). It is a single
+editable file with six patterns: a dark opening, ordinary content with
+overlays, a full-page figure, an enlarged detail, a quiet italic quotation,
+and a closing takeaway. The illustrative chart is drawn inside the file;
+there are no dependencies on the specimen decks or website assets.
+
+```sh
+./build-beamer.sh --starter                  # build/beamer/atlas-starter.pdf
+./build-beamer.sh --starter --handout        # six pages; overlays collapsed
+./build-beamer.sh --starter --plain          # black-on-white theme
+./build-beamer.sh --starter --plain --handout
+python3 tools/preview_starter.py              # six-pattern overview and gallery
+```
+
+The presentation has six frames and seven pages because the ordinary
+content slide reveals two items. Edit the metadata at the top, then the
+six marked sections. Replace `\TalkFigure` and `\TalkDetail` with your own
+PDF/image inclusions; the comments give size limits and examples. Keep the
+axes and legends needed to interpret a detail. Quiet-page and dark-palette
+changes are scoped to their frames. Speaker notes use ordinary `\note{...}`.
+
+For a copied file outside the repository, compile with LuaLaTeX three times,
+with the repository's `sty/` directory on the TeX search path:
+
+```sh
+TEXINPUTS=/path/to/latex-atlas/sty: lualatex talk.tex
+TEXINPUTS=/path/to/latex-atlas/sty: lualatex talk.tex
+TEXINPUTS=/path/to/latex-atlas/sty: lualatex talk.tex
+```
+
+| Opening | Ordinary content | Full figure |
+|:-:|:-:|:-:|
+| ![Opening](preview/starter/01-opening.png) | ![Content](preview/starter/02-content.png) | ![Figure](preview/starter/03-figure.png) |
+| Detail | Quiet quotation | Closing |
+| ![Detail](preview/starter/04-detail.png) | ![Quotation](preview/starter/05-quotation.png) | ![Closing](preview/starter/06-closing.png) |
+
 ## Beamer
 
 ```latex

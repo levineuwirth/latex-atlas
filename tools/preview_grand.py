@@ -43,15 +43,16 @@ def render_gallery(job, gallery, selections):
         ], check=True)
 
     # Preserve vector paths and live text in the overview, rather than
-    # making a composite raster image of the nine preview PNGs.
+    # making a composite raster image of the preview PNGs.
     page_list = ",".join(str(page) for _, page in selected)
+    rows = (len(selected) + 2) // 3
     tex = build / f"{job}-overview.tex"
     tex.write_text(
         r"\documentclass{article}" "\n"
-        r"\usepackage[paperwidth=480mm,paperheight=270mm,margin=0pt]{geometry}" "\n"
+        rf"\usepackage[paperwidth=480mm,paperheight={90*rows}mm,margin=0pt]{{geometry}}" "\n"
         r"\usepackage{pdfpages}" "\n"
         r"\begin{document}" "\n"
-        rf"\includepdf[pages={{{page_list}}},nup=3x3,delta=2mm 2mm,"
+        rf"\includepdf[pages={{{page_list}}},nup=3x{rows},delta=2mm 2mm,"
         rf"pagecommand={{}}]{{build/beamer/{job}.pdf}}" "\n"
         r"\end{document}" "\n"
     )
