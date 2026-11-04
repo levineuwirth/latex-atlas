@@ -317,6 +317,27 @@ overview sheets. Deliberate overflow and edge text were both flagged, and
 a previously successful deck failed correctly after its figure went missing.
 The README documents commands, dependencies, output locations, and limits.
 
+## GitHub CI
+
+GitHub is the private `github` remote at `levineuwirth/latex-atlas`; Forgejo
+remains `origin` and the upstream for `main`. `.github/workflows/ci.yml`
+checks pushes to main, pull requests, and manual dispatch. Official actions
+are pinned to release commits; the workflow has read-only repository
+permissions and cancels superseded runs on the same ref.
+
+The Python matrix covers 3.9 and 3.14, the CLI tests, frozen Crawler asset
+hashes, and the Euler geometry audit. `tools/ci_smoke.py` is the local and
+CI entry point for actual TeX/Poppler integration: external starter in all
+four variants, relative assets and references, all four existing specimens,
+and selected/multipage previews. Expected page counts live in the script.
+Ubuntu 24.04 installs TeX Live and fonts from its package repositories.
+Build products and failure logs are uploaded as `presentation-checks` for
+seven days; local outputs live in ignored `build/ci/`.
+
+The author prefers MIT for code, but explicitly requested CI first. No
+license changes are part of this work; settling the code/material boundary
+is the next licensing task.
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its

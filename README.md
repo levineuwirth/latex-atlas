@@ -85,6 +85,36 @@ Run the CLI regression checks with:
 python3 -m unittest discover -s tools -p 'test_*.py'
 ```
 
+### Continuous integration
+
+[GitHub Actions](https://github.com/levineuwirth/latex-atlas/actions/workflows/ci.yml)
+runs on pushes to `main`, pull requests, and manual dispatch. The fast jobs
+test Python 3.9 and 3.14, verify the frozen Crawler source hashes, and audit
+the Euler geometry. A separate Ubuntu 24.04 job installs TeX and runs real
+presentation checks:
+
+- A newly created talk outside the checkout, in all four variants.
+- A deck with relative figure and TeX includes, spaces in filenames, and a
+  forward reference.
+- Atlas, Grand, Euler, and Crawler specimens, with expected page counts.
+- A selected-slide preview and the full Crawler overview across five sheets.
+
+The `presentation-checks` artifact contains PDFs, PNGs, reports, and build
+logs for seven days, including diagnostics from failed runs. Builds use
+only committed assets; the website checkout is not required. Page counts
+are intentional regression expectations in `tools/ci_smoke.py`; update
+them alongside intentional slide or overlay changes.
+
+To run the integration checks locally with TeX and Poppler installed:
+
+```sh
+python3 tools/ci_smoke.py
+```
+
+Outputs go to the ignored `build/ci/` directory. Automated checks cover
+compilation and text bounds; the artifacts still need a visual review
+when the design changes.
+
 ### The starter source
 
 Copy [presentations/starter.tex](presentations/starter.tex). It is a single
