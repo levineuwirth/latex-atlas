@@ -12,6 +12,81 @@ than a roadmap or constraints on the new work.
 
 ## Start a talk
 
+The repository's `atlas` command creates, builds, previews, and checks a talk.
+It uses Python 3.9+ (standard library only), LuaLaTeX, `latexmk`, and Poppler.
+Preview contact sheets also use pdfLaTeX and `pdfpages`. Install the theme's
+TeX packages and fonts listed below; missing fonts can use the theme's fallbacks.
+
+```sh
+./atlas new /path/to/my-talk
+# Edit /path/to/my-talk/talk.tex; put figures in its assets/ directory.
+./atlas build /path/to/my-talk/talk.tex
+./atlas preview /path/to/my-talk/talk.tex
+./atlas check /path/to/my-talk/talk.tex --all-variants
+```
+
+`new` refuses to overwrite an existing directory. The generated talk stays
+independent of the specimen assets, but uses the themes from this checkout.
+Invoke `atlas` by its absolute path from elsewhere, or symlink it into a
+directory on your `PATH`; the symlink still locates the original theme files.
+
+Builds resolve figure and `\input` paths relative to the deck directory.
+`latexmk` reruns LuaLaTeX as needed to settle references and recorded positions,
+and reuses current outputs on subsequent builds. `--plain` and `--handout`
+are independent options. For `my-talk/talk.tex`, outputs are:
+
+```text
+my-talk/
+  talk.tex
+  assets/
+  build/talk/
+    ornate/talk.pdf
+    ornate-handout/talk.pdf
+    plain/talk.pdf
+    plain-handout/talk.pdf
+```
+
+Each variant keeps its own auxiliary files and `build.stdout.txt`. Use
+`--output-dir DIR` to change the build root, or `--workdir DIR` for decks
+whose relative paths assume another working directory. For example:
+
+```sh
+./atlas build presentations/atlas-grand.tex --workdir .
+```
+
+The existing `build-beamer.sh` commands remain available with their original
+output locations.
+
+`preview` builds a `.tex` deck, or reads an existing `.pdf`. It produces
+1200-pixel page PNGs and a vector `overview.pdf`, up to nine slides per sheet,
+in `talk-preview/` beside the PDF. By default it includes every PDF page,
+including overlays. To select particular pages or unique text:
+
+```sh
+./atlas preview /path/to/my-talk/talk.tex --handout
+./atlas preview /path/to/talk.pdf --pages 1,3-7
+./atlas preview /path/to/talk.pdf --match 'The full comparison' --match 'Give the evidence room.'
+```
+
+Text selections must match exactly one page; use page numbers for repeated
+overlay titles. The preview manifest records the source and selected pages.
+
+`check` forces a rebuild, reports LaTeX warnings, overfull/underfull boxes,
+missing glyphs, and extracted text within one point of or beyond a page edge.
+It writes `check.json` beside each checked PDF. Exit status is zero only when
+the build succeeds and no findings remain; findings and operational errors
+return nonzero. `--all-variants` checks all four combinations. These bounds
+are a review aid: they cannot detect every clipped graphic, overlapping
+element, or visual imbalance. Inspect the previews too.
+
+Run the CLI regression checks with:
+
+```sh
+python3 -m unittest discover -s tools -p 'test_*.py'
+```
+
+### The starter source
+
 Copy [presentations/starter.tex](presentations/starter.tex). It is a single
 editable file with six patterns: a dark opening, ordinary content with
 overlays, a full-page figure, an enlarged detail, a quiet italic quotation,

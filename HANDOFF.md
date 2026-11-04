@@ -281,6 +281,42 @@ in `/tmp` also builds with only `sty/` added to `TEXINPUTS`. The six-pattern
 overview was visually reviewed, and the existing Euler gallery regenerated
 with its unchanged nine-plate layout.
 
+## General talk workflow
+
+`atlas` is an executable Python entry point for `new`, `build`, `preview`,
+and `check`; implementation is `tools/atlas_cli.py`, using the standard
+library. It finds the themes relative to its resolved path, including when
+invoked through a symlink. It needs no installation or Python dependencies.
+The old specimen build and gallery commands retain their existing behavior.
+
+`new` copies the starter into a fresh directory with `assets/` and a build
+ignore rule. `build` runs LuaLaTeX via latexmk for reference convergence and
+incremental rebuilding. Each source stem and palette/handout combination
+has its own directory under the deck's `build/`. Relative assets default
+to the deck directory; `--workdir .` supports older specimens whose paths
+start at the repository root. `--output-dir` changes the build root.
+
+`preview` accepts TeX or PDF, defaults to all pages, and supports page ranges
+or unique text phrases. It writes page PNGs, a vector overview with up to
+nine slides per sheet, and a selection manifest beside the PDF. Repeated
+overlay titles require explicit page numbers. A successful refresh removes
+only obsolete thumbnails recorded in the previous manifest.
+
+`check` forces compilation before inspecting the final log and Poppler's
+text bounding boxes. Warnings, missing glyphs, overfull/underfull boxes,
+and text within one point of the page edge produce a nonzero status and
+`check.json`. Build failures cannot pass using an earlier PDF. Rebuilding
+invalidates a previous check report. This is not visual collision detection:
+graphics, overlaps, and composition still need a rendered review.
+
+Validation includes eleven fast regression tests; all four variants of a
+fresh external starter (paths contain spaces); an external deck with a
+relative PDF asset, included TeX, and a forward reference; six-pattern
+visual review; and the complete 37-page Crawler PDF rendered into five
+overview sheets. Deliberate overflow and edge text were both flagged, and
+a previously successful deck failed correctly after its figure went missing.
+The README documents commands, dependencies, output locations, and limits.
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its
