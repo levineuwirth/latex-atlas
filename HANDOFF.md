@@ -331,6 +331,9 @@ CI entry point for actual TeX/Poppler integration: external starter in all
 four variants, relative assets and references, all four existing specimens,
 and selected/multipage previews. Expected page counts live in the script.
 Ubuntu 24.04 installs TeX Live and fonts from its package repositories.
+The first hosted run exposed a missing Pagella Math font: with apt's
+recommended packages disabled, install `fonts-texgyre` and
+`fonts-texgyre-math` explicitly alongside EB Garamond.
 Build products and failure logs are uploaded as `presentation-checks` for
 seven days; local outputs live in ignored `build/ci/`.
 
