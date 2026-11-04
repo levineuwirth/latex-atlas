@@ -1,0 +1,76 @@
+% SPDX-License-Identifier: MIT
+% Copyright (c) 2026 the repository contributors
+% Reusable tree-pursuit diagrams and layout helpers.
+% Arguments: cop vertex, robber vertex, remaining vertices, solid edges.
+% The remaining vertices are the component of T-c containing r. At capture
+% we show the empty set by convention. Edges behind the cop stay dashed;
+% lettered circle/square pieces also distinguish players in the plain deck.
+\newcommand{\AtlasPursuitTree}[4]{%
+  \begin{tikzpicture}[x=1.15cm,y=1cm,
+    edge/.style={line width=.8pt,draw=AtlasInk},
+    faded/.style={edge,draw=AtlasInk!35!AtlasPaper,dashed},
+    cop/.style={circle,draw=AtlasRubric,fill=AtlasRubric,text=AtlasPaper,
+      minimum size=6mm,inner sep=0pt,font=\small},
+    robber/.style={rectangle,draw=AtlasInk,fill=AtlasPaper,text=AtlasInk,
+      line width=1pt,minimum size=6mm,inner sep=0pt,font=\small}]
+    \path[use as bounding box] (-.45,-1.9) rectangle (4.95,1.85);
+    \begin{scope}[overlay]
+      \coordinate (a) at (0,0);
+      \coordinate (b) at (1.1,0);
+      \coordinate (c) at (2.2,0);
+      \coordinate (d) at (3.3,.9);
+      \coordinate (e) at (4.5,.9);
+      \coordinate (f) at (1.1,1.3);
+      \coordinate (g) at (1.1,-1.2);
+      \coordinate (h) at (2.2,-1.2);
+      \foreach \u/\v in {a/b,b/c,c/d,d/e,b/f,b/g,c/h}
+        \draw[faded] (\u)--(\v);
+      \foreach \u/\v in {#4}
+        \draw[edge] (\u)--(\v);
+      \foreach \v in {a,b,c,d,e,f,g,h} {
+        \fill[AtlasInk!35!AtlasPaper] (\v) circle (1.8pt);
+      }
+      \foreach \v in {a,d,e,g,h}
+        \node[below=3.5mm,font=\small,text=AtlasInk] at (\v) {$\v$};
+      \foreach \v in {b,c}
+        \node[below right=2.5mm,font=\small,text=AtlasInk] at (\v) {$\v$};
+      \node[above=2.5mm,font=\small,text=AtlasInk] at (f) {$f$};
+      \foreach \v in {#3} {
+        \fill[AtlasRubric!18!AtlasPaper] (\v) circle (4mm);
+        \fill[AtlasInk] (\v) circle (1.8pt);
+      }
+      \ifstrequal{#1}{#2}{%
+        \node[cop,minimum size=8mm,font=\scriptsize] at (#1) {C/R};
+      }{%
+        \node[cop] at (#1) {C};
+        \node[robber] at (#2) {R};
+      }
+    \end{scope}
+  \end{tikzpicture}%
+}
+
+% One declaration per position, reused by the chase and the proof.
+\newcommand{\AtlasPursuitPosition}[1]{%
+  \ifcase#1\relax
+  \or\AtlasPursuitTree{a}{d}{b,c,d,e,f,g,h}{a/b,b/c,c/d,d/e,b/f,b/g,c/h}%
+  \or\AtlasPursuitTree{b}{d}{c,d,e,h}{b/c,c/d,d/e,c/h}%
+  \or\AtlasPursuitTree{b}{e}{c,d,e,h}{b/c,c/d,d/e,c/h}%
+  \or\AtlasPursuitTree{c}{e}{d,e}{c/d,d/e}%
+  \or\AtlasPursuitTree{d}{e}{e}{d/e}%
+  \or\AtlasPursuitTree{e}{e}{}{}%
+  \fi
+}
+
+\newcommand{\AtlasPursuitLegend}{%
+  {\small C: cop\qquad R: robber\par
+   Halos mark the robber's region.\par
+   Dashed branches are inaccessible.\par}%
+}
+
+\newcommand{\AtlasPursuitBeat}[3]{%
+  {\usebeamercolor[fg]{structure}\scshape\strut #1\strut\par}
+  \medskip
+  \parbox[t][2.3cm][t]{\linewidth}{\raggedright\strut #2\strut}\par
+  \bigskip
+  {\large Remaining vertices: $#3$\par}%
+}

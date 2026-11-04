@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Real TeX/Poppler integration checks; outputs stay in build/ci/.
 
 Run with python3 tools/ci_smoke.py after installing the README dependencies.

@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Check frozen essay sources without access to the author's website checkout."""
 import hashlib
 import json

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Audit the actual diagram's edge lists using geometric face walks.
 
 This counts faces independently of Euler's formula. Each erasure must

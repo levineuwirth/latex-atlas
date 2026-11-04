@@ -1,0 +1,66 @@
+latex-atlas: content provenance and license exceptions
+
+The software and reusable templates are MIT; the repository's authored
+demonstration material is generally CC BY-SA 4.0. See LICENSE,
+LICENSE-CONTENT, and README.md for the boundaries. These grants cover only
+rights held by the repository contributors. Earlier grants and more
+specific notices remain in effect; this update does not revoke them.
+
+Crawler Chronicles
+------------------
+Author: Levi Neuwirth
+Source: https://levineuwirth.org/essays/crawler_chronicles.html
+Source license notice: https://levineuwirth.org/licenses/CC-BY-NC-SA-4.0.txt
+Source exceptions: https://levineuwirth.org/licenses.html
+
+The website's LICENSE-CONTENT is preserved verbatim as
+presentations/crawler-assets/LICENSE-SOURCE. It licenses original prose
+and textual content data under CC BY-NC-SA 4.0, with attribution to Levi
+Neuwirth and a link to the original page. It expressly excludes illustrations,
+paper PDFs and other listed media without a separate notice, third-party
+quotations and snapshots, and public-domain works.
+
+Accordingly:
+
+* presentations/crawler-assets/originals/essay.md retains that prose
+  license, with the source's exclusions for embedded works and quotations.
+* The authored adaptation in presentations/crawler-chronicles.tex is
+  CC BY-NC-SA 4.0. It abridges and rearranges the main essay for slides,
+  adds speaker notes and presentation text, and uses preserved figures.
+* The imported graphs, emblems, petition, and court seal retain their
+  source-specific rights. This repository grants no additional reuse
+  license for those illustrations or PDFs. The website's prose license
+  must not be read as a license for those assets.
+* SVG-to-PDF conversions, recolored emblems, detail crops, and the
+  re-emitted petition cover retain the same source exceptions. Conversion
+  does not turn them into MIT or CC BY-SA assets.
+* The two metadata JSON files retain the source's terms insofar as rights
+  apply. No exclusive rights are asserted over uncopyrightable facts.
+* preview/crawler/ and rendered Crawler decks contain this mixture of
+  material. They are excluded from the blanket CC BY-SA grant; the prose
+  and embedded works retain their respective terms above.
+
+presentations/crawler-assets/manifest.json records the original relative
+paths and hashes, together with the conversions, crops, and color changes.
+The frozen original files have not been edited to add license headers.
+When refreshing the imports, review the website's notices and refresh
+LICENSE-SOURCE if needed; the asset importer does not update license grants.
+The separate composition code in presentations/crawler-plates.tex is MIT;
+that code license does not extend to files loaded from crawler-assets/.
+
+Public-domain text and attributed quotations
+-------------------------------------------
+George Herbert's poems from The Temple (1633), used in
+examples/09-verse-page.tex and bound/temple.tex, retain their public-domain
+status. The CC BY-SA notice covers the contributors' authored arrangement
+and demonstration material, not a new copyright claim over the poems.
+Other attributed quotations retain their source's rights and terms.
+
+External packages and fonts
+---------------------------
+TeX, Beamer, TikZ/PGF, pgfornament, fontspec, unicode-math, microtype,
+tcolorbox, Poppler, Cairo/librsvg, the installed font software, and other
+dependencies retain their own licenses. Their package source and font
+files are not relicensed by this repository. Rendered documents may
+contain their permitted output or embedded font subsets; the document's
+content license does not relicense that underlying software or font data.

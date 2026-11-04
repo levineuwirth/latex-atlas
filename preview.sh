@@ -1,5 +1,6 @@
 #!/bin/sh
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 # Render the first page of each built plate to PNG at 100 dpi with poppler's
 # pdftoppm: full plates into preview/, lab variants into preview/ablate/.
 # Run ./build.sh --ablate first. Output is byte-reproducible for an

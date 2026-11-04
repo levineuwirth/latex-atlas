@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2026 the repository contributors -->
+
 # latex-atlas — handoff
 
 ## Current direction — Beamer, 2026-11-03
@@ -340,9 +343,28 @@ The workflow verifies the TeX font files and refreshes LuaTeX's font index.
 Build products and failure logs are uploaded as `presentation-checks` for
 seven days; local outputs live in ignored `build/ci/`.
 
-The author prefers MIT for code, but explicitly requested CI first. No
-license changes are part of this work; settling the code/material boundary
-is the next licensing task.
+The author preferred MIT for code but requested CI first; the subsequent
+licensing decision and implementation are recorded below.
+
+## Software and content licensing
+
+The author confirmed MIT for reusable code and ShareAlike for authored
+material. `LICENSE` now contains MIT with an explicit scope; `LICENSE-CONTENT`
+contains CC BY-SA 4.0's full legal text. Source headers and the README map
+identify the MIT themes, tools, configuration, documentation, starter, and
+reusable diagram/layout helpers. `tree-pursuit-helpers.tex` separates the
+reusable macros from the ShareAlike slide narrative in `tree-pursuit.tex`.
+The Euler generator emits the MIT header into `euler-folds.tex`.
+
+The source website's actual grant differs from the old repository blanket
+notice: its prose is CC BY-NC-SA 4.0 and its illustrations/PDFs are excluded
+without separate notices. Asked about that mismatch, the author explicitly
+chose to preserve the website's existing terms. Therefore the Crawler slide
+text is CC BY-NC-SA, the imported assets retain the source exclusions, and
+no new blanket license covers the mixed Crawler previews. `NOTICES` records
+the distinction; `crawler-assets/LICENSE-SOURCE` preserves the source license
+verbatim. Frozen originals and their hashes are unchanged. Prior grants are
+not revoked, and third-party material/public-domain works are not relicensed.
 
 ## Historical handoff — September 2026 (superseded)
 

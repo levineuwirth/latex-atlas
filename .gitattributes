@@ -1,4 +1,9 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 # Frozen source bytes are checked against manifest.json; do not normalize them.
 /presentations/crawler-assets/originals/** -whitespace
 # SVG serialization retains source path and element whitespace.
 /presentations/crawler-assets/*.svg -whitespace
+# Preserve the supplied legal texts, including their trailing blank lines.
+/LICENSE-CONTENT -whitespace
+/presentations/crawler-assets/LICENSE-SOURCE -whitespace

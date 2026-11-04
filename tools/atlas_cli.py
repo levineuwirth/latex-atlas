@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Create, build, preview, and check Atlas talks. Python standard library only."""
 import argparse
 import json

@@ -1,4 +1,5 @@
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Fast CLI regression checks; real TeX/Poppler smoke tests are documented separately."""
 import contextlib
 import io

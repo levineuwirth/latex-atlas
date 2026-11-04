@@ -1,5 +1,6 @@
 #!/bin/sh
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 # Build the Atlas specimen. Outputs and logs stay in build/beamer/.
 set -eu
 

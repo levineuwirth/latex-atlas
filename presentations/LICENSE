@@ -1,0 +1,18 @@
+Authored Atlas, Grand, and Euler presentation material, including the
+slide text in tree-pursuit.tex, is CC BY-SA 4.0; see ../LICENSE-CONTENT.
+
+The following reusable sources are MIT; see ../LICENSE:
+  starter.tex
+  tree-pursuit-helpers.tex
+  grand-plates.tex
+  euler-plates.tex
+  euler-folds.tex
+  crawler-plates.tex
+
+Crawler slide text in crawler-chronicles.tex is CC BY-NC-SA 4.0.
+crawler-assets/ and rendered Crawler material retain the website's source
+terms and exclusions; see ../NOTICES and crawler-assets/LICENSE-SOURCE.
+The MIT code in crawler-plates.tex does not relicense the assets it loads.
+
+Third-party quotations and dependencies, and public-domain works, retain
+their own terms. Specific notices take precedence.

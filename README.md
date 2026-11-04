@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2026 the repository contributors -->
+
 # latex-atlas
 
 A LaTeX styling lab, currently exploring **Beamer presentations**. The
@@ -691,5 +694,28 @@ material enters this repo, and no manuscript text does either.
 
 ## License
 
-CC BY-SA 4.0, see `LICENSE`. Third-party deps (e.g. `fiziko` if later
-examples use it) are not relicensed here.
+The reusable software is **MIT**; authored demonstration material keeps
+**ShareAlike**. The Crawler imports retain their website terms, which are
+more restrictive than the other demonstrations.
+
+| Material | Terms |
+|---|---|
+| `sty/`, `tools/`, `atlas`, shell scripts, CI/configuration, and technical documentation | [MIT](LICENSE) |
+| `presentations/starter.tex` and `preview/starter/` | [MIT](LICENSE) |
+| Reusable `tree-pursuit-helpers.tex`, `grand-plates.tex`, `euler-plates.tex`, `euler-folds.tex`, and `crawler-plates.tex` in `presentations/` | [MIT](LICENSE) |
+| Authored Atlas, Grand, and Euler decks; `tree-pursuit.tex` slide text; `examples/`; `bound/`; and their previews | [CC BY-SA 4.0](LICENSE-CONTENT) |
+| Crawler essay prose and its authored slide adaptation in `crawler-chronicles.tex` | [CC BY-NC-SA 4.0](presentations/crawler-assets/LICENSE-SOURCE), with source exclusions |
+| Crawler graphs, emblems, petition, seal, and derived assets; mixed Crawler previews | Source terms and exclusions in [NOTICES](NOTICES); no additional blanket reuse grant |
+
+You can copy the MIT starter and helpers into your own talk while keeping
+their copyright and license notices. Using the tools or theme does not
+require your original presentation content to adopt a particular license.
+Reusing demonstration text or imported assets is a separate matter: follow
+the applicable content license and source notices. MIT components remain
+available under MIT when included in a demonstration.
+
+[NOTICES](NOTICES) records attribution and exclusions for imported works,
+public-domain poems, quotations, and external dependencies. Frozen Crawler
+originals retain their exact bytes; their notices are kept alongside them.
+Earlier license grants remain in effect; this change does not rewrite
+history or revoke rights already granted.

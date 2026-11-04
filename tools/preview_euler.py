@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Render the Euler gallery after ./build-beamer.sh --euler."""
 from preview_grand import render_gallery
 

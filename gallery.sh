@@ -1,5 +1,6 @@
 #!/bin/sh
-# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 # Rewrite the lab gallery in README.md, between the "<!-- lab:begin -->" and
 # "<!-- lab:end -->" markers, from the controls found in examples/*.tex and
 # the PNGs preview.sh renders. Four plates per row: the full treatment, then

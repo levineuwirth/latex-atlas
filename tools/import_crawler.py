@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Freeze the author's essay assets, preserving the four original graphs.
 
 Run explicitly to refresh from the website. Normal deck builds only read

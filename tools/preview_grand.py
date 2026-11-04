@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 the repository contributors
 """Render the grand specimen's gallery and a single-page PDF contact sheet.
 
 Run after ./build-beamer.sh --grand. Pages are located by their text so that
