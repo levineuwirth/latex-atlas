@@ -1,0 +1,83 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Build from the repository root with ./build-beamer.sh (two passes).
+\documentclass[aspectratio=169,12pt]{beamer}
+\usetheme{Atlas}
+\usepackage{tikz}
+\usepackage{booktabs}
+
+\title{The shape of a proof}
+\subtitle{An argument in motion}
+\author{latex-atlas}
+\institute{A typographic experiment in Beamer}
+\date{3 November 2026}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+
+\section{The question}
+\begin{frame}{One question, one slide}
+  \framesubtitle{Pursuit on a finite graph}
+  A cop and a robber occupy vertices. On each turn, a player may move
+  along one edge or stay put.
+  \begin{itemize}[<+->]
+    \item The cop chooses a starting vertex; the robber chooses next.
+    \item They alternate moves, with the cop moving first.
+    \item Can the cop guarantee that they meet?
+  \end{itemize}
+  \medskip
+  \uncover<3->{The graph's \alert{shape} decides the answer.}
+\end{frame}
+
+\section{The argument}
+\input{presentations/tree-pursuit.tex}
+
+\begin{frame}{Count what changes}
+  A finite tree on $n$ vertices has $n-1$ edges, and
+  \[
+    \sum_{v\in V(T)} d(v)=2|E(T)|=2(n-1).
+  \]
+  \medskip
+  \begin{center}
+    \begin{tabular}{lrr}
+      \toprule
+      Tree & Vertices & Edges \\
+      \midrule
+      A single vertex & 1 & 0 \\
+      A path & 8 & 7 \\
+      A star & 12 & 11 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Distinguish the kinds of statement}
+  \begin{definition}
+    The \emph{cop number} $c(G)$ is the smallest number of cops that can
+    guarantee capture on $G$.
+  \end{definition}
+  \begin{exampleblock}{Example}
+    Theorem~\ref{thm:tree} says that $c(T)=1$ for every finite tree $T$.
+  \end{exampleblock}
+  \begin{alertblock}{The hypothesis matters}
+    A cycle of length at least four needs two cops.
+  \end{alertblock}
+\end{frame}
+
+\section{To explore}
+\begin{frame}{Where does the proof break?}
+  \begin{enumerate}
+    \item Add a cycle to the picture.
+    \item Find the step where the region can stop shrinking.
+    \item Ask what a second cop repairs.
+  \end{enumerate}
+  \bigskip
+  \begin{quote}
+    The page can hold an argument. A slide must give it a pace.
+  \end{quote}
+\end{frame}
+
+\end{document}

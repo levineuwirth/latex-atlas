@@ -1,0 +1,581 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Adapted from Levi Neuwirth's main essay; source snapshot in crawler-assets.
+% ./build-beamer.sh --crawler
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{AtlasGrand}
+\usepackage{booktabs}
+\input{presentations/crawler-plates.tex}
+\title{Crawler Chronicles}
+\subtitle{One small server. An unreasonable amount of interest.}
+\author{Levi Neuwirth}
+\date{The October 2026 record}
+
+\begin{document}
+
+% 1. Opening; the essay's own spider mark, in the grand palette.
+{\AtlasGrandNight
+\begin{frame}[plain,noframenumbering]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west,text=AtlasGoldLight,font=\small] at
+      ([xshift=16mm,yshift=-15mm]current page.north west)
+      {\textls[130]{\textsc{Dispatches from a small public forge}}};
+    \node[anchor=north west,text=AtlasIvory,align=left,inner sep=0pt] at
+      ([xshift=17mm,yshift=-30mm]current page.north west)
+      {{\fontsize{34}{37}\selectfont\scshape Crawler}\\[2mm]
+       {\fontsize{34}{37}\selectfont\scshape Chronicles}};
+    \node[anchor=north west,text=AtlasGoldLight,text width=77mm,align=left,
+      font=\large\itshape,inner sep=0pt] at
+      ([xshift=18mm,yshift=-62mm]current page.north west)
+      {One small server.\\An unreasonable amount of interest.};
+    \node at ([xshift=122mm,yshift=-46mm]current page.north west)
+      {\CEmblem{spider}{gold}{55mm}};
+    \node[anchor=south west,text=AtlasGoldLight,font=\scriptsize] at
+      ([xshift=17mm,yshift=9mm]current page.south west)
+      {\textsc{Levi Neuwirth\quad /\quad The October 2026 record}};
+  \end{tikzpicture}
+  \note{This adapts the main essay, including its October 22 response. It is a historical account of the retained October record, not a live traffic report. The spider and later scales are the author's original marks.}
+\end{frame}}
+
+% 2. Give a fresh audience the nouns before giving them the numbers.
+\section{The premises}
+\begin{frame}{One server, several ways to be visited}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \CLabel{The premises}
+      A modest rented virtual server hosts both the website and
+      \texttt{git.levineuwirth.org}.\par\medskip
+      \textbf{Forgejo} is the software that serves the code repositories:
+      files, history, and downloadable archives.\par\medskip
+      \CAside{I am a researcher. The server is not a hyperscaler.}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \CLabel{A small vocabulary}
+      \textbf{Repository:} a project and its history.\par\smallskip
+      \textbf{Commit:} a recorded version.\par\smallskip
+      \textbf{Crawler:} software visiting pages automatically.\par\medskip
+      \textbf{HTTP 200:} a successful response.\par\smallskip
+      \textbf{HTTP 403:} a challenge or denial in these logs.
+    \end{column}
+  \end{columns}
+  \note{A request is not a person, and HTTP 200 alone does not establish that a visitor was a bot. The early tables count repository-path responses across agents; the later test uses a much narrower cohort.}
+\end{frame}
+
+% 3. Keep the opening provocation recognizably satirical.
+{\CQuiet
+\begin{frame}[plain]
+  \centering\CLabel{A modest contribution to Dead Internet speculation}
+  \bigskip
+  {\fontsize{27}{31}\selectfont\itshape
+    Perhaps the internet is alive.\\
+    It is simply very interested\\in my old commits.\par}
+  \bigskip\bigskip
+  \begin{minipage}{110mm}\centering
+    A grand theory deserves a modest exhibit:\\
+    one unexpectedly popular Git server.
+  \end{minipage}
+  \note{The large wording is a presentation adaptation, not a verbatim quotation. Treat the Dead Internet premise as the essay's comic framing, not as a finding proved by these access logs.}
+\end{frame}}
+
+% 4. Maintenance is the inciting incident.
+\begin{frame}{Maintenance discovers an audience}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \CNumber{$\sim$2,500}{queued source-archive jobs}
+      \medskip\CLabel{Discovered on 1 October}
+      \CAside{A project snapshot is a perfectly ordinary thing to download.
+        Thousands of historical snapshots are a less ordinary welcome.}
+    \end{column}
+    \begin{column}{.45\textwidth}
+      Late-September security updates prompted a closer look at Forgejo.\par\medskip
+      The archive backlog was removed, Forgejo upgraded to 15.0.9,
+      and source-archive downloads disabled.\par\medskip
+      {\color{AtlasRubric}\large\itshape ``This was merely the appetizer.''}
+    \end{column}
+  \end{columns}
+  \note{The main essay rounds to about 2,500 jobs. The petition's supporting record gives 2,464. The archive reconstruction/training interpretation that follows is a hypothesis about possible use, not evidence of a training pipeline.}
+\end{frame}
+
+% 5. The archive/diff example without requiring an audience to read Bash.
+\begin{frame}{Why might anyone want all those versions?}
+  \CLabel{A possible recipe}
+  \begin{center}
+    {\Large old snapshot\quad$+$\quad new snapshot\quad$\longrightarrow$\quad a change}
+  \end{center}
+  \medskip
+  \begin{block}{The edit, in miniature}
+    {\ttfamily\small
+      def greet(name):\par
+      \textcolor{AtlasRubric}{+\quad name = name.strip() or "stranger"}\par
+      \hspace*{4mm}return f"Hello, \{name\}!"\par}
+  \end{block}
+  \uncover<2->{The old code, the edit, and the result could become a learning
+    example. Repeating the process over history could produce many of them.\par\medskip
+    \CAside{A plausible use for the material. The logs do not reveal its eventual use.}}
+  \note{The essay shows unzip, diff, and patch. This slide preserves their conceptual purpose while reducing shell syntax for a fresh audience. The possible training use is explicitly speculative.}
+\end{frame}
+
+% 6. Historical snapshot totals retained, with the one-response mismatch documented.
+\section{The first visitors}
+\begin{frame}{Three days of enthusiastic readership}
+  \centering\CLabel{1--3 October\quad /\quad repository HTTP 200 responses}
+  \bigskip
+  {\color{AtlasRubric}\fontsize{47}{51}\selectfont 367,972\par}
+  \bigskip
+  {\Large About 84\% went to \texttt{pmacs}.\par}
+  \medskip
+  \begin{minipage}{110mm}\centering
+    An Emacs-inspired IDE written in Rust.\par
+    Files, raw content, history, and other repository pages all count.
+  \end{minipage}\par
+  \bigskip{\small\itshape Historical daily snapshot used in the essay.\par}
+  \note{The repository-share figure's internally consistent hourly cube totals 367,971: one response fewer on October 3. Its metadata explicitly records that discrepancy. Preserve the main essay's 367,972 here and the original graph unchanged; do not silently invent an allocation for the extra response.}
+\end{frame}
+
+% 7. Identification and conjecture belong in different paragraphs.
+\begin{frame}{Some visitors brought name badges}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.47\textwidth}
+      \CNumber{137,249}{requests declaring Meta crawlers}
+      \medskip\CLabel{A little over 37\% of the three-day total}
+      A routing lookup for a sampled address identified Meta's AS32934 network.
+    \end{column}
+    \begin{column}{.47\textwidth}
+      \CLabel{My interpretation}
+      Software-engineering benchmarks reward useful code examples.
+      Repository history supplies changes and context.\par\medskip
+      This motivates my suspicion of a training-data collection
+      strategy.\par\medskip
+      \CAside{The access logs do not establish training use, a particular
+        model, or the crawler's internal instructions.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 8. The essay's original scales supply the ceremonial entrance.
+{\AtlasGrandNight
+\begin{frame}[plain]
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.43\textwidth}\centering\CEmblem{scales}{gold}{56mm}\end{column}
+    \begin{column}{.51\textwidth}
+      {\color{AtlasGoldLight}\small\scshape 4 October\par}\bigskip
+      {\color{AtlasIvory}\fontsize{32}{36}\selectfont\scshape Enter Anubis.\par}
+      \bigskip
+      {\color{AtlasIvory}\large\itshape ``weighs the soul of incoming HTTP
+        requests to stop AI crawlers.''\par}
+      \bigskip{\color{AtlasGoldLight}\small Anubis, as quoted in the essay.}
+    \end{column}
+  \end{columns}
+  \note{The author had reservations about making visitors perform computational work. The decision was driven by the limited resources and bandwidth of a small VPS. The Cloudflare aside belongs here orally: the essay's idealism leaves that exit firmly closed.}
+\end{frame}}
+
+% 9. Preserve the essay's exact table and denominator.
+\begin{frame}{The gate makes an immediate difference}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.55\textwidth}
+      \small
+      \begin{tabular}{@{}lrr@{}}\toprule
+        October & HTTP 200 & HTTP 403\\\midrule
+        1 & 204,540 & 0\\
+        2 & 73,740 & 0\\
+        3 & 89,692 & 0\\\midrule
+        5 & 153 & 194,649\\
+        8 & 233 & 17,669\\
+        9 & 5,890 & 9,370\\
+        13 & 15,539 & 21,633\\\bottomrule
+      \end{tabular}\par\smallskip
+      {\scriptsize Repository responses; UTC dates; essay's daily snapshot.}
+    \end{column}
+    \begin{column}{.39\textwidth}
+      \CLabel{An admission charge}
+      Anubis challenges or denies incoming requests before they reach
+      the repository content.\par\medskip
+      The successful responses collapse.\par\medskip
+      \CAside{``Levineuwirth.org will die before it migrates to Cloudflare.''}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 10. A pause before the change of antagonist.
+{\CQuiet
+\begin{frame}[plain]
+  \centering\CLabel{A provisional declaration of victory}\bigskip
+  {\fontsize{28}{33}\selectfont\itshape
+    At last, back to research.\par}
+  \bigskip\bigskip
+  {\Large By 13 October, the plot had acquired a sequel.\par}
+  \note{This is adapted narrative, not a direct quotation. The original frames the reversal with The Monkey's Paw: getting fewer requests did not bring the simple resolution the author had wished for.}
+\end{frame}}
+
+% 11. Count requests and addresses separately.
+\section{A nemesis reborn}
+\begin{frame}{One browser costume; nearly ten thousand doors}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.53\textwidth}
+      \CNumber{160,402}{requests with the same Linux/Chrome 155 user-agent}
+      \medskip\CAside{Out of 169,384 requests in the October 13 record.}
+    \end{column}
+    \begin{column}{.41\textwidth}
+      {\color{AtlasRubric}\fontsize{30}{34}\selectfont $\sim$10,000\par}
+      {\large distinct source addresses\par}\medskip
+      A distributed, automated pattern.\par\medskip
+      \CAside{The browser name is supplied by the visitor.
+        An address count does not count operators.}
+    \end{column}
+  \end{columns}
+  \note{The later statistical cohort also includes Chrome 150 under its documented user-agent rule. Do not equate this single-day Chrome 155 observation with every count in the later, wider analysis window.}
+\end{frame}
+
+% 12. Infrastructure is a useful lead without identifying a customer.
+\begin{frame}{The network gets a name; the customer does not}
+  \CLabel{One useful lead: UAB code200's published network list}
+  \bigskip
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.30\textwidth}\CNumber{3,788}{successful responses}\end{column}
+    \begin{column}{.30\textwidth}\CNumber{2,342}{source addresses}\end{column}
+    \begin{column}{.30\textwidth}\CNumber{24.5\%}{of the dominant group's successes}\end{column}
+  \end{columns}
+  \bigskip\bigskip
+  Other sampled allocations pointed to EGIHosting, AviationAI, and
+  familiar service providers.\par\medskip
+  \CAside{Registration records name infrastructure. They do not identify
+    the ultimate customer or explain the purpose of a request.}
+  \note{The 24.5 percent denominator is 15,492 successful responses in the dominant Chrome 155 group, not all requests or all repository traffic. These are the main essay's October 13 network observations.}
+\end{frame}
+
+% 13. Keep the original suspicion, without turning chronology into attribution.
+\begin{frame}{Was it still Meta?}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \CLabel{Why I suspected it}
+      A previously enthusiastic visitor already knew the forge.
+      The distributed activity appeared after the gate went up.\par\medskip
+      An appealing application of Occam's razor.
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \CLabel{What the record establishes}
+      The operator of the later swarm remains unknown.\par\medskip
+      Shared infrastructure, a browser string, and a plausible chronology
+      cannot settle its identity.\par\medskip
+      \CAside{The mystery is part of the story. It does not need an invented culprit.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 14. Begin the investigation with the actual question.
+{\CQuiet
+\begin{frame}[plain]
+  \centering\CLabel{Curiosity invoked}\bigskip
+  {\fontsize{27}{32}\selectfont\itshape
+    Were the bots waiting\\for my next commit?\par}
+  \bigskip\bigskip
+  {\large A flattering hypothesis. Fortunately, a testable one.\par}
+\end{frame}}
+
+% 15. Full original figure, with no recoloring or data reconstruction.
+\section{The flattering hypothesis}
+\CEvidence{Exhibit I\quad /\quad the original repository-traffic figure}
+  {repository-targets}{The mix shifted from \texttt{pmacs} toward the website repository.}
+
+% 16. Read the plot aloud at presentation size.
+\begin{frame}{The crawlers appeared to follow my attention}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \CLabel{Early October}
+      {\Large \texttt{pmacs}: 84.1\%\par}\medskip
+      The IDE had recently been the focus of development.
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \CLabel{13 October}
+      {\Large Website: 67.1\%\par}\medskip
+      The website was undergoing the first phase of a substantial refactor.
+    \end{column}
+  \end{columns}
+  \bigskip\bigskip
+  {\large Could the change in traffic be a response to new publications?\par}
+  \medskip\CAside{These are shares of successful responses. A rising share
+    can accompany a falling total. The original figure shows both.}
+  \note{Early means October 1--3 combined; the second share is October 13. The graph's lower panel uses a logarithmic volume axis. October 19 is a partial day ending at 19:00 UTC.}
+\end{frame}
+
+% 17. Publication is the unit, not local commit creation.
+\begin{frame}{A commit's birthday is not its public debut}
+  \centering
+  \only<1|handout:0>{\CPublication{1}}%
+  \only<2|handout:1>{\CPublication{2}}%
+  \par\medskip
+  \begin{minipage}{118mm}\raggedright
+    Local edits may be published together in one push. A crawler can
+    react only after the relevant version becomes visible.\par\medskip
+    The server's branch reflogs and push notifications recover that
+    publication history.
+  \end{minipage}
+  \note{A publication episode groups ref transactions in the same second. The reconstruction follows first reachability across all branches. This simplified four-commit cartoon illustrates batching; it is not an actual measured episode.}
+\end{frame}
+
+% 18. Full original publication graph.
+\CEvidence{Exhibit II\quad /\quad the original publication timeline}
+  {publication-timeline}{Website repository, all branches: publication dates, not local commit dates.}
+
+% 19. Separate inventory, eligibility, and observational scope.
+\begin{frame}{What entered the comparison}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \CNumber{48}{publication episodes exposing 271 commits}
+      \medskip
+      Website repository, 1--13 October.\par\medskip
+      \textbf{40 episodes} met the primary timing test's coverage and
+      stable-policy rules.
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \CLabel{The measured audience}
+      Successful website-page GETs by the Linux/Chrome 150-or-155 cohort.\par\medskip
+      \CLabel{A second publication channel}
+      Eleven GitHub-only pushes exposed 28 commits earlier there,
+      with a maximum head start of 17.6 hours.\par\smallskip
+      \CAside{These logs do not observe requests to GitHub.}
+    \end{column}
+  \end{columns}
+  \note{The main essay's phrase about episodes on the Forgejo instance is broader than the underlying inventory: these 48 episodes and 271 commits concern the website repository. The corrected figure has eleven GitHub-only pushes; the archived analysis report's nine is superseded. Requests are observed through October 19 at 22:00 UTC.}
+\end{frame}
+
+% 20. The audience can understand the statistic before its null model.
+\begin{frame}{Count the half hour on either side}
+  \centering
+  \only<1|handout:0>{\CWindow{1}}%
+  \only<2|handout:1>{\CWindow{2}}%
+  \par
+  \uncover<2->{\large $(829-659)/40=4.25$ extra requests per episode, before adjustment.}
+  \note{The totals sum the forty eligible before/after windows; they need not count unique requests if windows overlap. The statistic is the mean within-episode difference. The publication minute is omitted. Successful GETs measure access through the policy gate, not all attempts.}
+\end{frame}
+
+% 21. Preserve dependence rather than narrating thousands of independent bots.
+\begin{frame}{Move the clock; leave the swarm alone}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \CLabel{The problem}
+      Crawlers arrive in bursts. Thousands of correlated requests
+      are not thousands of independent experiments.\par\medskip
+      A busy half hour might have been busy even without a push.
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \CLabel{The comparison}
+      Keep the request timeline fixed. Shift publication times
+      around within their occupied UTC hours.\par\medskip
+      Pushes sharing an hour move together.\par\medskip
+      Repeat \textbf{10,000 times} and compare the actual alignment
+      with these shifted alignments.
+    \end{column}
+  \end{columns}
+  \medskip\CAside{An observational comparison, conditional on this within-hour timing model.}
+  \note{Circular rotation preserves the within-hour spacing modulo sixty minutes. It assumes within-hour exchangeability; the schedule was not randomized. Avoid describing the p-value as the probability that bots are monitoring the server.}
+\end{frame}
+
+% 22. Both panels, intact.
+\CEvidence{Exhibit III\quad /\quad episodes and shifted-time comparisons}
+  {episode-contributions}{Each dot is one publication episode; the right panel compares shifted alignments.}
+
+% 23. Enlarge the original null panel and interpret its labels.
+\begin{frame}{The apparent bump meets its comparison}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.48\textwidth}\centering
+      \includegraphics[height=56mm]{\CAssets/episode-null.pdf}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \CLabel{Mean extra requests per episode}
+      \begin{tabular}{@{}lr@{}}
+        Observed alignment & $+4.25$\\[2mm]
+        Shifted-time baseline & $+1.89$\\[2mm]
+        Adjusted excess & $+2.36$
+      \end{tabular}\par\bigskip
+      {\color{AtlasRubric}\Large $p=0.151$\par}\medskip
+      No detected prompt increase under this comparison.\par\smallskip
+      \CAside{Detail of the original right-hand panel.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 24. A small, intelligible dose of uncertainty, not the whole appendix.
+\begin{frame}{The evidence did not reward the hypothesis}
+  \CLabel{Adjusted excess: uncertainty intervals under two resampling choices}
+  \medskip
+  \begin{tabular}{@{}lr@{}}\toprule
+    Resample overlapping-window clusters & $-1.47$ to $+7.75$\\[2mm]
+    Resample entire dates & $-1.97$ to $+10.47$\\\bottomrule
+  \end{tabular}\par\bigskip
+  Both intervals include zero. The estimate is not precise enough to
+  rule out every modest effect.\par\medskip
+  The timing test did not establish repeated, prompt monitoring.\par\medskip
+  \CAside{A better question remained: which versions were they actually fetching?}
+  \note{These are the essay's reported intervals for adjusted excess. The request process and policy changes limit interpretation. Do not claim that p greater than .05 proves no effect. The appendix additionally shows strong dependence on October 13.}
+\end{frame}
+
+% 25. Teach the scatter's coordinates before displaying it.
+\section{An archaeological expedition}
+\begin{frame}{A URL can confess to the version it wants}
+  \CLabel{A commit-pinned request}
+  \medskip
+  {\ttfamily\small /neuwirth/levineuwirth.org/src/commit/<hash>/index.md\par}
+  \bigskip
+  Resolve the hash, recover its first Forgejo publication, and compare
+  that time with the request.\par\bigskip
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \CLabel{On the diagonal}
+      A recently published version, fetched soon afterwards.
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \CLabel{In a horizontal band}
+      The same old publication date, visited on many later dates.
+    \end{column}
+  \end{columns}
+  \note{The next plot has request time on the horizontal axis and first Forgejo publication on the vertical axis. Unlike the primary timing test, the hash analysis includes unsuccessful GET attempts, including challenge denials. This is exploratory evidence about requested versions.}
+\end{frame}
+
+% 26. All cohorts remain present in the full original figure.
+\CEvidence{Exhibit IV\quad /\quad requested versions across three cohorts}
+  {request-vs-publication}{The dominant cohort forms bands of old versions, away from the just-published diagonal.}
+
+% 27. State the zero only for the cohort to which it belongs.
+\begin{frame}{The swarm was chiefly revisiting the past}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.48\textwidth}\centering
+      \includegraphics[height=57mm]{\CAssets/request-primary.pdf}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \CLabel{Dominant Linux/Chrome cohort}
+      \textbf{90,122 GETs} named current commits.\par\medskip
+      \textbf{87,270} named versions over seven days old: about \textbf{97\%}.\par\medskip
+      \textbf{Zero} named a commit less than an hour old.\par\medskip
+      \CAside{Other visitors sometimes fetched new commits promptly.
+        This zero belongs to the dominant cohort.}
+    \end{column}
+  \end{columns}
+  \note{The main prose says no cohort, but the appendix expressly limits this result to linux-chrome-150-155. The youngest target was 1.35 hours old at the start of its request minute. The 87,270 count uses minute-midpoint ages; 87,265 are definitely older than seven days at the start of the minute. None of this identifies an operator or proves training use.}
+\end{frame}
+
+% 28. The central comic reversal.
+{\CQuiet
+\begin{frame}[plain]
+  \centering\CLabel{The revised working model}\bigskip
+  {\fontsize{27}{32}\selectfont\itshape
+    My latest work could wait.\\
+    My old mistakes were in demand.\par}
+  \bigskip\bigskip
+  \begin{minipage}{112mm}\centering
+    The pattern fits a slow traversal of older URLs better than repeated,
+    prompt fetching after each push.\par\medskip
+    {\small The logs leave the operator, purpose, intermittent polling,
+      and activity elsewhere unresolved.}
+  \end{minipage}
+\end{frame}}
+
+% 29. The actual provider-specific evidence, not the whole swarm attributed to it.
+\section{The correspondence}
+\begin{frame}{A narrow factual basis for an elaborate letter}
+  \CLabel{EGIHosting allocation\quad /\quad 13 October observation}
+  \bigskip
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}\CNumber{1,385}{successful repository responses}\end{column}
+    \begin{column}{.46\textwidth}\CNumber{803}{distinct source addresses}\end{column}
+  \end{columns}
+  \bigskip
+  Linux/Chrome 150-or-155 requests within \texttt{23.230.0.0/16}.
+  The retained ARIN lookup named EGIHosting as registrant.\par\medskip
+  The October 20 email asked the abuse desk to forward a request for
+  gentler crawling. No customer identity or account records were requested.
+  \note{These provider-associated counts are separate from the wider server totals and code200 matching. Registration establishes a network lead; it does not establish that EGIHosting commissioned the activity.}
+\end{frame}
+
+% 30. A real PDF made with this very project returns as an exhibit.
+\begin{frame}{The Court of Unnecessary Computation convenes}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.36\textwidth}\centering
+      \includegraphics[height=56mm]{\CAssets/petition-cover.pdf}
+    \end{column}
+    \begin{column}{.58\textwidth}
+      \CLabel{The original attachment}
+      {\large\itshape ``old programming mistakes were retained for
+        version control, without any expectation that they would attract
+        a distributed archaeological expedition''\par}
+      \medskip
+      A five-page petition, made with \texttt{latex-atlas}.
+      The numbers are real; the Court is invented.\par\medskip
+      \CAside{Its only recognized jurisdiction: the author's page margins.}
+    \end{column}
+  \end{columns}
+  \note{The quote is from the published October 20 email. The facsimile is page one of the original five-page attachment, retained unchanged in crawler-assets/petition.pdf. It is satire with no legal force. No new message has been sent as part of making this presentation.}
+\end{frame}
+
+% 31. Let the stationery have its own punchline.
+{\CQuiet
+\begin{frame}[plain]
+  \centering\includegraphics[height=21mm]{\CAssets/court-seal.pdf}\par\medskip
+  \CLabel{The prayer for symbolic relief}\medskip
+  {\fontsize{24}{29}\selectfont\itshape
+    Three imaginary gold pieces\\and one entirely hypothetical biscuit.\par}
+  \bigskip
+  {\large Monetary amount due: zero.\par}\medskip
+  \CAside{Clerks are to be treated kindly. They have already received the PDF.}
+\end{frame}}
+
+% 32. Quote the material response without inventing measured causality.
+\begin{frame}{On 22 October, a reply}
+  \CLabel{From the published correspondence}
+  \bigskip
+  \begin{quote}\Large\itshape
+    ``the specified target domain has been restricted from access
+    for the related end-users.''
+  \end{quote}
+  \bigskip
+  The reply offered to re-evaluate if more traffic appeared.\par\medskip
+  I noticed the plural: \emph{end-users}.\par\medskip
+  \CAside{An interesting word. A very small foundation for a theory of the entire supply chain.}
+  \note{Quote from the reply reproduced in the essay. The email claims restriction; the presentation does not infer a measured post-reply effect from graphs whose records end earlier. No personal name is reproduced.}
+\end{frame}
+
+% 33. Preserve the open ending and the limits of attribution.
+\begin{frame}{What now?}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.46\textwidth}
+      \CLabel{Where matters stood}
+      Traffic had died down substantially. A provider reported a
+      restriction. Further experiments were promised.\par\medskip
+      I was, unsurprisingly, not done.
+    \end{column}
+    \begin{column}{.48\textwidth}
+      \CLabel{What remains conjecture}
+      Proxy infrastructure? An intermediary selling data? A customer
+      obscuring its identity?\par\medskip
+      Those are possibilities, not findings. The customer and the
+      ultimate purpose remain unknown.
+    \end{column}
+  \end{columns}
+  \medskip\CAside{The figures stop on October 19. The correspondence continues to October 22.}
+\end{frame}
+
+% 34. A humorous takeaway rooted in the actual petition, not a new allegation.
+{\AtlasGrandNight
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node at ([xshift=34mm,yshift=-42mm]current page.north west)
+      {\CEmblem{spider}{gold}{39mm}};
+    \node[anchor=north west,text=AtlasGoldLight,font=\small] at
+      ([xshift=61mm,yshift=-17mm]current page.north west)
+      {\textls[130]{\textsc{The finding entered into the record}}};
+    \node[anchor=north west,text=AtlasIvory,text width=84mm,align=left,inner sep=0pt] at
+      ([xshift=62mm,yshift=-28mm]current page.north west)
+      {{\fontsize{24}{29}\selectfont\itshape
+        My past errors\\had acquired\\a distribution department.}\par\bigskip
+       {\small Keep records. Test the flattering hypothesis.\\
+        Be kind to the person reading the abuse mailbox.}};
+    \node[anchor=south west,text=AtlasGoldLight,font=\scriptsize] at
+      ([xshift=16mm,yshift=9mm]current page.south west)
+      {\href{https://levineuwirth.org/essays/crawler_chronicles/}{\textsc{Read the essay\quad /\quad Crawler Chronicles}}};
+    \node[anchor=south east,text=AtlasGoldLight,font=\scriptsize] at
+      ([xshift=-14mm,yshift=9mm]current page.south east) {\textsc{The tale has just begun.}};
+  \end{tikzpicture}
+  \note{Closing line adapts the petition's observation that the author's past errors had acquired a distribution department. The presentation covers the main essay; the appendix remains the source for detailed methods, sensitivity analyses, reproduction, and limitations.}
+\end{frame}}
+
+\end{document}

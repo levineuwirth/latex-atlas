@@ -1,15 +1,264 @@
 # latex-atlas
 
-A LaTeX styling lab. Each file in `examples/` is a standalone plate that
-puts a few typographic devices on one page, in the register of the early
-presses, the engraver's shop, or the *Principia*. Some of the devices are
-functional and might graduate into a preprint style; some are pure
-costume and are here because they are a pleasure to build. The lab does
-not choose between them. It shows what each one contributes.
+A LaTeX styling lab, currently exploring **Beamer presentations**. The
+first Atlas theme brings Garamond text and math, small-cap headings,
+rubric, and a warm background to ordinary Beamer slides.
 
-Companion to `vintage-latex` (`/home/jeans/scratch/tmp/vintage-latex`),
-the gallery of period pastiches; kept separate so this repo can grow
-toward reusable website preprint styles.
+**Direction reset, 2026-11-03:** the previous design decisions and intended
+work are shelved and superseded. Beamer is the current investigation;
+further exploration will follow what it teaches us. The older plates,
+article styles, and verse work remain available as experiments, rather
+than a roadmap or constraints on the new work.
+
+## Beamer
+
+```latex
+\documentclass[aspectratio=169,12pt]{beamer}
+\usetheme{Atlas}
+\title{A presentation}
+\author{Your name}
+\date{}
+\begin{document}
+\begin{frame}[plain,noframenumbering]
+  \titlepage
+\end{frame}
+\begin{frame}{An observation}
+  Ordinary Beamer content, including math, blocks, and overlays.
+\end{frame}
+\end{document}
+```
+
+Compile with **LuaLaTeX**, with `sty/` on `TEXINPUTS`, twice to resolve
+references and the frame count. The theme is `sty/beamerthemeAtlas.sty`;
+load it with `\usetheme{Atlas}`. It is independent of the article packages
+`atlas` and `atlas-grand`; do not load those in a presentation.
+
+Build [the specimen deck](presentations/atlas.tex) from the repository:
+
+```sh
+./build-beamer.sh                     # build/beamer/atlas.pdf
+./build-beamer.sh --plain             # atlas-plain.pdf: black on white
+./build-beamer.sh --handout           # atlas-handout.pdf: collapsed overlays
+./build-beamer.sh --plain --handout   # atlas-plain-handout.pdf
+```
+
+For your own deck, point to this repository's `sty/` directory:
+
+```sh
+TEXINPUTS=/path/to/latex-atlas/sty: lualatex talk.tex
+TEXINPUTS=/path/to/latex-atlas/sty: lualatex talk.tex
+```
+
+The first version styles the title page, frame titles and subtitles,
+numbered theorems, proofs, lists, blocks, and frame numbers. Beamer keeps
+control of sections, references, overlays, and page size. The specimen
+uses 16:9 at 12 pt; those are document options, not theme requirements.
+The title frame above is unnumbered, and overlays share a frame number.
+
+The specimen now includes an argument in motion: a large theorem statement,
+a six-step cop-and-robber chase on a fixed tree, and a diagram beside a
+three-step proof. Advance PDF pages to move through the overlays; these are
+speaker-paced steps, with no timer or special PDF animation support needed.
+The cop and robber have distinct lettered pieces, while halos and dashed
+branches show the shrinking region. The handout keeps an intermediate
+position and a table of the complete chase, followed by the full proof.
+These slide patterns live in [presentations/tree-pursuit.tex](presentations/tree-pursuit.tex)
+and use ordinary Beamer and TikZ commands, independently of the theme.
+
+Use `\usetheme[plain]{Atlas}` for black on white and the Beamer class's
+`handout` option to collapse overlays. These are independent choices.
+Customize individual elements with normal `\setbeamercolor`,
+`\setbeamerfont`, and `\setbeamertemplate` calls after loading the theme.
+The named colors are `AtlasPaper`, `AtlasInk`, and `AtlasRubric`.
+
+Requirements: LuaLaTeX, Beamer, `fontspec`, `unicode-math`, EB Garamond
+and Garamond-Math (with TeX Gyre Pagella and Pagella Math as fallbacks).
+The specimen also uses TikZ and `booktabs`. This is an initial theme for
+visual exploration; projection readability still needs an actual room.
+
+## The grand edition
+
+`\usetheme{AtlasGrand}` is the maximalist investigation: gilded double
+borders and corner ornaments, laid and chain lines, illuminated initials,
+framed theorem blocks, marginal scholia, Roman folios, and dark astronomical
+chapter openings. It loads the Beamer `Atlas` theme, not the old article
+package `atlas-grand`.
+
+[The grand specimen](presentations/atlas-grand.tex) expands the argument
+into an engraved mathematical atlas. Its illustrations include an armillary
+frontispiece, medallion player pieces, a seven-segment countdown dial,
+hatched territory bars, and animated one- and two-cop cycle plates.
+Everything is vector; the overlays advance with the speaker. The handout
+keeps a single coherent position and the whole argument on each frame.
+
+```sh
+./build-beamer.sh --grand                     # atlas-grand.pdf
+./build-beamer.sh --grand --handout           # atlas-grand-handout.pdf
+./build-beamer.sh --grand --plain             # atlas-grand-plain.pdf
+./build-beamer.sh --grand --plain --handout   # atlas-grand-plain-handout.pdf
+python3 tools/preview_grand.py                # gallery + vector PDF overview
+```
+
+All PDFs are in `build/beamer/`. Grand builds take three LuaLaTeX passes
+to settle the positions of the page ornaments. The preview command makes
+`atlas-grand-overview.pdf`, a nine-plate contact sheet, and the gallery
+below. It requires Poppler and pdfLaTeX (the latter only combines existing
+PDF pages). Preview selections follow text in the deck, rather than fixed
+page numbers.
+
+| Frontispiece | Chapter opening | Proposition |
+|:-:|:-:|:-:|
+| ![Grand frontispiece](preview/grand/01-cover.png) | ![Chapter opening](preview/grand/02-chapter.png) | ![Framed theorem](preview/grand/03-proposition.png) |
+| Chase | Working proof | Hatched chart |
+| ![Engraved chase](preview/grand/04-chase.png) | ![The invariant](preview/grand/05-proof.png) | ![Territory chart](preview/grand/06-chart.png) |
+| Two boundaries | Marginalia | Finis |
+| ![Two-cop capture](preview/grand/07-two-boundaries.png) | ![Illuminated prose and scholia](preview/grand/08-marginalia.png) | ![Closing leaf](preview/grand/09-finis.png) |
+
+For another deck, use the normal Beamer metadata and `\titlepage`, then
+ordinary frames, theorems, proofs, lists, and blocks. The grand helpers are:
+
+| Command | Purpose |
+|---|---|
+| `\AtlasGrandChapter{II}{Title}{Subtitle}` | An unnumbered dark chapter slide |
+| `\AtlasGrandScholium{Heading}{Text}` | A marginal note panel; place in a column |
+| `\AtlasGrandInitial{A}` | A framed illuminated letter; the specimen shows its placement |
+| `\AtlasGrandFleuron[25mm]` | A scalable ornament |
+| `\AtlasGrandKicker{Text}` | A small gold heading |
+| `\AtlasGrandRubric{Text}` | Spaced small capitals in rubric |
+| `\AtlasGrandAstrolabe[55mm]` | The vector instrument, designed for dark frames |
+
+For a custom dark slide, scope the palette around its frame:
+
+```latex
+{\AtlasGrandNight
+\begin{frame}[plain,noframenumbering]
+  \centering
+  \AtlasGrandAstrolabe[35mm]\par\bigskip
+  {\Huge\scshape Finis\par}
+\end{frame}}
+```
+
+`[plain]` keeps the ornament but uses black, white, and grays, including on
+the chapter slides. Additional theme dependencies are `pgfornament`, TikZ,
+`tcolorbox`, and `microtype`. The custom specimen is composed for 16:9 at
+11 pt; its plates live in [grand-plates.tex](presentations/grand-plates.tex).
+The theme also supports ordinary 4:3 frames. This edition intentionally
+tests excess; it does not establish a new requirement for subsequent work.
+
+## The Form of Two — an Euler spectacle
+
+[The second grand specimen](presentations/atlas-euler.tex) explores scale,
+depth, and pacing across twelve composed frames (29 presentation pages).
+An engraved cube opens on five hinges into a six-square net. A separate
+planar drawing then carries the proof: cycle edges disappear, faces merge,
+and the remaining tree loses its leaves until only one point remains.
+The final formula receives the largest type in the deck.
+
+Bare, unframed pages interrupt the ornament. The tree and point occupy
+those quieter pages; the dark astronomical field returns for the equation.
+This is a second composition using `AtlasGrand`, not another theme fork.
+
+```sh
+./build-beamer.sh --euler                     # atlas-euler.pdf
+./build-beamer.sh --euler --handout           # atlas-euler-handout.pdf
+./build-beamer.sh --euler --plain             # atlas-euler-plain.pdf
+./build-beamer.sh --euler --plain --handout   # atlas-euler-plain-handout.pdf
+python3 tools/preview_euler.py                # gallery + nine-plate PDF overview
+python3 tools/check_euler.py                  # independent graph/geometry audit
+```
+
+Outputs are in `build/beamer/`; the handouts have twelve pages. Advance PDF
+pages to unfold the solid and perform individual graph operations. No
+special viewer animation support is required. The handout keeps the open
+net, final graph states, full reasoning, and the face-erasure count trace.
+
+| The object | The unfolding | The plane |
+|:-:|:-:|:-:|
+| ![Engraved cube cover](preview/euler/01-cover.png) | ![Six-square hinged net](preview/euler/02-net.png) | ![The exterior is a face](preview/euler/03-plane.png) |
+| The erasure | The tree | The point |
+| ![Faces merge as edges disappear](preview/euler/04-erasure.png) | ![An unframed tree](preview/euler/05-tree.png) | ![One point and its exterior](preview/euler/06-point.png) |
+| The revelation | Many forms | The theorem |
+| ![Euler's formula](preview/euler/07-formula.png) | ![Three polyhedra](preview/euler/08-solids.png) | ![The scope of the theorem](preview/euler/09-theorem.png) |
+
+The presentation-local helpers live in
+[euler-plates.tex](presentations/euler-plates.tex): a quiet page treatment,
+scoped dark illustration colors, engraved solids, a fixed graph stage,
+and a count ledger. `tools/euler_geometry.py` generates the committed
+`euler-folds.tex` from six rigid squares joined by five hinges; regenerate
+it only when changing the geometry. Building the deck needs no Python
+packages or external image assets.
+
+The net is explicitly a cut surface, where some original edges appear
+twice. The proof uses the uncut cube graph in a planar drawing, with the
+outer region counted as a face. Its cycle-erasure argument follows
+[the induction-on-faces proof collected by David Eppstein](https://ics.uci.edu/~eppstein/junkyard/euler/iface.html),
+then prunes the tree to a point. The final claim concerns finite connected
+plane graphs, and hence convex polyhedra. It makes no claim that the same
+constant applies to surfaces with handles.
+
+## Crawler Chronicles — the first full essay adaptation
+
+[Crawler Chronicles](presentations/crawler-chronicles.tex) adapts Levi
+Neuwirth's main essay for an audience arriving without the Git, hosting,
+or statistical background. It covers the maintenance discovery, the early
+traffic, Anubis, the distributed swarm, the commit-response investigation,
+and the correspondence through October 22. The appendix supplies precise
+definitions and qualifications; it is not reproduced as another talk.
+
+The result is **34 frames / 37 presentation pages**, with a 34-page handout.
+The voice is first person, with comic interludes and the original Court of
+Unnecessary Computation petition. All four main-essay graphs appear in full
+on white evidence pages. The null-distribution and dominant-cohort panels
+also appear as enlarged details. Original graph colors, labels, and data
+are preserved, including the scatter's original embedded raster layer.
+
+```sh
+./build-beamer.sh --crawler
+./build-beamer.sh --crawler --handout
+./build-beamer.sh --crawler --plain
+./build-beamer.sh --crawler --plain --handout
+python3 tools/preview_crawler.py
+```
+
+PDFs are named `crawler-chronicles*.pdf` under `build/beamer/`. The overview
+is `crawler-chronicles-overview.pdf`. The plain option changes the theme and
+emblems to black on white; the original figures and petition retain their
+source colors. Beamer `\note{...}` entries in the source carry presenter
+context and statistical qualifications.
+
+| Opening | The audience | Anubis |
+|:-:|:-:|:-:|
+| ![Crawler cover](preview/crawler/01-cover.png) | ![Early request count](preview/crawler/02-volume.png) | ![The scales of Anubis](preview/crawler/03-anubis.png) |
+| Repository traffic | Publication | The timing comparison |
+| ![Original traffic graph](preview/crawler/04-repositories.png) | ![Local commits become public](preview/crawler/05-publication.png) | ![Enlarged null distribution](preview/crawler/06-comparison.png) |
+| Requested versions | The petition | The takeaway |
+| ![Older versions dominate](preview/crawler/07-versions.png) | ![Court of Unnecessary Computation](preview/crawler/08-court.png) | ![A distribution department](preview/crawler/09-finis.png) |
+
+The deck builds from frozen assets in `presentations/crawler-assets/`, with
+no dependency on the website checkout. `manifest.json` records source paths
+and hashes; `adaptation.json` maps all main-essay sections to frames and
+records important scope decisions. To refresh deliberately from the website:
+
+```sh
+python3 tools/import_crawler.py --source /path/to/content/essays/crawler_chronicles
+```
+
+Import requires `rsvg-convert` and `pdftocairo`. The complete original SVGs,
+essay, and petition are retained under `originals/`. PDF conversions preserve
+their graphics; detail views isolate original panels without redrawing data.
+The petition cover is re-emitted as a vector PDF to repair a resource issue
+on LuaTeX inclusion; the complete original attachment remains unchanged.
+
+Two main-prose claims are scoped using the appendix: the 48 publication
+episodes concern the website repository, and zero sub-hour commit fetches
+applies to the dominant Linux/Chrome cohort. The historical daily total of
+367,972 differs by one response from the figure's later hourly aggregation;
+each original is retained and the difference is documented in the notes.
+The figures end on October 19, so the October 22 reply is not presented as
+the measured cause of their traffic decline.
+
+The gallery and article/verse documentation below describe the earlier
+lab. Its website-preprint plans are historical.
 
 ## Gallery
 
@@ -285,7 +534,7 @@ output to `build/`, nothing committed.
 as printed: the proof that made the seams visible and the style
 necessary.
 
-## Toward website preprints
+## Earlier direction: website preprints (superseded)
 
 The style above is the path. When a treatment proves itself in the lab,
 it moves into `sty/atlas.sty`; preprints for `levineuwirth.org` (sources

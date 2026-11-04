@@ -1,0 +1,4 @@
+# Frozen source bytes are checked against manifest.json; do not normalize them.
+/presentations/crawler-assets/originals/** -whitespace
+# SVG serialization retains source path and element whitespace.
+/presentations/crawler-assets/*.svg -whitespace

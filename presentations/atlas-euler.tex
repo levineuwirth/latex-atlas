@@ -1,0 +1,291 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% ./build-beamer.sh --euler
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{AtlasGrand}
+\input{presentations/euler-plates.tex}
+\title{The Form of Two}
+\subtitle{A polyhedron, unfolded into an invariant}
+\author{latex-atlas}
+\date{November 2026}
+
+\begin{document}
+
+% I. An object before a formula. The cover uses scale, not a title box.
+{\EulerNight
+\begin{frame}[plain,noframenumbering]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west,text=AtlasGoldLight,font=\small]
+      at ([xshift=15mm,yshift=-14mm]current page.north west)
+      {\textls[150]{\textsc{A geometry of what remains}}};
+    \node[anchor=north west,text=AtlasIvory,align=left,inner sep=0pt]
+      at ([xshift=16mm,yshift=-29mm]current page.north west)
+      {{\fontsize{38}{39}\selectfont\scshape The Form}};
+    \node[anchor=north west,text=AtlasIvory,inner sep=0pt]
+      at ([xshift=16mm,yshift=-45mm]current page.north west)
+      {{\fontsize{38}{39}\selectfont\scshape of Two}};
+    \node[anchor=north west,text=AtlasGoldLight,text width=64mm,align=left,
+      font=\large\itshape,inner sep=0pt]
+      at ([xshift=17mm,yshift=-64mm]current page.north west)
+      {A polyhedron, unfolded\\into an invariant.};
+    \node at ([xshift=118mm,yshift=-45mm]current page.north west)
+      {\resizebox{!}{68mm}{\EulerCube{0}}};
+    \node[anchor=south west,text=AtlasGoldLight,font=\scriptsize]
+      at ([xshift=16mm,yshift=9mm]current page.south west)
+      {\textls[150]{\textsc{Atlas\quad /\quad Geometria\quad /\quad MMXXVI}}};
+  \end{tikzpicture}
+\end{frame}}
+
+\section{The object}
+\begin{frame}{Three ways of seeing}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.53\textwidth}
+      \centering
+      \only<1|handout:0>{\resizebox{!}{53mm}{\EulerCube{1}}}%
+      \only<2|handout:0>{\resizebox{!}{53mm}{\EulerCube{2}}}%
+      \only<3|handout:1>{\resizebox{!}{53mm}{\EulerCube{3}}}%
+    \end{column}
+    \begin{column}{.41\textwidth}
+      \begin{overlayarea}{\linewidth}{49mm}
+        \AtlasGrandKicker{An inventory of the cube}\medskip
+        \uncover<1->{\noindent{\fontsize{29}{32}\selectfont $8$}\quad vertices\par\medskip}
+        \uncover<2->{\noindent{\fontsize{29}{32}\selectfont $12$}\quad edges\par\medskip}
+        \uncover<3->{\noindent{\fontsize{29}{32}\selectfont $6$}\quad faces\par\medskip
+          {\small\itshape Including the parts hidden from view.}}
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Let the surface open}
+  \framesubtitle{Six rigid squares; five surviving hinges}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.56\textwidth}
+      \centering
+      \only<1|handout:0>{\resizebox{!}{51mm}{\EulerFoldClosed}}%
+      \only<2|handout:0>{\resizebox{!}{51mm}{\EulerFoldOpening}}%
+      \only<3|handout:1>{\resizebox{!}{51mm}{\EulerFoldOpen}}%
+    \end{column}
+    \begin{column}{.38\textwidth}
+      \AtlasGrandKicker{The cut-out net}
+      The faces turn about their hinges. Lengths and angles within each
+      square survive.\par\medskip
+      \AtlasGrandScholium{Keep the identities}{Cut edges appear twice in
+        the net. This is a view of the surface, not the graph on which
+        we will count.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Give one face to the horizon}
+  \framesubtitle{The cube redrawn in the plane, without cutting its edges}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.52\textwidth}
+      \centering\resizebox{!}{54mm}{\EulerMap{0}{0}}
+    \end{column}
+    \begin{column}{.42\textwidth}
+      \begin{overlayarea}{\linewidth}{48mm}
+        \AtlasGrandKicker{A change of viewpoint}
+        The four corners of one face become the outer square. The
+        opposite face sits inside it.\par\medskip
+        \uncover<2->{The chosen face becomes the unbounded exterior.
+          \emph{It still counts.}\par\medskip
+          \EulerLedger{8}{12}{6}}
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% V. A deliberate silence between the object and the operation.
+{\EulerQuiet
+\begin{frame}[plain]
+  \centering
+  \EulerCaption{The first operation}{Erase an edge on a cycle.}\bigskip
+  {\fontsize{34}{40}\selectfont $\Delta E=-1\qquad\Delta F=-1$\par}
+  \bigskip
+  \begin{minipage}{103mm}\centering
+    Its two incident faces become one. The rest of the cycle keeps
+    the graph connected. No vertex is lost.
+  \end{minipage}\par\bigskip
+  {\color{AtlasRubric}\Large $V-E+F\quad\text{is unchanged.}$\par}
+\end{frame}}
+
+\section{The transformation}
+\begin{frame}{One boundary less; one region less}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.53\textwidth}
+      \centering
+      \only<1|handout:0>{\resizebox{!}{54mm}{\EulerMap{0}{0}}}%
+      \only<2|handout:0>{\resizebox{!}{54mm}{\EulerMap{1}{0}}}%
+      \only<3|handout:0>{\resizebox{!}{54mm}{\EulerMap{2}{0}}}%
+      \only<4|handout:0>{\resizebox{!}{54mm}{\EulerMap{3}{0}}}%
+      \only<5|handout:0>{\resizebox{!}{54mm}{\EulerMap{4}{0}}}%
+      \only<6|handout:1>{\resizebox{!}{54mm}{\EulerMap{5}{0}}}%
+    \end{column}
+    \begin{column}{.41\textwidth}
+      \begin{overlayarea}{\linewidth}{54mm}
+        \AtlasGrandKicker{The regions join the exterior}\medskip
+        \only<1|handout:0>{\EulerCount{8}{12}{6}}%
+        \only<2|handout:0>{\EulerCount{8}{11}{5}}%
+        \only<3|handout:0>{\EulerCount{8}{10}{4}}%
+        \only<4|handout:0>{\EulerCount{8}{9}{3}}%
+        \only<5|handout:0>{\EulerCount{8}{8}{2}}%
+        \only<6|handout:1>{\EulerCount{8}{7}{1}}%
+        \medskip
+        {\small\raggedright Repeat while a cycle remains. Each erased edge
+          merges two faces; the connected drawing eventually becomes a tree.\par}
+        \only<beamer:0|handout:1>{\smallskip{\scriptsize
+          $(E,F): (12,6)\to(11,5)\to(10,4)$\par
+          $\phantom{(E,F):}\to(9,3)\to(8,2)\to(7,1)$.}}
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% VII. Full scale, with all ornament withheld. A tree has no enclosed face.
+{\EulerQuiet
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node at ([xshift=52mm,yshift=-43mm]current page.north west)
+      {\resizebox{!}{69mm}{\EulerMap{5}{0}}};
+    \node[anchor=west,text width=53mm,align=left,text=AtlasInk]
+      at ([xshift=98mm,yshift=-40mm]current page.north west)
+      {{\fontsize{27}{29}\selectfont\itshape Nothing\\is enclosed.}\par\bigskip
+       {\large One face remains:\\the whole exterior.}\par\bigskip
+       {\color{AtlasRubric}\Large $F=1$}};
+    \node[anchor=south west,text=AtlasGold,font=\scriptsize]
+      at ([xshift=16mm,yshift=8mm]current page.south west)
+      {\textls[160]{\textsc{The tree beneath the surface}}};
+  \end{tikzpicture}
+\end{frame}}
+
+\begin{frame}{Now let the branches fall}
+  \framesubtitle{The second operation: remove a leaf and its incident edge}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.53\textwidth}
+      \centering
+      \only<1|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{0}}}%
+      \only<2|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{1}}}%
+      \only<3|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{2}}}%
+      \only<4|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{3}}}%
+      \only<5|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{4}}}%
+      \only<6|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{5}}}%
+      \only<7|handout:0>{\resizebox{!}{51mm}{\EulerMap{5}{6}}}%
+      \only<8|handout:1>{\resizebox{!}{51mm}{\EulerMap{5}{7}}}%
+    \end{column}
+    \begin{column}{.41\textwidth}
+      \begin{overlayarea}{\linewidth}{51mm}
+        \AtlasGrandKicker{Vertices and edges depart together}\smallskip
+        \only<1|handout:0>{\EulerCount{8}{7}{1}}%
+        \only<2|handout:0>{\EulerCount{7}{6}{1}}%
+        \only<3|handout:0>{\EulerCount{6}{5}{1}}%
+        \only<4|handout:0>{\EulerCount{5}{4}{1}}%
+        \only<5|handout:0>{\EulerCount{4}{3}{1}}%
+        \only<6|handout:0>{\EulerCount{3}{2}{1}}%
+        \only<7|handout:0>{\EulerCount{2}{1}{1}}%
+        \only<8|handout:1>{\EulerCount{1}{0}{1}}%
+        \smallskip
+        {\small\raggedright Every finite tree with at least two vertices
+          has a leaf. Removing it leaves a smaller tree, with the same
+          single face.\par}\smallskip
+        {\color{AtlasRubric}$\Delta V=\Delta E=-1,\quad\Delta F=0.$}
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+{\EulerQuiet
+\begin{frame}[plain]
+  \centering
+  \EulerCaption{The irreducible drawing}{One point. No edges. One surrounding face.}
+  \bigskip
+  \begin{tikzpicture}
+    \path[use as bounding box] (-3,-.8) rectangle (3,.8);
+    \draw[AtlasGold,line width=.4pt] (0,0) circle (.22);
+    \fill[AtlasInk] (0,0) circle (.07);
+  \end{tikzpicture}\par\bigskip
+  {\fontsize{34}{40}\selectfont $1-0+1$\par}
+  \bigskip
+  {\large\itshape The expression has kept its value through every loss.\par}
+\end{frame}}
+
+% X. The answer gets the largest type and the full illuminated field.
+{\EulerNight
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[text=AtlasGoldLight,font=\small] at
+      ([yshift=25mm]current page.center)
+      {\textls[200]{\textsc{Euler's polyhedral formula}}};
+    \node[text=AtlasIvory,inner sep=0pt] at
+      ([yshift=2mm]current page.center)
+      {{\fontsize{58}{65}\selectfont $V-E+F=2$}};
+    \node[text=AtlasGoldLight,font=\large\itshape] at
+      ([yshift=-23mm]current page.center)
+      {What changed was the drawing. What endured was the number.};
+    \node at ([yshift=-33mm]current page.center)
+      {\pgfornament[width=25mm,color=AtlasGoldLight]{71}};
+  \end{tikzpicture}
+\end{frame}}
+
+\section{The invariant}
+\begin{frame}{Many forms; the same remainder}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.30\textwidth}\centering
+      \begin{tikzpicture}[scale=.85,draw=AtlasInk,line width=.7pt]
+        \path[use as bounding box] (-1.9,-1.8) rectangle (1.9,2);
+        \fill[AtlasGold!16!AtlasPaper] (0,1.7)--(-1.6,-1)--(.5,-1.5)--cycle;
+        \fill[AtlasGold!30!AtlasPaper] (0,1.7)--(.5,-1.5)--(1.5,-.5)--cycle;
+        \draw[dashed,opacity=.4] (-1.6,-1)--(1.5,-.5);
+        \draw (0,1.7)--(-1.6,-1)--(.5,-1.5)--(1.5,-.5)--cycle (0,1.7)--(.5,-1.5);
+      \end{tikzpicture}\par
+      \AtlasGrandKicker{Tetrahedron}\medskip
+      {\Large $4-6+4=2$}
+    \end{column}
+    \begin{column}{.30\textwidth}\centering
+      \resizebox{!}{32.3mm}{\EulerCube{0}}\par
+      \AtlasGrandKicker{Cube}\medskip
+      {\Large $8-12+6=2$}
+    \end{column}
+    \begin{column}{.30\textwidth}\centering
+      \begin{tikzpicture}[scale=.85,draw=AtlasInk,line width=.7pt]
+        \path[use as bounding box] (-1.9,-1.8) rectangle (1.9,2);
+        \fill[AtlasGold!16!AtlasPaper] (0,1.7)--(-1.6,0)--(.4,-.6)--cycle;
+        \fill[AtlasGold!30!AtlasPaper] (0,1.7)--(.4,-.6)--(1.6,0)--cycle;
+        \fill[AtlasGold!24!AtlasPaper] (0,-1.6)--(-1.6,0)--(.4,-.6)--cycle;
+        \fill[AtlasGold!40!AtlasPaper] (0,-1.6)--(.4,-.6)--(1.6,0)--cycle;
+        \draw[dashed,opacity=.4] (-1.6,0)--(-.4,.5)--(1.6,0) (0,1.7)--(-.4,.5)--(0,-1.6);
+        \draw (0,1.7)--(-1.6,0)--(0,-1.6)--(1.6,0)--cycle
+          (-1.6,0)--(.4,-.6)--(1.6,0) (0,1.7)--(.4,-.6)--(0,-1.6);
+      \end{tikzpicture}\par
+      \AtlasGrandKicker{Octahedron}\medskip
+      {\Large $6-12+8=2$}
+    \end{column}
+  \end{columns}
+  \bigskip\bigskip
+  \centerline{\itshape The cube illustrated the proof. The operations did not depend on the cube.}
+\end{frame}
+
+{\EulerNight
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node at ([xshift=43mm,yshift=-43mm]current page.north west)
+      {\resizebox{!}{55mm}{\EulerSphere}};
+    \node[anchor=north west,text=AtlasGoldLight,font=\small] at
+      ([xshift=80mm,yshift=-18mm]current page.north west)
+      {\textls[150]{\textsc{The shape of the theorem}}};
+    \node[anchor=north west,text=AtlasIvory,text width=65mm,align=left,inner sep=0pt] at
+      ([xshift=81mm,yshift=-28mm]current page.north west)
+      {{\fontsize{20}{24}\selectfont\scshape Every finite\\connected plane graph.}\par\medskip
+       Count the exterior among its faces. Then $V-E+F=2$.\par\medskip
+       {\small A convex polyhedron has a spherical surface, so its edges
+       admit just such a drawing. A surface with handles is another story.}};
+    \node[anchor=south west,text=AtlasGoldLight,font=\scriptsize] at
+      ([xshift=16mm,yshift=9mm]current page.south west)
+      {\textls[100]{\textsc{Cycles\enspace $\longrightarrow$\enspace tree\enspace $\longrightarrow$\enspace point}}};
+    \node[anchor=south east,text=AtlasGoldLight,font=\scriptsize] at
+      ([xshift=-14mm,yshift=9mm]current page.south east)
+      {\href{https://ics.uci.edu/~eppstein/junkyard/euler/iface.html}{\textsc{Proof notes: Eppstein's Geometry Junkyard}}};
+  \end{tikzpicture}
+\end{frame}}
+
+\end{document}

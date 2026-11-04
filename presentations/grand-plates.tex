@@ -1,0 +1,149 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Engraved mathematical plates for the grand specimen. Entirely vector.
+% The seven-edge tree and six states agree with tree-pursuit.tex.
+\newcommand{\GrandTree}[1]{%
+  \begingroup
+  \ifcase#1\relax
+  \or\def\gc{a}\def\gr{d}\def\region{b,c,d,e,f,g,h}\def\edges{a/b,b/c,c/d,d/e,b/f,b/g,c/h}%
+  \or\def\gc{b}\def\gr{d}\def\region{c,d,e,h}\def\edges{b/c,c/d,d/e,c/h}%
+  \or\def\gc{b}\def\gr{e}\def\region{c,d,e,h}\def\edges{b/c,c/d,d/e,c/h}%
+  \or\def\gc{c}\def\gr{e}\def\region{d,e}\def\edges{c/d,d/e}%
+  \or\def\gc{d}\def\gr{e}\def\region{e}\def\edges{d/e}%
+  \or\def\gc{e}\def\gr{e}\def\region{}\def\edges{}%
+  \fi
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \path[use as bounding box] (-.65,-2.05) rectangle (5.8,2.35);
+    \begin{scope}[overlay]
+      \fill[AtlasPaper!85!white] (-.65,-2.05) rectangle (5.8,2.35);
+      \draw[AtlasGold,line width=.7pt] (-.65,-2.05) rectangle (5.8,2.35);
+      \draw[AtlasGold,line width=.2pt] (-.57,-1.97) rectangle (5.72,2.27);
+      \foreach \x in {0,.4,...,5.4}
+        \draw[AtlasGold,opacity=.13,line width=.2pt] (\x,-1.75)--(\x,1.9);
+      \foreach \y in {-1.6,-1.2,...,1.6}
+        \draw[AtlasGold,opacity=.13,line width=.2pt] (-.4,\y)--(5.55,\y);
+      \node[fill=AtlasPaper!85!white,text=AtlasRubric,font=\scriptsize\scshape]
+        at (2.575,2.27) {Tabula I\quad Arbor finita};
+      \node[fill=AtlasPaper!85!white,text=AtlasGold,font=\scriptsize\itshape]
+        at (2.575,-1.97) {The branches remember every advance};
+      \coordinate (a) at (0,0);
+      \coordinate (b) at (1.25,0);
+      \coordinate (c) at (2.5,0);
+      \coordinate (d) at (3.75,.9);
+      \coordinate (e) at (5,.9);
+      \coordinate (f) at (1.25,1.35);
+      \coordinate (g) at (1.25,-.95);
+      \coordinate (h) at (2.5,-.95);
+      \foreach \u/\v in {a/b,b/c,c/d,d/e,b/f,b/g,c/h}
+        \draw[AtlasInk!28!AtlasPaper,dashed,line width=.55pt] (\u)--(\v);
+      \foreach \u/\v in \edges {
+        \draw[AtlasGold!45!AtlasPaper,line width=2.8pt] (\u)--(\v);
+        \draw[AtlasInk,line width=.55pt,double=AtlasPaper,double distance=.8pt] (\u)--(\v);
+      }
+      \foreach \v in {a,b,c,d,e,f,g,h}
+        \fill[AtlasInk!35!AtlasPaper] (\v) circle (.035);
+      \foreach \v in \region {
+        \fill[AtlasGold!16!AtlasPaper] (\v) circle (.24);
+        \draw[AtlasGold,line width=.35pt] (\v) circle (.24);
+        \draw[AtlasGold!60!AtlasPaper,line width=.2pt] (\v) circle (.29);
+        \fill[AtlasInk] (\v) circle (.055);
+      }
+      \foreach \v in {a,d,e,g,h}
+        \node[below=3.7mm,text=AtlasInk,font=\small\itshape] at (\v) {\v};
+      \foreach \v in {b,c}
+        \node[below right=3mm,text=AtlasInk,font=\small\itshape] at (\v) {\v};
+      \node[above=3mm,text=AtlasInk,font=\small\itshape] at (f) {f};
+      \ifdefstrequal{\gc}{\gr}{%
+        \node[circle,draw=AtlasGold,fill=AtlasRubric,text=AtlasPaper,
+          double=AtlasPaper,double distance=1pt,minimum size=8mm,
+          inner sep=0pt,font=\scriptsize] at (\gc) {C/R};
+      }{%
+        \node[circle,draw=AtlasGold,fill=AtlasRubric,text=AtlasPaper,
+          double=AtlasPaper,double distance=1pt,minimum size=7mm,
+          inner sep=0pt,font=\small] at (\gc) {C};
+        \node[diamond,draw=AtlasInk,fill=AtlasPaper,text=AtlasInk,
+          double=AtlasGold,double distance=.7pt,minimum size=9mm,
+          inner sep=0pt,font=\small] at (\gr) {R};
+      }
+    \end{scope}
+  \end{tikzpicture}%
+  \endgroup
+}
+
+\newcommand{\GrandDial}[1]{%
+  \begin{tikzpicture}[baseline=(number.base)]
+    \path[use as bounding box] (-1.05,-1.05) rectangle (1.05,1.05);
+    \foreach \i in {1,...,7}{
+      \pgfmathsetmacro{\start}{90-(\i-1)*360/7-3}
+      \pgfmathsetmacro{\stop}{90-\i*360/7+3}
+      \ifnum\i>#1\relax\def\sector{AtlasGold!15!AtlasPaper}
+      \else\def\sector{AtlasRubric}\fi
+      \fill[\sector] (\start:.9) arc (\start:\stop:.9)--(\stop:.76)
+        arc (\stop:\start:.76)--cycle;
+    }
+    \draw[AtlasGold,line width=.3pt] (0,0) circle (.96);
+    \draw[AtlasGold,line width=.3pt] (0,0) circle (.69);
+    \node[text=AtlasRubric,font=\fontsize{27}{27}\selectfont] (number) at (0,.06) {#1};
+    \node[text=AtlasGold,font=\tiny\scshape] at (0,-.4) {remaining};
+  \end{tikzpicture}%
+}
+
+\newcommand{\GrandCycle}[3]{%
+  % Cop angle, robber angle, second cop angle (-1 = absent).
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \path[use as bounding box] (-2.95,-2.75) rectangle (2.95,2.75);
+    \begin{scope}[overlay]
+      \draw[AtlasGold,line width=.4pt] (0,0) circle (2.3);
+      \draw[AtlasGold,line width=.2pt] (0,0) circle (2.38);
+      \foreach \a in {0,10,...,350}
+        \draw[AtlasGold,line width=.3pt] (\a:2.3)--(\a:2.36);
+      \foreach \a in {0,60,...,300}{
+        \pgfmathsetmacro{\b}{\a+60}
+        \draw[AtlasGold,line width=2.5pt] (\a:1.75)--(\b:1.75);
+        \draw[AtlasInk,line width=.55pt] (\a:1.75)--(\b:1.75);
+        \node[circle,fill=AtlasInk,inner sep=1.8pt] at (\a:1.75) {};
+        \node[text=AtlasGold,font=\scriptsize] at (\a:2.6) {\a};
+      }
+      \node[text=AtlasGold,font=\Large] at (0,.15) {$C_6$};
+      \node[text=AtlasGold,font=\tiny\scshape] at (0,-.3) {circuitus};
+      \ifnum#3>-1\relax
+        \node[circle,fill=AtlasRubric,draw=AtlasGold,text=AtlasPaper,
+          double=AtlasPaper,double distance=.7pt,minimum size=7mm,
+          inner sep=0pt] at (#3:1.75) {C};
+      \fi
+      \ifnum#1=#2\relax
+        \node[circle,fill=AtlasRubric,draw=AtlasGold,text=AtlasPaper,
+          minimum size=8mm,font=\scriptsize,inner sep=0pt] at (#1:1.75) {C/R};
+      \else
+        \node[circle,fill=AtlasRubric,draw=AtlasGold,text=AtlasPaper,
+          double=AtlasPaper,double distance=.7pt,minimum size=7mm,
+          inner sep=0pt] at (#1:1.75) {C};
+        \node[diamond,fill=AtlasPaper,draw=AtlasInk,text=AtlasInk,
+          double=AtlasGold,double distance=.7pt,minimum size=9mm,
+          inner sep=0pt] at (#2:1.75) {R};
+      \fi
+    \end{scope}
+  \end{tikzpicture}%
+}
+
+\newcommand{\GrandDescent}{%
+  \begin{tikzpicture}[x=1.28cm,y=.34cm]
+    \path[use as bounding box] (-.4,-3) rectangle (7.6,8.4);
+    \foreach \y in {0,...,7}{
+      \draw[AtlasGold!28!AtlasPaper,line width=.3pt] (0,\y)--(7.2,\y);
+      \node[left,text=AtlasGold,font=\scriptsize] at (0,\y) {\y};
+    }
+    \foreach \x/\h/\label in {.5/7/a,2/4/b,3.5/2/c,5/1/d,6.5/0/e}{
+      \ifnum\h>0
+        \fill[AtlasGold!14!AtlasPaper] (\x,0) rectangle ++(.65,\h);
+        \fill[pattern=north east lines,pattern color=AtlasGold] (\x,0) rectangle ++(.65,\h);
+        \draw[AtlasInk,line width=.5pt] (\x,0) rectangle ++(.65,\h);
+      \else
+        \draw[AtlasRubric,line width=1.2pt] (\x,0)--++(.65,0);
+      \fi
+      \node[above,text=AtlasRubric,font=\large] at (\x+.325,\h) {\h};
+      \node[below=3mm,text=AtlasInk,font=\small\itshape] at (\x+.325,0) {\label};
+    }
+    \draw[AtlasRubric,line width=.75pt] (.825,7)--(2.325,4)--(3.825,2)--(5.325,1)--(6.825,0);
+    \node[text=AtlasGold,font=\scriptsize\scshape] at (3.6,-2.55) {position of the advancing cop};
+  \end{tikzpicture}%
+}

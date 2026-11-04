@@ -1,0 +1,163 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Atlas for Beamer. LuaLaTeX; load with \usetheme{Atlas}.
+% The optional [plain] palette uses black on white.
+% Independent of atlas.sty: Beamer owns geometry, sectioning, counters,
+% overlays, and theorem/proof environments. This file only styles them.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeAtlas}[2026/11/03 v0.1 Atlas presentation theme]
+
+\RequirePackage{iftex}
+\ifLuaTeX\else
+  \PackageError{beamerthemeAtlas}{Atlas requires LuaLaTeX}
+    {Compile this presentation with lualatex.}
+  \expandafter\endinput
+\fi
+
+\newif\ifatlasbeamer@plain
+\DeclareOptionBeamer{plain}{\atlasbeamer@plaintrue}
+\ProcessOptionsBeamer
+
+\mode<presentation>
+
+% Faces. The math fallback ranges come from atlas.sty's symbol audit.
+% Kept here while the presentation design is explored independently of the
+% shelved article styles. No article layout package is loaded.
+\usefonttheme{serif}
+\usefonttheme{professionalfonts}
+\RequirePackage{fontspec}
+\RequirePackage{unicode-math}
+\defaultfontfeatures{Renderer=Node}
+\IfFontExistsTF{EB Garamond}{
+  \setmainfont{EB Garamond}[Numbers={Lining,Proportional},Ligatures={TeX,Common}]
+}{
+  \setmainfont{TeX Gyre Pagella}[Numbers={Lining,Proportional},Ligatures={TeX,Common}]
+}
+\IfFontExistsTF{Latin Modern Mono}{
+  \setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
+}{}
+\IfFontExistsTF{Garamond-Math.otf}{
+  \setmathfont{Garamond-Math.otf}[StylisticSet={5,7}]
+  \setmathfont{TeX Gyre Pagella Math}[range={
+    "2257-"225F, "2305-"2306, "2320-"2321, "23AE, "23B2-"23B3,
+    "2422-"2423, "2591-"2593, "2660-"2667, "266A, "266D-"266F,
+    "2713, "2720, "27E0-"27E3, "27F4, "2A8B-"2A8C, "2A95-"2A96,
+    "1D789, "1D78C-"1D78F, "1D7C3, "1D7C6-"1D7C9}]
+}{
+  \setmathfont{TeX Gyre Pagella Math}
+}
+
+% Namespaced colors leave a deck's own ink/paper colors alone.
+\ifatlasbeamer@plain
+  \definecolor{AtlasPaper}{HTML}{FFFFFF}
+  \definecolor{AtlasInk}{HTML}{000000}
+  \definecolor{AtlasRubric}{HTML}{000000}
+\else
+  \definecolor{AtlasPaper}{HTML}{F5ECDB}
+  \definecolor{AtlasInk}{HTML}{241F19}
+  \definecolor{AtlasRubric}{HTML}{9E2B25}
+\fi
+\setbeamercolor{normal text}{fg=AtlasInk,bg=AtlasPaper}
+\setbeamercolor{background canvas}{bg=AtlasPaper}
+\setbeamercolor{structure}{fg=AtlasRubric}
+\setbeamercolor{alerted text}{fg=AtlasRubric}
+\setbeamercolor{example text}{fg=AtlasInk}
+\setbeamercolor{title}{fg=AtlasInk}
+\setbeamercolor{subtitle}{fg=AtlasRubric}
+\setbeamercolor{author}{fg=AtlasInk}
+\setbeamercolor{institute}{fg=AtlasInk}
+\setbeamercolor{date}{fg=AtlasInk}
+\setbeamercolor{frametitle}{fg=AtlasRubric,bg=}
+\setbeamercolor{framesubtitle}{fg=AtlasInk}
+\setbeamercolor{page number in head/foot}{fg=AtlasInk,bg=}
+\setbeamercolor{block title}{fg=AtlasRubric,bg=}
+\setbeamercolor{block body}{fg=AtlasInk,bg=}
+\setbeamercolor{block title alerted}{fg=AtlasRubric,bg=}
+\setbeamercolor{block body alerted}{fg=AtlasInk,bg=AtlasRubric!6!AtlasPaper}
+\setbeamercolor{block title example}{fg=AtlasInk,bg=}
+\setbeamercolor{block body example}{fg=AtlasInk,bg=}
+\setbeamercolor{bibliography entry author}{fg=AtlasInk}
+\setbeamercolor{bibliography entry title}{fg=AtlasInk}
+\setbeamercolor{bibliography entry location}{fg=AtlasInk}
+\setbeamercolor{bibliography entry note}{fg=AtlasInk}
+
+\setbeamerfont{title}{size=\LARGE,series=\mdseries,shape=\scshape}
+% Explicit shapes prevent NFSS combining inherited small caps with italics.
+\setbeamerfont{subtitle}{size=\large,series=\mdseries,shape=\normalshape\itshape}
+\setbeamerfont{author}{size=\normalsize}
+\setbeamerfont{institute}{size=\small}
+\setbeamerfont{date}{size=\small}
+\setbeamerfont{frametitle}{size=\Large,series=\mdseries,shape=\scshape}
+\setbeamerfont{framesubtitle}{size=\small,series=\mdseries,shape=\normalshape\itshape}
+\setbeamerfont{block title}{size=\normalsize,series=\mdseries,shape=\scshape}
+\setbeamerfont{block title alerted}{parent=block title}
+\setbeamerfont{block title example}{parent=block title}
+\setbeamerfont{page number in head/foot}{size=\scriptsize}
+\setbeamerfont{footnote}{size=\scriptsize}
+
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{blocks}[default]
+\setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{qed symbol}{\textup{\scriptsize Q.E.D.}}
+\setbeamertemplate{bibliography item}[text]
+
+% The title page uses ordinary Beamer metadata, including an optional graphic.
+% Put it in a [plain,noframenumbering] frame to leave it out of the count.
+\defbeamertemplate*{title page}{Atlas}{%
+  \vfill
+  \begingroup
+    \raggedright
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+    \ifx\insertsubtitle\@empty\else
+      \vskip.5em
+      {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+    \fi
+    \vskip.9em
+    {\usebeamercolor[fg]{structure}\rule{.18\textwidth}{.6pt}\par}
+    \vskip.8em
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+    \ifx\insertinstitute\@empty\else
+      \vskip.3em
+      {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+    \fi
+    \ifx\insertdate\@empty\else
+      \vskip.6em
+      {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+    \fi
+    \ifx\inserttitlegraphic\@empty\else
+      \vskip.6em
+      \inserttitlegraphic\par
+    \fi
+  \endgroup
+  \vfill
+}
+
+% Natural paragraphs let long headings wrap, and keep math untransformed.
+\defbeamertemplate*{frametitle}{Atlas}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\textwidth,sep=0pt]{frametitle}
+    \vskip3mm
+    \raggedright
+    \usebeamerfont{frametitle}\strut\insertframetitle\strut\par
+    \ifx\insertframesubtitle\@empty\else
+      {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}%
+        \insertframesubtitle\strut\par}
+    \fi
+    \vskip1mm
+    \hrule height .4pt
+    \vskip1mm
+  \end{beamercolorbox}
+}
+
+% Count frames, not overlay pages. Beamer resolves the total on pass two.
+\defbeamertemplate*{footline}{Atlas}{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3mm,dp=2mm,rightskip=8mm]{page number in head/foot}
+    \hfill\usebeamerfont{page number in head/foot}%
+    \insertframenumber\,/\,\inserttotalframenumber
+  \end{beamercolorbox}
+}
+
+\mode<all>

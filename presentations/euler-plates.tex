@@ -1,0 +1,110 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Presentation-local visual vocabulary. Geometry stays outside the theme.
+\colorlet{EulerStroke}{AtlasInk}
+\colorlet{EulerGround}{AtlasPaper}
+\input{presentations/euler-folds.tex}
+
+% Sparse pages deliberately suspend the grand border and paper texture.
+\newcommand{\EulerQuiet}{%
+  \setbeamertemplate{background canvas}{\color{AtlasPaper}\vrule width\paperwidth height\paperheight}%
+  \setbeamertemplate{footline}{}%
+}
+\newcommand{\EulerNight}{%
+  \AtlasGrandNight
+  \colorlet{EulerStroke}{AtlasGoldLight}\colorlet{EulerGround}{AtlasNight}}
+\newcommand{\EulerCaption}[2]{%
+  {\small\color{AtlasGold}\textls[140]{\textsc{#1}}\par}\smallskip
+  {\large\itshape #2\par}}
+
+% The cube graph in a Schlegel drawing. The five removed edges are a
+% complement of the path a-b-c-d-h-g-f-e. Every prefix remains connected.
+\newcommand{\EulerMap}[2]{% deleted cycle edges (0..5), pruned leaves (0..7)
+  \begin{tikzpicture}[line cap=round,line join=round]
+    \path[use as bounding box] (-3.1,-3.05) rectangle (3.1,3.05);
+    \foreach \name/\x/\y in {a/-2.35/2.35,b/2.35/2.35,c/2.35/-2.35,d/-2.35/-2.35,e/-.9/.9,f/.9/.9,g/.9/-.9,h/-.9/-.9}
+      \coordinate (\name) at (\x,\y);
+    % Face tint disappears when that region joins the exterior. The
+    % innermost face is opened last; all five face mergers are explicit.
+    \ifnum#1<1\fill[AtlasGold!12!EulerGround] (a)--(d)--(h)--(e)--cycle;\fi
+    \ifnum#1<2\fill[AtlasGold!19!EulerGround] (a)--(b)--(f)--(e)--cycle;\fi
+    \ifnum#1<3\fill[AtlasGold!27!EulerGround] (b)--(c)--(g)--(f)--cycle;\fi
+    \ifnum#1<4\fill[AtlasGold!35!EulerGround] (c)--(d)--(h)--(g)--cycle;\fi
+    \ifnum#1<5\fill[AtlasRubric!12!EulerGround] (e)--(f)--(g)--(h)--cycle;\fi
+    \foreach \u/\v/\step in {d/a/1,a/e/2,b/f/3,c/g/4,e/h/5}{
+      \ifnum#1<\step
+        \draw[EulerStroke,line width=1pt] (\u)--(\v);
+      \fi
+    }
+    \foreach \u/\v/\step in {a/b/1,b/c/2,c/d/3,d/h/4,h/g/5,g/f/6,f/e/7}{
+      \ifnum#2<\step
+        \draw[EulerStroke,line width=1.2pt] (\u)--(\v);
+        \draw[AtlasGold,line width=.25pt] (\u)--(\v);
+      \fi
+    }
+    \foreach \n/\step in {a/1,b/2,c/3,d/4,h/5,g/6,f/7,e/8}{
+      \ifnum#2<\step
+        \fill[EulerGround] (\n) circle (.10);
+        \draw[EulerStroke,line width=.5pt,fill=AtlasGold] (\n) circle (.065);
+      \fi
+    }
+    \ifnum#1=0
+      \node[font=\scriptsize\itshape,text=AtlasRubric] at (0,0) {one face};
+      \node[font=\scriptsize\itshape,text=AtlasRubric] at (0,2.8) {the exterior is a face, too};
+    \fi
+  \end{tikzpicture}%
+}
+
+\newcommand{\EulerLedger}[3]{%
+  \begin{tabular}{@{}ccc@{}}
+    {\color{AtlasGold}\scshape vertices}&{\color{AtlasGold}\scshape edges}&{\color{AtlasGold}\scshape faces}\\[1mm]
+    {\Large #1}&{\Large #2}&{\Large #3}
+  \end{tabular}\par
+}
+\newcommand{\EulerCount}[3]{%
+  \EulerLedger{#1}{#2}{#3}\medskip
+  {\large $#1-#2+#3$\par}}
+
+% A purpose-built solid, used for the cover and the counting plate.
+\newcommand{\EulerCube}[1]{% 0 engraved, 1 vertices, 2 edges, 3 faces
+  \begin{tikzpicture}[line join=round,line cap=round]
+    \path[use as bounding box] (-2.7,-2.4) rectangle (2.7,3.3);
+    \foreach \n/\x/\y in {a/-2/-.7,b/.6/-1.55,c/2/-.3,d/-.6/.55,e/-2/1.8,f/.6/.95,g/2/2.2,h/-.6/3.05}
+      \coordinate (\n) at (\x,\y);
+    \fill[AtlasGold!18!EulerGround] (a)--(b)--(f)--(e)--cycle;
+    \fill[AtlasGold!34!EulerGround] (b)--(c)--(g)--(f)--cycle;
+    \fill[AtlasGold!8!EulerGround] (e)--(f)--(g)--(h)--cycle;
+    \begin{scope}
+      \clip (a)--(b)--(c)--(g)--(h)--(e)--cycle;
+      \foreach \y in {-3,-2.88,...,4}
+        \draw[AtlasGold,opacity=.23,line width=.22pt] (-3,\y)--++(6,1.3);
+    \end{scope}
+    \draw[EulerStroke,opacity=.45,densely dashed,line width=.5pt] (a)--(d)--(c) (d)--(h);
+    \ifnum#1=2\def\ew{1.8pt}\else\def\ew{.8pt}\fi
+    \draw[EulerStroke,line width=\ew] (a)--(b)--(c)--(g)--(h)--(e)--cycle
+      (b)--(f)--(e) (f)--(g);
+    \ifnum#1=1
+      \foreach \n in {a,b,c,d,e,f,g,h}{
+        \fill[EulerGround] (\n) circle (.14);
+        \draw[EulerStroke,fill=AtlasGold,line width=.5pt] (\n) circle (.085);
+      }
+    \fi
+    \ifnum#1=3
+      \foreach \x/\y in {-.7/.15,1.3/.4,0/2}
+        \node[text=EulerStroke,font=\small\itshape] at (\x,\y) {face};
+    \fi
+  \end{tikzpicture}%
+}
+
+\newcommand{\EulerSphere}{%
+  \begin{tikzpicture}[draw=EulerStroke,line width=.45pt]
+    \path[use as bounding box] (-2.6,-2.6) rectangle (2.6,2.6);
+    \foreach \a in {-60,-30,0,30,60}{
+      \pgfmathsetmacro{\yy}{2.3*sin(\a)}
+      \pgfmathsetmacro{\xx}{2.3*cos(\a)}
+      \draw[opacity=.4] (0,\yy) ellipse (\xx cm and .18cm);
+    }
+    \foreach \r in {.55,1.15,1.8}\draw[opacity=.45] (0,0) ellipse (\r cm and 2.3cm);
+    \draw[line width=1pt] (0,0) circle (2.3);
+    \draw (0,0) ellipse (2.3cm and .5cm);
+  \end{tikzpicture}%
+}

@@ -1,0 +1,97 @@
+{
+  "source": "/home/jeans/Repos/personal/levineuwirth.org/content/essays/crawler_chronicles",
+  "files": {
+    "essay.md": {
+      "source": "index.md",
+      "sha256": "adceb98aacd638a72ec1e872c9427f656e00a63fff22808c6af0204fb17eb137"
+    },
+    "repository-targets.svg": {
+      "source": "figures/repository-targets.svg",
+      "sha256": "dc3ff9a4b1542c51239f4d0338c350b2b24a50bba130679272d67a3f7f94e2e5"
+    },
+    "publication-timeline.svg": {
+      "source": "figures/publication-timeline.svg",
+      "sha256": "5b17c53c09fd21c4ba650bc1c0b51a727f524de19f175f1446c016a392d7c93a"
+    },
+    "episode-contributions.svg": {
+      "source": "data/commit-response/results/figures/episode-contributions.svg",
+      "sha256": "b13c5a3f8472a2bbead7ee8536e9e5646b9e72da0deb7381f77272fab1c1bf84"
+    },
+    "request-vs-publication.svg": {
+      "source": "data/commit-response/results/figures/request-vs-publication.svg",
+      "sha256": "94833eb0894d0666c337726bcd52ad5511711710c59cdfcdb5b68f47c7f36e53"
+    },
+    "mark.svg": {
+      "source": "mark.svg",
+      "sha256": "6972589255b3b2036a1ab7b886ef4053055a64faf237aa7a6fa66378a00f121a"
+    },
+    "petition.pdf": {
+      "source": "exhibits/court-of-unnecessary-computation/notice.pdf",
+      "sha256": "7e4614cefefd0c8f35847f3345e8d2eac7b74ea1a2955baa296730243f94d2f9"
+    },
+    "court-seal.pdf": {
+      "source": "exhibits/court-of-unnecessary-computation/court-seal.pdf",
+      "sha256": "48676768b0a0d4cd9a449c2ccfd2759cf29f7e0858c1ef5eaca969a89b049877"
+    },
+    "repository-targets-metadata.json": {
+      "source": "data/repository-targets-metadata.json",
+      "sha256": "fb8fd957795e84e811cf983c61a3586d6f5ae1542dbbaebf8e652384781bd821"
+    },
+    "publication-timeline-summary.json": {
+      "source": "data/publication-timeline-summary.json",
+      "sha256": "ba24894bfaaf73f0557e010b8c5beee67ea69863886c406b618372ede1bb9232"
+    }
+  },
+  "derived": {
+    "petition-cover": {
+      "source": "petition.pdf",
+      "page": 1,
+      "operation": "vector PDF re-emission by pdftocairo for inclusion"
+    },
+    "episode-null": {
+      "source": "episode-contributions.svg",
+      "viewport": [
+        520,
+        0,
+        275.209988,
+        328.121787
+      ],
+      "axes_group": "axes_2"
+    },
+    "request-primary": {
+      "source": "request-vs-publication.svg",
+      "viewport": [
+        0,
+        29,
+        302,
+        333.70825
+      ],
+      "axes_group": "axes_1"
+    },
+    "spider-gold": {
+      "source": "mark.svg",
+      "color": "#D9B879"
+    },
+    "spider-ink": {
+      "source": "mark.svg",
+      "color": "#29221B"
+    },
+    "spider-plain": {
+      "source": "mark.svg",
+      "color": "#000000"
+    },
+    "scales-gold": {
+      "source": "essay.md inline scales",
+      "color": "#D9B879"
+    },
+    "scales-ink": {
+      "source": "essay.md inline scales",
+      "color": "#29221B"
+    },
+    "scales-plain": {
+      "source": "essay.md inline scales",
+      "color": "#000000"
+    }
+  },
+  "converter": "rsvg-convert version 2.63.4\n\nlibraries used:\n  cairo 1.18.6\n  pango 1.58.2\n  harfbuzz 15.0.0\n  fontconfig 2.18.3"
+}

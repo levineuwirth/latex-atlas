@@ -1,0 +1,38 @@
+{
+  "title": "Crawler Chronicles",
+  "author": "Levi Neuwirth",
+  "scope": "Main essay, through the October 22 response; appendix used for definitions and qualifications, not reproduced as a second talk.",
+  "coverage": [
+    {"source": "Opening / Dead Internet theory", "frames": [1, 2, 3]},
+    {"source": "The Forebodings of Mutiny through Maintenance", "frames": [4, 5]},
+    {"source": "Enter October / Meta", "frames": [6, 7]},
+    {"source": "Anubis", "frames": [8, 9, 10]},
+    {"source": "October 13th: a nemesis reborn? / The new swarm's addresses", "frames": [11, 12, 13]},
+    {"source": "Curiosity Invoked: were the bots waiting for new commits?", "frames": [14, 15, 16]},
+    {"source": "When does a commit become available?", "frames": [17, 18, 19, 20, 21, 22, 23, 24]},
+    {"source": "What did the requests actually name?", "frames": [25, 26, 27, 28]},
+    {"source": "Correspondence", "frames": [29, 30, 31]},
+    {"source": "A response", "frames": [32]},
+    {"source": "What Now?", "frames": [33, 34]}
+  ],
+  "source_qualifications": [
+    "The 48 publication episodes and 271 commits concern the website repository, not all repositories on the forge (appendix A2).",
+    "Zero requests for commits younger than one hour applies to linux-chrome-150-155; other agents did sometimes fetch promptly (appendix A6).",
+    "Eleven GitHub-only pushes is the corrected count in the original publication figure and appendix A2; the archived report's nine is superseded.",
+    "The essay daily snapshot totals 367972 early HTTP 200 responses. The figure's hourly cube totals 367971 because October 3 differs by one. Both originals are preserved and the distinction is in the speaker notes.",
+    "The primary timing test uses successful website-page GETs; the hash analysis includes unsuccessful commit-specific GETs. Their denominators differ.",
+    "The figures' records end on October 19, before the October 22 provider reply. The deck does not present the reply as a measured cause of a plotted decline.",
+    "Infrastructure registration, user-agent claims, operator identity, and training intent remain distinct. Speculation is attributed to the author."
+  ],
+  "preserved_full_figures": [
+    {"asset": "repository-targets.pdf", "frame": 15},
+    {"asset": "publication-timeline.pdf", "frame": 18},
+    {"asset": "episode-contributions.pdf", "frame": 22},
+    {"asset": "request-vs-publication.pdf", "frame": 26}
+  ],
+  "detail_views": [
+    {"asset": "episode-null.pdf", "frame": 23, "operation": "viewport crop of original right panel"},
+    {"asset": "request-primary.pdf", "frame": 27, "operation": "viewport crop of original left cohort panel"}
+  ],
+  "presentation_voice": "Unquoted comic interludes and the closing takeaway are adaptations. Quoted email and petition passages are from the supplied published record. No new correspondence was sent."
+}

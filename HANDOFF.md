@@ -1,5 +1,259 @@
 # latex-atlas — handoff
 
+## Current direction — Beamer, 2026-11-03
+
+The author's instruction: "Let's take that first usable theme. The previous
+decisions and intended work are shelved and superseded. We'll investigate
+beamer and then keep exploring this."
+
+This supersedes every earlier design decision and intended-work list below.
+They remain as a historical record, not an active backlog or constraints.
+The previous implementation remains available; there is no requirement to
+finish the poetry, preprint, grand-options, bibliography, or website work
+before proceeding. Beamer is the present investigation, and what follows it
+is open.
+
+The first implementation is `sty/beamerthemeAtlas.sty`, selected with
+`\usetheme{Atlas}` under LuaLaTeX. It owns presentation styling only:
+Garamond text/math with Pagella fallbacks, lining figures, small-cap headings,
+rubric, a warm background, a title page, numbered theorem blocks, proof
+endings, and frame numbers. `[plain]` is an optional black-on-white palette.
+These are initial choices for this experiment, not renewed historical rules.
+
+`presentations/atlas.tex` is the specimen: title, lists and overlays,
+an animated argument, a table and display math, and ordinary, example,
+and alert blocks. `./build-beamer.sh` compiles it twice into
+`build/beamer/atlas.pdf`. `--plain` and `--handout` select independent
+variants with separate job names. The README has a minimal starting deck.
+
+The theme does not load `atlas.sty`: that package sets A4 geometry and
+replaces sectioning and title machinery that Beamer needs. Its font setup
+and audited missing-symbol ranges are reused locally for now; a shared
+font package is not a prerequisite for exploring slides. Beamer's own
+theorem/proof environments, overlay processing, labels, and counters remain
+in charge. No changes to the older styles were needed.
+
+The second exploration is `presentations/tree-pursuit.tex`, included by the
+specimen: a large theorem statement, a six-overlay chase, and a three-overlay
+working proof. The graph stays fixed while the cop follows the unique path,
+the robber retreats and then waits, and the discarded branches accumulate.
+The regions have sizes 7, 4, 4, 2, 1, 0. Steps 4 and 5 include the robber's
+explicit wait after the cop moves; this is one legal play, followed by the
+argument for every safe reply. The proof returns to the middle of the chase
+and reveals the component definition, strict containment, and termination.
+The closing slide now asks where the argument fails on a cycle.
+
+These are presentation-local patterns, not new theme commands. The diagram
+has a fixed bounding box, and replacement text has a fixed overlay area.
+Players carry distinct letters and shapes even in the plain palette.
+Handouts select only step 4's diagram, with a full six-position trace beside
+it; the proof selects its final diagram and shows the whole derivation.
+Every mutually exclusive overlay names its handout behavior explicitly.
+In particular, a handout-only summary needs `<beamer:0|handout:1>`: omitting
+the beamer mode also displays it during the presentation.
+
+The natural next step is to use the sequence and judge its pace, then explore
+the presentation design further. Readability in an actual projection room
+remains to be judged.
+
+Validation: LuaLaTeX, two passes per variant. The default and plain decks
+have seventeen PDF pages; the handout variants have eight (title plus seven content
+frames). Overlays retain their frame number, the title is excluded, and
+the theorem reference resolves. The logs have no warnings, overfull or
+underfull boxes, or missing characters. Rendered slides were inspected,
+including the statement, each chase position, and the working proof. The
+six drawn regions and their solid edges were checked against the tree's
+components. PDF text coordinates confirm that all eight vertex labels and
+the region counter stay fixed across the six chase overlays. The
+strict-decrease claim was also checked for all 86 safe
+replies after noncapturing cop moves across every distinct starting pair on
+this tree; the slide gives the general argument.
+
+During the first theme pass, a scratch 4:3 deck checked long titles and headings, empty metadata,
+math in headings, a theorem with an overlay specification, fallback math
+symbols, a table of contents, nested lists, and a fragile verbatim frame.
+Those checks found one visual issue: Beamer subtitles inherit the title's
+small caps, and LaTeX combines that shape with italics. The subtitle font
+now resets with `\normalshape` before `\itshape`; both title-page and frame
+subtitles were inspected after the fix.
+
+## The maximalist Beamer edition — 2026-11-04
+
+The author asked for an exhaustive attempt at grandiosity: "Go all out on
+this and let's see how far the system can be pushed at the current."
+`sty/beamerthemeAtlasGrand.sty` and `presentations/atlas-grand.tex` are that
+experiment. The earlier Beamer specimen remains available. This is a new
+presentation theme over `Atlas`, not a load of the historical article
+`atlas-grand.sty` and not a reinstatement of its design decisions.
+
+The theme adds gilded double borders, corner ornaments, laid and chain
+lines, light edge foxing, Roman folios, framed theorem/definition/example
+blocks, illuminated initials, marginal scholia, spaced headings, and dark
+chapter pages with astronomical linework. The specimen gives the cover an
+armillary/compass frontispiece and stages a three-part discourse. Its
+engraved plates carry double-stroked roads, medallion and diamond pieces,
+gold region rings, a segmented countdown dial, and hatched territory bars.
+The cycle and two-cop demonstrations extend the mathematics beyond the
+first specimen. A typographic interlude, marginal-reading leaf, colophon,
+and dark closing seal complete it. The artwork is vector and the text
+remains selectable; the texture and border do not change between overlays.
+
+`./build-beamer.sh --grand` builds the 33-page presentation (19 logical
+frames, 13 numbered). Add `--handout` for 19 PDF pages; `--plain` independently
+switches to black, white, and grays, retaining the ornament. Grand builds
+use three passes for the remembered page positions. The original deck
+still uses two. `python3 tools/preview_grand.py` locates nine representative
+pages by unique text, makes `preview/grand/*.png`, and imposes the original
+vector pages into `build/beamer/atlas-grand-overview.pdf`. An absent or
+ambiguous selection is an error, so a new frame cannot silently substitute
+a different plate in the gallery.
+
+The general theme helpers are documented in the README. The mathematical
+drawings are kept in `presentations/grand-plates.tex`; the spectacle of the
+specimen is composed for 16:9 at 11 pt, while the theme itself supports
+normal Beamer frames and metadata. Dark palettes are scoped around frames;
+chapter helpers produce unnumbered slides. The existing Beamer theorem
+counters and overlay machinery remain responsible for meaning.
+
+Validation covers all four grand variants, the original default and plain
+handout build paths, and a separate 4:3 deck with wrapped mathematical
+titles, multiple authors, theorem overlays and references, fragile code,
+example/proof blocks, a chapter, and a footnote. The six tree regions and
+solid-edge sets were checked against their graph; the strict-decrease
+claim holds for all 86 safe replies after noncapturing cop moves on this
+tree. All 18 opposite-position responses on the six-cycle were checked,
+as was the forced wait between two cops. The full presentation was
+rendered and inspected, including every overlay. The final log checks
+reject warnings, overfull/underfull boxes, and missing characters.
+
+What the visual pass found: the ornament needs an actual protected margin;
+plate captions need space below the vertex labels; the cycle's angle labels
+must sit outside the player medallions; narrow scholia need ragged setting;
+and the chart's axis description needs its own line beneath the positions.
+Handouts explicitly select intermediate diagrams and pair them with the
+complete reasoning or chase ledger. Room-scale projection readability
+remains an empirical question. The maximalist edition is an experiment in
+excess, not a requirement that later work inherit every device.
+
+## The Euler spectacle — November 2026
+
+The author approved a second specimen built around grandeur through
+composition: scale, spatial depth, and dramatic pacing. The result is
+`presentations/atlas-euler.tex`, titled **The Form of Two**. It uses the
+existing AtlasGrand theme, with presentation-local helpers rather than a
+new theme fork. Twelve logical frames become 29 PDF pages through overlays;
+eleven frames are numbered, with the cover excluded. Handouts have twelve
+pages. `./build-beamer.sh --euler` selects it; `--plain` and `--handout`
+remain independent. `--grand` and `--euler` are mutually exclusive.
+
+The sequence is: monumental cube; vertex/edge/face inventory; hinged net;
+the cube graph with a chosen exterior; the cycle-edge operation; five
+successive face mergers; a quiet tree; seven leaf removals; a quiet point;
+the full-width equation; three different polyhedra; the general theorem.
+Four treatments carry the pacing: large engraved objects, ordinary Atlas
+proof plates, bare parchment fields, and dark astronomical pages. Quiet
+pages intentionally omit the frame, ornaments, texture, and folio.
+
+`presentations/euler-plates.tex` owns the illustrations and local page
+treatments. `tools/euler_geometry.py` generates `euler-folds.tex` using
+rigid-face rotations: four side faces hinge on a base, and the lid has a
+second hinge on the north face. Closed, partly open, and flat positions
+share a fixed bounding box. The generated TeX is committed source; no
+Python dependency is needed to compile. Everything remains vector.
+
+The net is a visual study, explicitly distinguished from the graph used
+for counting. A cut edge can have two copies in a net. The planar cube
+graph instead retains all eight vertices, twelve edges, and six faces,
+including the exterior. Removing the edges d-a, a-e, b-f, c-g, e-h leaves
+the path a-b-c-d-h-g-f-e. Each deleted edge merges two distinct faces.
+Pruning the path in that order leaves vertex e. Both operations preserve
+V-E+F. The final slide states the finite, connected hypothesis and links
+Eppstein's collection of proofs; convex polyhedra are the motivating case.
+
+`tools/check_euler.py` reads the actual diagram's vertex and edge lists,
+counts faces by geometric half-edge walks independently of Euler's
+formula, checks connectivity and the two-face condition for each erasure,
+checks every leaf removal, and validates the cube's rigid faces and hinges.
+The gallery helper is shared with the earlier grand specimen;
+`tools/preview_euler.py` selects nine plates by text, including explicitly
+counted overlay occurrences, and creates `atlas-euler-overview.pdf`.
+
+The visual audit removed residual construction edges from the graph so
+that deleted boundaries are unambiguously gone. It also gave the pruning
+text and the handout's count trace enough vertical room. Bounding-box
+checks include the lifted lid and the vertex highlight rings, so neither
+can silently change the scale between overlays. All four variants
+are checked for layout warnings and missing glyphs, and the rendered
+sequence is inspected, including the open net and monochrome handout.
+Projection in an actual room remains untested.
+
+The author's screenshot exposed footer text touching the inner bottom
+border. The shared grand theme now places the footer baseline 6.3mm above
+the page edge, with a 2mm box height. Its total reserved height stays at
+8.3mm, preserving the existing frame layouts while lifting the footer
+text clear of the border, including descenders.
+
+## Crawler Chronicles — the first real-material presentation
+
+The author supplied the essay at
+`~/Repos/personal/levineuwirth.org/content/essays/crawler_chronicles/`,
+asking for the main essay rather than an appendix talk, with a fresh
+audience, broad coverage, no strict time budget, and the article's humorous
+takeaway. `presentations/crawler-chronicles.tex` is the resulting adaptation:
+34 logical frames, 37 presentation pages, 34 handout pages. The cover is
+unnumbered; the other 33 frames are numbered, including the evidence pages
+and quiet interludes whose folios are intentionally hidden.
+
+The sequence introduces the server and vocabulary, then follows maintenance,
+archive jobs, early traffic and Meta attribution, Anubis, the distributed
+swarm, network leads and unresolved identity, the publication hypothesis,
+timing comparison, requested-version evidence, correspondence, petition,
+reply, and open ending. The voice is first person. The humorous lines are
+presentation adaptations except where expressly quoted. Source notes use
+native Beamer `\note` entries. The project sends no correspondence.
+
+The four original main-essay graphs are preserved in full on white evidence
+slides, with extra enlarged views of the null-distribution and dominant
+cohort panels. `tools/import_crawler.py` copies and hashes the originals,
+converts SVGs to PDF, isolates selected axes groups for detail views, and
+extracts/recolors the author's original spider and Anubis emblems. It
+does not redraw chart data. The scatter already contains rasterized points
+inside its SVG; that original layer is retained. The full source essay and
+five-page petition are kept in `presentations/crawler-assets/originals/`.
+The deck needs only the frozen PDFs at build time, not the website checkout.
+
+`manifest.json` records provenance and conversions. `adaptation.json` maps
+every main section to frame numbers and records scope decisions. The
+appendix is used to resolve two overbroad main-prose phrasings: 48 episodes
+and 271 commits refer to the website repository, and the zero-within-one-hour
+result applies only to the dominant Linux/Chrome cohort. Eleven GitHub-only
+pushes is the corrected figure count. The original daily snapshot's 367,972
+successes and the graph's 367,971 are both retained with their one-response
+discrepancy explained in the notes. Successful GETs in the timing test and
+all-status GETs in the hash analysis remain distinct. Registry allocation,
+user-agent claim, operator identity, and training purpose are not conflated.
+The October 22 reply is chronologically later than the graphs' data cutoff.
+
+Use `./build-beamer.sh --crawler`, optionally `--plain` and/or `--handout`.
+Plain means the theme and emblems are monochrome; evidence figures retain
+the source colors. Deck-selector flags are mutually exclusive.
+`tools/preview_crawler.py` creates the gallery and nine-plate overview using
+the shared text-based selection helper. The full original petition is also
+available as `presentations/crawler-assets/petition.pdf`.
+
+The visual pass found a caption continuing the preceding minipage's line,
+a slightly oversized Anubis emblem, and neighbouring chart-panel titles
+overhanging the crop viewports. These are corrected. The source petition
+renders correctly alone but its first page generated an unknown PGF
+ExtGState on LuaTeX inclusion. `pdftocairo` re-emits only the cover for the
+facsimile, retaining vector content and leaving the original PDF untouched.
+Final validation covers all four build variants, original-asset hashes,
+main-section coverage, PDF page counts, layout and glyph warnings, rendering
+of every presentation page, and text/footers within their page boundaries.
+The audience-facing pacing remains to be judged in an actual presentation.
+
+## Historical handoff — September 2026 (superseded)
+
 Written 2026-09-15 at the end of the session that gave build.sh its
 declared passes, biber and -j, and added the bibliography; extended
 2026-09-16 by the sessions that began the graduation and dressed the
@@ -9,7 +263,7 @@ far, what bit us, and what to do next.
 
 ---
 
-## Where it stands
+## Where it stood in September
 
 `main` at `5ea3f92` (atlas-grand.sty after the third and fourth
 manuscripts) plus this handoff, remote
@@ -63,7 +317,7 @@ preprint; `78cfebe` what the second manuscript found; `3996f95`,
 `d1d73ca` the grand edition and its merge; `02d7008` what the third and
 fourth manuscripts found; `5ea3f92` what they taught the grand layer.
 
-## The decision
+## Earlier decisions (superseded)
 
 Two of them, both made deliberately:
 
@@ -925,7 +1179,7 @@ the poem's own now; the style still warns if a stanza runs over. Grandness per i
 plain `atlas` beneath for a quiet edition, and the per-device grand
 options still to be built.
 
-## Outstanding, in rough order
+## Earlier intended work (shelved and superseded)
 
 The graduation is the main line now; the lab continues beside it in
 both registers. Verse joined it on 2026-09-16 (plate 09, `atlas-verse`,

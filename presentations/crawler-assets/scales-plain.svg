@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="280" height="280" role="img" aria-labelledby="crawler-scales-title">
+<ns0:title id="crawler-scales-title">The scales of Anubis: a feather against a sinking pan heaped with crawler requests, more of the swarm drifting in, above a line of commits.</ns0:title>
+<ns0:g fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round">
+<ns0:circle cx="140" cy="140" r="128" stroke-width="0.6" />
+<ns0:path d="M 144.5 81 C 145.5 75 146 70 145 66 L 148 52 L 142 63.5 C 139 65 135 66 131.5 67.5 L 125 70.5 L 126.5 72.5 L 132 73 C 135 73.5 136.5 76 137 81" stroke-width="1.0" />
+<ns0:path d="M 145 66 L 143.5 64.5" stroke-width="0.5" />
+<ns0:line x1="135.5" y1="81.5" x2="146" y2="81.5" stroke-width="1.0" />
+<ns0:line x1="140" y1="81.5" x2="140" y2="192" stroke-width="1.4" />
+<ns0:circle cx="140" cy="92" r="3" stroke-width="1.0" />
+<ns0:rect x="126" y="192" width="28" height="6" stroke-width="1.0" />
+<ns0:rect x="114" y="198" width="52" height="6" stroke-width="1.0" />
+<ns0:line x1="76.35" y1="85.31" x2="203.65" y2="98.69" stroke-width="1.4" />
+<ns0:path d="M 52.35 141.31 L 76.35 85.31 L 100.35 141.31" stroke-width="0.5" />
+<ns0:path d="M 50.35 141.31 Q 76.35 153.31 102.35 141.31" stroke-width="1.2" />
+<ns0:path d="M 76.95 145.81 C 68.95 134.81 65.95 118.81 70.95 108.81 C 73.95 105.81 77.95 107.81 75.95 111.81 C 83.95 121.81 83.95 135.81 76.95 145.81 Z" stroke-width="0.8" />
+<ns0:path d="M 76.95 145.81 C 75.95 133.81 73.95 121.81 71.95 112.81" stroke-width="0.5" />
+<ns0:g stroke-width="0.3">
+<ns0:line x1="76.65" y1="140.73" x2="72.15" y2="136.73" />
+<ns0:line x1="76.65" y1="140.73" x2="80.65" y2="136.23" />
+<ns0:line x1="76.1" y1="135.66" x2="71.6" y2="131.66" />
+<ns0:line x1="76.1" y1="135.66" x2="80.1" y2="131.16" />
+<ns0:line x1="75.38" y1="130.58" x2="70.88" y2="126.58" />
+<ns0:line x1="75.38" y1="130.58" x2="79.38" y2="126.08" />
+<ns0:line x1="74.54" y1="125.5" x2="70.04" y2="121.5" />
+<ns0:line x1="74.54" y1="125.5" x2="78.54" y2="121" />
+<ns0:line x1="73.58" y1="120.43" x2="69.08" y2="116.43" />
+<ns0:line x1="73.58" y1="120.43" x2="77.58" y2="115.93" />
+</ns0:g>
+<ns0:path d="M 179.65 154.69 L 203.65 98.69 L 227.65 154.69" stroke-width="0.5" />
+<ns0:path d="M 177.65 154.69 Q 203.65 166.69 229.65 154.69" stroke-width="1.2" />
+<ns0:g stroke-width="0.8">
+<ns0:line x1="87.4" y1="226" x2="108.6" y2="226" />
+<ns0:line x1="115.4" y1="226" x2="136.6" y2="226" />
+<ns0:line x1="143.4" y1="226" x2="164.6" y2="226" />
+<ns0:line x1="171.4" y1="226" x2="192.6" y2="226" />
+<ns0:line x1="80.6" y1="226" x2="50" y2="226" stroke-width="0.5" stroke-dasharray="2 3" />
+</ns0:g>
+<ns0:g stroke-width="1.0">
+<ns0:circle cx="84" cy="226" r="3.4" />
+<ns0:circle cx="112" cy="226" r="3.4" />
+<ns0:circle cx="140" cy="226" r="3.4" />
+<ns0:circle cx="168" cy="226" r="3.4" />
+</ns0:g>
+</ns0:g>
+<ns0:g fill="#000000" stroke="none">
+<ns0:circle cx="138.4" cy="68.2" r="0.8" />
+<ns0:circle cx="196" cy="226" r="3.4" />
+<ns0:circle cx="192.15" cy="157.69" r="1.3" />
+<ns0:circle cx="196.75" cy="157.69" r="1.3" />
+<ns0:circle cx="201.35" cy="157.69" r="1.3" />
+<ns0:circle cx="205.95" cy="157.69" r="1.3" />
+<ns0:circle cx="210.55" cy="157.69" r="1.3" />
+<ns0:circle cx="215.15" cy="157.69" r="1.3" />
+<ns0:circle cx="194.45" cy="153.69" r="1.3" />
+<ns0:circle cx="199.05" cy="153.69" r="1.3" />
+<ns0:circle cx="203.65" cy="153.69" r="1.3" />
+<ns0:circle cx="208.25" cy="153.69" r="1.3" />
+<ns0:circle cx="212.85" cy="153.69" r="1.3" />
+<ns0:circle cx="196.75" cy="149.69" r="1.3" />
+<ns0:circle cx="201.35" cy="149.69" r="1.3" />
+<ns0:circle cx="205.95" cy="149.69" r="1.3" />
+<ns0:circle cx="210.55" cy="149.69" r="1.3" />
+<ns0:circle cx="199.05" cy="145.69" r="1.3" />
+<ns0:circle cx="203.65" cy="145.69" r="1.3" />
+<ns0:circle cx="208.25" cy="145.69" r="1.3" />
+<ns0:circle cx="201.35" cy="141.69" r="1.3" />
+<ns0:circle cx="205.95" cy="141.69" r="1.3" />
+<ns0:circle cx="203.65" cy="137.69" r="1.3" />
+<ns0:circle cx="166" cy="50" r="0.8" />
+<ns0:circle cx="181" cy="41" r="0.8" />
+<ns0:circle cx="194" cy="56" r="1.0" />
+<ns0:circle cx="208" cy="44" r="0.8" />
+<ns0:circle cx="221" cy="58" r="1.0" />
+<ns0:circle cx="186" cy="70" r="1.0" />
+<ns0:circle cx="205" cy="72" r="1.2" />
+<ns0:circle cx="234" cy="74" r="0.8" />
+<ns0:circle cx="219" cy="84" r="1.2" />
+<ns0:circle cx="233" cy="96" r="1.0" />
+<ns0:circle cx="227" cy="112" r="1.2" />
+<ns0:circle cx="176" cy="62" r="0.8" />
+<ns0:circle cx="198" cy="34" r="0.8" />
+<ns0:circle cx="240" cy="88" r="0.8" />
+</ns0:g>
+</ns0:svg>

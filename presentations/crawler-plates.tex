@@ -1,0 +1,91 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Local composition tools; the essay's plots are preserved PDF assets.
+\newcommand{\CAssets}{presentations/crawler-assets}
+\newcommand{\CQuiet}{%
+  \setbeamertemplate{background canvas}{\color{AtlasPaper}\vrule width\paperwidth height\paperheight}%
+  \setbeamertemplate{footline}{}%
+}
+\newcommand{\CWhite}{%
+  \setbeamertemplate{background canvas}{\color{white}\vrule width\paperwidth height\paperheight}%
+  \setbeamertemplate{footline}{}%
+}
+\makeatletter
+\newcommand{\CEmblem}[3]{% name, palette, height
+  \begingroup
+  \def\cpalette{#2}%
+  \ifatlasbeamer@plain\def\cpalette{plain}\fi
+  \includegraphics[height=#3]{\CAssets/#1-\cpalette.pdf}%
+  \endgroup
+}
+\makeatother
+\newcommand{\CLabel}[1]{\AtlasGrandKicker{#1}}
+\newcommand{\CNumber}[2]{%
+  {\color{AtlasRubric}\fontsize{34}{38}\selectfont #1\par}\smallskip
+  {\large #2\par}%
+}
+\newcommand{\CAside}[1]{\par{\small\itshape\raggedright #1\par}}
+\newcommand{\CEvidence}[3]{%
+  \begingroup\CWhite
+  \begin{frame}[plain]
+    \begin{tikzpicture}[remember picture,overlay]
+      \node[anchor=north west,text=AtlasInk,font=\scriptsize] at
+        ([xshift=6mm,yshift=-3mm]current page.north west) {\textsc{#1}};
+      \node at ([yshift=1mm]current page.center)
+        {\includegraphics[width=149mm,height=73mm,keepaspectratio]{\CAssets/#2.pdf}};
+      \node[anchor=south,text=AtlasInk,text width=145mm,align=center,font=\small] at
+        ([yshift=3mm]current page.south) {#3};
+    \end{tikzpicture}
+  \end{frame}
+  \endgroup
+}
+\newcommand{\CServer}{%
+  \begin{tikzpicture}[draw=AtlasGoldLight,text=AtlasGoldLight,line width=.6pt]
+    \path[use as bounding box] (-2.8,-2.1) rectangle (2.8,2.1);
+    \draw[double,double distance=1pt] (-1.05,-1.4) rectangle (1.05,1.4);
+    \foreach \y in {-.8,0,.8}{
+      \draw (-.85,\y-.24) rectangle (.85,\y+.24);
+      \fill (.6,\y) circle (.06);
+      \draw (-.65,\y)--(.3,\y);
+    }
+    \foreach \i in {0,...,13}{
+      \pgfmathsetmacro{\a}{\i*360/14+8}
+      \draw[opacity=.4] (\a:2.5)--(\a:1.65);
+      \fill (\a:2.5) circle (.055);
+    }
+    \node[font=\scriptsize\scshape] at (0,-1.8) {one small server};
+  \end{tikzpicture}%
+}
+\newcommand{\CWindow}[1]{%
+  \begin{tikzpicture}[x=1mm,y=1mm]
+    \path[use as bounding box] (-59,-23) rectangle (59,24);
+    \fill[AtlasGold!16!AtlasPaper] (-55,0) rectangle (-2,12);
+    \fill[AtlasRubric!12!AtlasPaper] (2,0) rectangle (55,12);
+    \draw[AtlasGold] (-55,0)--(55,0);
+    \draw[AtlasInk,line width=.8pt] (0,-2)--(0,16);
+    \node[font=\small,anchor=south] at (0,17) {publication};
+    \node at (-28,6) {30 minutes before};
+    \node at (28,6) {30 minutes after};
+    \node[font=\scriptsize] at (0,-7) {omit the publication minute};
+    \ifnum#1=2
+      \node[text=AtlasRubric,font=\large] at (-28,-17) {659 GETs};
+      \node[text=AtlasRubric,font=\large] at (28,-17) {829 GETs};
+    \fi
+  \end{tikzpicture}%
+}
+\newcommand{\CPublication}[1]{%
+  \begin{tikzpicture}[x=1mm,y=1mm,line width=.5pt]
+    \path[use as bounding box] (0,-12) rectangle (121,29);
+    \node[anchor=west,font=\small\scshape,text=AtlasGold] at (0,25) {on my machine};
+    \draw[AtlasGold] (5,10)--(52,10);
+    \foreach \x in {8,20,32,44}\draw[AtlasInk,fill=AtlasPaper] (\x,10) circle (1.5);
+    \node[font=\small] at (27,0) {four local commits};
+    \ifnum#1=2
+      \draw[-{Stealth[length=2mm]},AtlasRubric,line width=.8pt] (57,10)--(80,10);
+      \node[font=\scriptsize,above] at (69,12) {one push};
+      \draw[AtlasInk,fill=AtlasGold!15!AtlasPaper] (88,4) rectangle (119,17);
+      \node[font=\small] at (103.5,10.5) {Forgejo};
+      \node[font=\small,text=AtlasRubric] at (102,-3) {one publication};
+      \node[font=\scriptsize] at (102,-9) {episode};
+    \fi
+  \end{tikzpicture}%
+}

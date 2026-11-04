@@ -1,0 +1,195 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% Three slide patterns: a statement, a six-beat chase, and a working proof.
+% Input from atlas.tex, after \begin{document}. TikZ and booktabs are loaded.
+% Every diagram has the same coordinates and explicit bounding box. A fixed
+% overlay area also keeps replacement prose from moving the picture.
+
+% Arguments: cop vertex, robber vertex, remaining vertices, solid edges.
+% The remaining vertices are the component of T-c containing r. At capture
+% we show the empty set by convention. Edges behind the cop stay dashed;
+% lettered circle/square pieces also distinguish players in the plain deck.
+\newcommand{\AtlasPursuitTree}[4]{%
+  \begin{tikzpicture}[x=1.15cm,y=1cm,
+    edge/.style={line width=.8pt,draw=AtlasInk},
+    faded/.style={edge,draw=AtlasInk!35!AtlasPaper,dashed},
+    cop/.style={circle,draw=AtlasRubric,fill=AtlasRubric,text=AtlasPaper,
+      minimum size=6mm,inner sep=0pt,font=\small},
+    robber/.style={rectangle,draw=AtlasInk,fill=AtlasPaper,text=AtlasInk,
+      line width=1pt,minimum size=6mm,inner sep=0pt,font=\small}]
+    \path[use as bounding box] (-.45,-1.9) rectangle (4.95,1.85);
+    \begin{scope}[overlay]
+      \coordinate (a) at (0,0);
+      \coordinate (b) at (1.1,0);
+      \coordinate (c) at (2.2,0);
+      \coordinate (d) at (3.3,.9);
+      \coordinate (e) at (4.5,.9);
+      \coordinate (f) at (1.1,1.3);
+      \coordinate (g) at (1.1,-1.2);
+      \coordinate (h) at (2.2,-1.2);
+      \foreach \u/\v in {a/b,b/c,c/d,d/e,b/f,b/g,c/h}
+        \draw[faded] (\u)--(\v);
+      \foreach \u/\v in {#4}
+        \draw[edge] (\u)--(\v);
+      \foreach \v in {a,b,c,d,e,f,g,h} {
+        \fill[AtlasInk!35!AtlasPaper] (\v) circle (1.8pt);
+      }
+      \foreach \v in {a,d,e,g,h}
+        \node[below=3.5mm,font=\small,text=AtlasInk] at (\v) {$\v$};
+      \foreach \v in {b,c}
+        \node[below right=2.5mm,font=\small,text=AtlasInk] at (\v) {$\v$};
+      \node[above=2.5mm,font=\small,text=AtlasInk] at (f) {$f$};
+      \foreach \v in {#3} {
+        \fill[AtlasRubric!18!AtlasPaper] (\v) circle (4mm);
+        \fill[AtlasInk] (\v) circle (1.8pt);
+      }
+      \ifstrequal{#1}{#2}{%
+        \node[cop,minimum size=8mm,font=\scriptsize] at (#1) {C/R};
+      }{%
+        \node[cop] at (#1) {C};
+        \node[robber] at (#2) {R};
+      }
+    \end{scope}
+  \end{tikzpicture}%
+}
+
+% One declaration per position, reused by the chase and the proof.
+\newcommand{\AtlasPursuitPosition}[1]{%
+  \ifcase#1\relax
+  \or\AtlasPursuitTree{a}{d}{b,c,d,e,f,g,h}{a/b,b/c,c/d,d/e,b/f,b/g,c/h}%
+  \or\AtlasPursuitTree{b}{d}{c,d,e,h}{b/c,c/d,d/e,c/h}%
+  \or\AtlasPursuitTree{b}{e}{c,d,e,h}{b/c,c/d,d/e,c/h}%
+  \or\AtlasPursuitTree{c}{e}{d,e}{c/d,d/e}%
+  \or\AtlasPursuitTree{d}{e}{e}{d/e}%
+  \or\AtlasPursuitTree{e}{e}{}{}%
+  \fi
+}
+
+\newcommand{\AtlasPursuitLegend}{%
+  {\small C: cop\qquad R: robber\par
+   Halos mark the robber's region.\par
+   Dashed branches are inaccessible.\par}%
+}
+
+\newcommand{\AtlasPursuitBeat}[3]{%
+  {\usebeamercolor[fg]{structure}\scshape\strut #1\strut\par}
+  \medskip
+  \parbox[t][2.3cm][t]{\linewidth}{\raggedright\strut #2\strut}\par
+  \bigskip
+  {\large Remaining vertices: $#3$\par}%
+}
+
+\begin{frame}{One cop is enough}
+  % The local font change makes a statement slide without a new theme API.
+  \begingroup
+    \setbeamerfont{block title}{size=\large}
+    \Large
+    \begin{theorem}[Trees]\label{thm:tree}
+      One cop can catch a robber\par
+      on any finite tree.
+    \end{theorem}
+  \endgroup
+  \bigskip
+  The strategy: follow the unique path toward the robber.
+\end{frame}
+
+\begin{frame}{Follow the unique path}
+  \framesubtitle{One legal chase on a fixed tree}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.54\textwidth}
+      \begin{overlayarea}{\linewidth}{5.6cm}
+        \centering
+        \only<1|handout:0>{\AtlasPursuitPosition{1}}%
+        \only<2|handout:0>{\AtlasPursuitPosition{2}}%
+        \only<3|handout:0>{\AtlasPursuitPosition{3}}%
+        \only<4|handout:1>{\AtlasPursuitPosition{4}}%
+        \only<5|handout:0>{\AtlasPursuitPosition{5}}%
+        \only<6|handout:0>{\AtlasPursuitPosition{6}}%
+        \par\medskip
+        \AtlasPursuitLegend
+      \end{overlayarea}
+    \end{column}
+    \begin{column}{.43\textwidth}
+      \begin{overlayarea}{\linewidth}{5.6cm}
+        \raggedright
+        \only<1|handout:0>{\AtlasPursuitBeat{1. Start}
+          {The cop is at $a$; the robber is at $d$.
+           Every other vertex is still reachable without crossing the cop.}{7}}
+        \only<2|handout:0>{\AtlasPursuitBeat{2. The cop advances}
+          {Move from $a$ to $b$. The branches through $a$, $f$, and $g$
+           are now cut off from the robber.}{4}}
+        \only<3|handout:0>{\AtlasPursuitBeat{3. The robber retreats}
+          {The robber moves from $d$ to $e$. This changes the position,
+           but cannot reopen a discarded branch.}{4}}
+        \only<4|handout:0>{\AtlasPursuitBeat{4. Narrow the region}
+          {The cop moves to $c$; the robber waits at $e$.
+           The branch through $h$ is cut off too.}{2}}
+        \only<5|handout:0>{\AtlasPursuitBeat{5. Close the last exit}
+          {The cop moves to $d$. The robber stays at $e$:
+           its only neighbor is occupied.}{1}}
+        \only<6|handout:0>{\AtlasPursuitBeat{6. Capture}
+          {The cop moves to $e$. Both pieces occupy the same vertex.
+           There is nowhere left to retreat.}{0}}
+        \only<beamer:0|handout:1>{%
+          {\usebeamercolor[fg]{structure}\scshape The whole chase\par}
+          \smallskip
+          \small
+          Step 4 is pictured.\par\smallskip
+          \renewcommand{\arraystretch}{.9}
+          \begin{tabular}{@{}crrc@{}}
+            \toprule
+            Step & C & R & Region \\
+            \midrule
+            1 & $a$ & $d$ & 7 \\
+            2 & $b$ & $d$ & 4 \\
+            3 & $b$ & $e$ & 4 \\
+            4 & $c$ & $e$ & 2 \\
+            5 & $d$ & $e$ & 1 \\
+            6 & $e$ & $e$ & 0 \\
+            \bottomrule
+          \end{tabular}
+          \smallskip\par
+          R waits in steps 4 and 5.
+        }
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Why every retreat ends}
+  \framesubtitle{Return to the middle of the chase}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.54\textwidth}
+      \begin{overlayarea}{\linewidth}{5.6cm}
+        \centering
+        \only<1|handout:0>{\AtlasPursuitPosition{3}}%
+        \only<2-|handout:1>{\AtlasPursuitPosition{4}}%
+        \par\smallskip
+        \only<1|handout:0>{Before the move: $|S|=4$.}
+        \only<2-|handout:1>{After the move: $|S'|=2$.}
+        \par\smallskip
+        {\small Cop: $b\to c$. Robber: stays at $e$.\par}
+      \end{overlayarea}
+    \end{column}
+    \begin{column}{.43\textwidth}
+      \begin{overlayarea}{\linewidth}{5.6cm}
+        \small\raggedright
+        {\usebeamercolor[fg]{structure}\scshape 1. Name the region\par}
+        Delete the cop's vertex. Let $S$ be the robber's component.
+        \par\smallskip
+        \uncover<2->{%
+          {\usebeamercolor[fg]{structure}\scshape 2. Move the boundary\par}
+          Move to $v$ on the unique path. Every safe reply stays in
+          \par\smallskip
+          {\centering $\displaystyle S'\subseteq S\setminus\{v\}.$\par}
+          \smallskip
+        }
+        \uncover<3->{%
+          {\usebeamercolor[fg]{structure}\scshape 3. Count down\par}
+          Since $v\in S$, $|S'|<|S|$.\par
+          Finiteness forces capture.
+          \hfill\usebeamertemplate{qed symbol}
+        }
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}

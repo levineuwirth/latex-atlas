@@ -1,0 +1,404 @@
+%!TEX program = lualatex
+% SPDX-License-Identifier: CC-BY-SA-4.0
+% A maximalist, entirely vector specimen. ./build-beamer.sh --grand
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{AtlasGrand}
+\usepackage{booktabs}
+\usepackage{array}
+\input{presentations/grand-plates.tex}
+\title[Atlas of Pursuit]{Atlas of Pursuit}
+\subtitle{A grand discourse on trees, territories, and inevitable capture}
+\author{latex-atlas}
+\institute{The mathematical cabinet}
+\date{4 November 2026}
+
+\newcommand{\GrandBeat}[3]{%
+  {\color{AtlasRubric}\scshape\strut #1\strut\par}\smallskip
+  \parbox[t][1.8cm][t]{\linewidth}{\raggedright\strut #2\strut}\par
+  \smallskip\centerline{\GrandDial{#3}}%
+}
+
+\begin{document}
+
+% The frontispiece has its own architectural composition.
+{\AtlasGrandNight
+\begin{frame}[plain,noframenumbering]
+  \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west,text=AtlasGoldLight,font=\small]
+      at ([xshift=16mm,yshift=-15mm]current page.north west)
+      {\textls[160]{\textsc{De venatione in arboribus}}};
+    \node[anchor=north west,text=AtlasIvory,inner sep=0pt,align=left]
+      at ([xshift=17mm,yshift=-27mm]current page.north west)
+      {{\fontsize{48}{48}\selectfont\textsc{Atlas}}};
+    \node[anchor=north west,text=AtlasIvory,inner sep=0pt]
+      at ([xshift=17mm,yshift=-45mm]current page.north west)
+      {{\fontsize{29}{32}\selectfont\textsc{of Pursuit}}};
+    \node[anchor=north west,text=AtlasGoldLight,font=\normalsize\itshape,
+      text width=68mm,align=left,inner sep=0pt]
+      at ([xshift=17mm,yshift=-59mm]current page.north west)
+      {Of trees and territories;\\of retreat, and inevitable capture.};
+    \node at ([xshift=121mm,yshift=-44mm]current page.north west)
+      {\AtlasGrandAstrolabe[57mm]};
+    \draw[AtlasGoldLight,line width=.35pt]
+      ([xshift=96mm,yshift=-19mm]current page.north west)--
+      ([xshift=96mm,yshift=-71mm]current page.north west);
+    \node[anchor=south west,text=AtlasGoldLight,font=\scriptsize]
+      at ([xshift=17mm,yshift=11mm]current page.south west)
+      {\textls[120]{\textsc{The mathematical cabinet\quad •\quad MMXXVI}}};
+    \node[anchor=south east] at ([xshift=-14mm,yshift=9mm]current page.south east)
+      {\pgfornament[width=23mm,color=AtlasGoldLight]{71}};
+  \end{tikzpicture}
+\end{frame}}
+
+\section{Prolegomena}
+\begin{frame}{Two landscapes of pursuit}
+  \framesubtitle{An engraved frontispiece to the argument}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.53\textwidth}
+      \centering\resizebox{.90\linewidth}{!}{\GrandTree{1}}\par
+      \smallskip\AtlasGrandRubric{I. The tree}\par
+      {\small\itshape Every route has a single passage.}
+    \end{column}
+    \begin{column}{.41\textwidth}
+      \centering\resizebox{.78\linewidth}{!}{\GrandCycle{180}{0}{-1}}\par
+      \AtlasGrandRubric{II. The circuit}\par
+      {\small\itshape A road returns upon itself.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The Argument}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.12\textwidth}\AtlasGrandInitial{A}\end{column}
+    \begin{column}{.83\textwidth}
+      \large pursuer walks upon a finite graph. The fugitive sees every
+      move and chooses a reply. What property of the landscape makes
+      capture inevitable?
+    \end{column}
+  \end{columns}
+  \medskip
+  \begin{tabular}{@{}p{10mm}>{\raggedright\arraybackslash}p{35mm}>{\raggedright\arraybackslash}p{74mm}@{}}
+    \toprule
+    \textcolor{AtlasRubric}{I} & \textsc{The field} & Rules, positions, and the question.\\[2mm]
+    \textcolor{AtlasRubric}{II} & \textsc{The narrowing world} & A tree, a chase, and a decreasing integer.\\[2mm]
+    \textcolor{AtlasRubric}{III} & \textsc{The returning road} & Where the proof fails; what a second cop repairs.\\
+    \bottomrule
+  \end{tabular}
+  \medskip
+  \centerline{\AtlasGrandFleuron[25mm]}
+\end{frame}
+
+\section{The field}
+\AtlasGrandChapter{I}{The field}{First establish the rules of the encounter.}
+
+\begin{frame}{The terms of the encounter}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.62\textwidth}
+      \begin{enumerate}[<+->]
+        \item The cop chooses a vertex. The robber chooses next.
+        \medskip
+        \item They alternate turns, with the cop moving first.
+        \medskip
+        \item A move follows one edge, or stays at the same vertex.
+        \medskip
+        \item Capture occurs when they occupy the same vertex.
+      \end{enumerate}
+    \end{column}
+    \begin{column}{.32\textwidth}
+      \AtlasGrandScholium{Scholium}{Both players see the whole graph and
+        each other's positions. This is a question of strategy.}
+      \centering\medskip\AtlasGrandFleuron[20mm]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{A question fit for a single line}
+  \centering
+  \AtlasGrandFleuron[30mm]\par\bigskip
+  {\fontsize{25}{31}\selectfont\itshape
+    When does one pursuer suffice?\par}
+  \bigskip
+  {\color{AtlasRubric}\fontsize{30}{34}\selectfont $c(G)=1\;?$\par}
+  \bigskip
+  {\small\scshape The cop number is the least number guaranteeing capture.}
+\end{frame}
+
+\section{The narrowing world}
+\AtlasGrandChapter{II}{The narrowing world}{Every advance leaves less room for retreat.}
+
+\begin{frame}[label=grand-trees]{Propositio I\enspace—\enspace Of finite trees}
+  \begin{theorem}[The tree principle]\label{grand:tree}
+    \Large One cop can catch a robber on any finite tree.
+  \end{theorem}
+  \medskip
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.63\textwidth}
+      \AtlasGrandKicker{The construction}
+      Follow the unique path toward the robber. The rest of the proof
+      is an account of what the robber can never recover.
+    \end{column}
+    \begin{column}{.31\textwidth}
+      \AtlasGrandScholium{In the margin}{Finiteness will end the chase.
+      Uniqueness of paths will make progress irreversible.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Tabula I\enspace—\enspace The chase}
+  \framesubtitle{The plate stays still; the territory contracts}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.55\textwidth}
+      \begin{overlayarea}{\linewidth}{5.4cm}
+        \centering
+        \only<1|handout:0>{\resizebox{.88\linewidth}{!}{\GrandTree{1}}}%
+        \only<2|handout:0>{\resizebox{.88\linewidth}{!}{\GrandTree{2}}}%
+        \only<3|handout:0>{\resizebox{.88\linewidth}{!}{\GrandTree{3}}}%
+        \only<4|handout:1>{\resizebox{.88\linewidth}{!}{\GrandTree{4}}}%
+        \only<5|handout:0>{\resizebox{.88\linewidth}{!}{\GrandTree{5}}}%
+        \only<6|handout:0>{\resizebox{.88\linewidth}{!}{\GrandTree{6}}}%
+        \par\smallskip
+        {\scriptsize C: the pursuer\quad R: the fugitive\par
+          Gold rings: the remaining region. Dashed roads: lost territory.}
+      \end{overlayarea}
+    \end{column}
+    \begin{column}{.39\textwidth}
+      \begin{overlayarea}{\linewidth}{5.4cm}
+        \small\raggedright
+        \only<1|handout:0>{\GrandBeat{I. The whole field}
+          {The cop stands at $a$, the robber at $d$.
+          Seven vertices remain reachable without crossing the cop.}{7}}
+        \only<2|handout:0>{\GrandBeat{II. The first advance}
+          {The cop takes $b$. The roads to $a$, $f$, and $g$
+          are closed to the robber.}{4}}
+        \only<3|handout:0>{\GrandBeat{III. The retreat}
+          {The robber moves from $d$ to $e$.
+          Retreat changes a position, but restores no territory.}{4}}
+        \only<4|handout:0>{\GrandBeat{IV. The narrowing}
+          {The cop takes $c$; the robber waits at $e$.
+          The road to $h$ is lost as well.}{2}}
+        \only<5|handout:0>{\GrandBeat{V. The last refuge}
+          {The cop takes $d$. At $e$, the robber's only safe reply is to wait.}{1}}
+        \only<6|handout:0>{\GrandBeat{VI. The meeting}
+          {The cop takes $e$. The two pieces coincide.
+          The remaining region is empty: capture.}{0}}
+        \only<beamer:0|handout:1>{%
+          \AtlasGrandKicker{A record of the chase}
+          \begin{tabular}{@{}crrc@{}}\toprule
+            Step & C & R & Region\\\midrule
+            I & $a$ & $d$ & 7\\
+            II & $b$ & $d$ & 4\\
+            III & $b$ & $e$ & 4\\
+            IV & $c$ & $e$ & 2\\
+            V & $d$ & $e$ & 1\\
+            VI & $e$ & $e$ & 0\\\bottomrule
+          \end{tabular}\par\smallskip
+          Step IV is pictured. The robber waits in IV and V.
+
+        }
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Demonstratio\enspace—\enspace An irreversible loss}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.53\textwidth}
+      \begin{overlayarea}{\linewidth}{5.8cm}
+        \only<1|handout:0>{\resizebox{.90\linewidth}{!}{\GrandTree{3}}}%
+        \only<2-|handout:1>{\resizebox{.90\linewidth}{!}{\GrandTree{4}}}%
+        \par\smallskip
+        \centering\small
+        \only<1|handout:0>{$S=\{c,d,e,h\}$}
+        \only<2-|handout:1>{$S'=\{d,e\}$}
+      \end{overlayarea}
+    \end{column}
+    \begin{column}{.42\textwidth}
+      \begin{overlayarea}{\linewidth}{5.8cm}
+        \small\raggedright
+        \AtlasGrandKicker{I. The region}
+        Delete the cop's vertex. Let $S$ be the robber's component.
+        \par\medskip
+        \uncover<2->{%
+          \AtlasGrandKicker{II. Its boundary}
+          Step to $v$ on the unique path. Every safe reply leaves
+          \par\smallskip
+          {\color{AtlasRubric}\large $S'\subseteq S\setminus\{v\}.$\par}
+          \medskip
+        }
+        \uncover<3->{%
+          \AtlasGrandKicker{III. Finiteness}
+          Since $v\in S$, we have $|S'|<|S|$.
+          A positive integer cannot fall forever.
+          \par\smallskip\hfill\usebeamertemplate{qed symbol}
+        }
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Tabula II\enspace—\enspace The account of territory}
+  \centering
+  \resizebox{.80\linewidth}{!}{\GrandDescent}\par
+  \smallskip
+  \begin{minipage}{.85\linewidth}
+    \AtlasGrandScholium{What the record counts}{The bars record the region
+    after successive cop advances in this chase. A robber move can leave
+    the count unchanged; it cannot make the lost region return.}
+  \end{minipage}
+\end{frame}
+
+{\AtlasGrandNight
+\begin{frame}[plain,noframenumbering]
+  \centering
+  \pgfornament[width=45mm,color=AtlasGoldLight]{71}\par\bigskip
+  {\color{AtlasIvory}\fontsize{27}{34}\selectfont\itshape
+    The proof is a landscape\\
+    that grows smaller\\
+    with every advance.\par}
+  \bigskip
+  {\color{AtlasGoldLight}\Large $7\;>\;4\;>\;2\;>\;1\;>\;0$\par}
+  \bigskip
+  {\color{AtlasGoldLight}\scriptsize\textls[160]{\textsc{An interlude on descent}}\par}
+\end{frame}}
+
+\section{The returning road}
+\AtlasGrandChapter{III}{The returning road}{A single circuit changes the nature of retreat.}
+
+\begin{frame}{Tabula III\enspace—\enspace A road back}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \begin{overlayarea}{\linewidth}{5.8cm}
+        \centering
+        \only<1|handout:0>{\GrandCycle{180}{0}{-1}}%
+        \only<2|handout:0>{\GrandCycle{120}{0}{-1}}%
+        \only<3|handout:1>{\GrandCycle{120}{300}{-1}}%
+      \end{overlayarea}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \begin{overlayarea}{\linewidth}{5.8cm}
+        \small\raggedright
+        \AtlasGrandKicker{The missing invariant}
+        Removing one vertex leaves a connected path of five vertices.
+        The region's size does not change.
+        \par\smallskip
+        \uncover<2->{The cop moves one edge closer.\par\smallskip}
+        \uncover<3->{The robber moves away and restores the opposite position.\par}
+        \smallskip
+        \AtlasGrandScholium{The distinction}{Distance can fall for a turn
+        without territory being lost.}
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Tabula IV\enspace—\enspace Two boundaries}
+  \begin{columns}[c,onlytextwidth]
+    \begin{column}{.48\textwidth}
+      \begin{overlayarea}{\linewidth}{5.8cm}
+        \centering
+        \only<1|handout:0>{\GrandCycle{180}{60}{0}}%
+        \only<2|handout:1>{\GrandCycle{120}{60}{0}}%
+        \only<3|handout:0>{\GrandCycle{60}{60}{0}}%
+      \end{overlayarea}
+    \end{column}
+    \begin{column}{.46\textwidth}
+      \begin{overlayarea}{\linewidth}{5.8cm}
+        \small\raggedright
+        \AtlasGrandKicker{Hold; then advance}
+        One cop holds $0^\circ$. The other advances along the robber's path.
+        \par\smallskip
+        \uncover<2->{At $120^\circ$, the moving cop leaves only a wait at $60^\circ$.\par\smallskip}
+        \uncover<3->{The next advance captures the robber.\par}
+        \smallskip
+        \AtlasGrandScholium{The repaired argument}{The fixed cop cuts the cycle.
+        The moving cop shortens the path.}
+      \end{overlayarea}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The proposition, the example, the caution}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.58\textwidth}
+      \begin{definition}[Cop number]
+        $c(G)$ is the least number of cops that can guarantee capture on $G$.
+      \end{definition}
+      \begin{exampleblock}{The tree}
+        Proposition~\ref{grand:tree} gives $c(T)=1$ for every finite tree.
+      \end{exampleblock}
+    \end{column}
+    \begin{column}{.36\textwidth}
+      \begin{alertblock}{The circuit}
+        For a cycle of length at least four, $c(C_n)=2$.
+      \end{alertblock}
+      \centering\medskip\AtlasGrandFleuron[21mm]\par\medskip
+      {\small\itshape A hypothesis is part of the theorem's shape.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{The cabinet}
+\begin{frame}{A leaf for the marginal reader}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.65\textwidth}
+      \begin{columns}[T,onlytextwidth]
+        \begin{column}{.2\textwidth}\AtlasGrandInitial{E}\end{column}
+        \begin{column}{.75\textwidth}
+          very proof has a measure. Here it is the number of vertices
+          left in a territory that cannot be regained.
+        \end{column}
+      \end{columns}
+      \bigskip
+      {\large\itshape The drawing shows what is lost.\\
+        The inequality shows why it matters.\par}
+      \bigskip
+      {\color{AtlasRubric}\LARGE $S'\subsetneq S$\par}
+      \medskip\AtlasGrandFleuron[28mm]
+    \end{column}
+    \begin{column}{.29\textwidth}
+      \AtlasGrandScholium{Scholium I}{The region is a component, not a ball
+      of a prescribed radius.}
+      \AtlasGrandScholium{Scholium II}{The chase illustrates a strategy.
+      The invariant must cover every reply.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Colophon\enspace—\enspace What this edition attempts}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \AtlasGrandKicker{The type}
+      Garamond text and mathematics; rubric, small capitals,
+      illuminated letters, and Roman folios.
+      \par\medskip
+      \AtlasGrandKicker{The plate}
+      Compass rings, armillary linework, engraved roads, medallion pieces,
+      hatched quantities, and a dial that runs down to capture.
+      \par\medskip
+      \AtlasGrandKicker{The sheet}
+      Laid lines, chain lines, gilded borders, corner ornaments,
+      and a dark reverse for the chapter openings.
+    \end{column}
+    \begin{column}{.34\textwidth}
+      \AtlasGrandScholium{The experiment}{How much ceremony can a mathematical
+      presentation carry before the apparatus begins to rival the argument?}
+      \centering\AtlasGrandFleuron[24mm]\par\medskip
+      {\scriptsize All illustrations are vector constructions.\\
+      The movements are speaker-paced overlays.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+{\AtlasGrandNight
+\begin{frame}[plain,noframenumbering]
+  \centering
+  \AtlasGrandAstrolabe[32mm]\par\medskip
+  {\color{AtlasIvory}\fontsize{38}{40}\selectfont\textsc{Finis}\par}
+  \medskip
+  {\color{AtlasGoldLight}\large\itshape The circuit invites another argument.\par}
+  \bigskip
+  \pgfornament[width=38mm,color=AtlasGoldLight]{71}\par\smallskip
+  {\color{AtlasGoldLight}\scriptsize\textls[160]{\textsc{Set for the screen\quad •\quad MMXXVI}}\par}
+\end{frame}}
+
+\end{document}

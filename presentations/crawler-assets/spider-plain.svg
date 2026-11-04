@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" viewBox="0 0 280 280" role="img" aria-labelledby="mark-title-crawler-chronicles" width="280" height="280">
+  <ns0:title id="mark-title-crawler-chronicles">A question mark whose dot is a spider, hanging from the thread that draws it.</ns0:title>
+  <ns0:desc>Frontmatter mark for the essay "Crawler Chronicles".</ns0:desc>
+
+  <ns0:g fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round">
+
+    
+    <ns0:circle cx="140" cy="140" r="128" stroke-width="0.6" />
+
+    
+    <ns0:path d="M 104 92 C 104 64 121 46 142 46 C 164 46 179 62 179 83 C 179 103 163 112 153 120 C 145 126 140 134 140 150" stroke-width="1.4" />
+
+    
+    <ns0:line x1="140" y1="150" x2="140" y2="177" stroke-width="0.5" />
+
+    
+    <ns0:g stroke-width="1.2">
+      <ns0:path d="M 144.06 212.525 L 157.4 217.6 L 161.75 237.9" />
+      <ns0:path d="M 145.51 209.625 L 164.65 207.45 L 176.25 223.4" />
+      <ns0:path d="M 145.51 205.275 L 164.65 192.95 L 177.7 197.3" />
+      <ns0:path d="M 144.06 202.375 L 158.85 182.8 L 173.35 174.1" />
+      <ns0:path d="M 135.94 212.525 L 122.6 217.6 L 118.25 237.9" />
+      <ns0:path d="M 134.49 209.625 L 115.35 207.45 L 103.75 223.4" />
+      <ns0:path d="M 134.49 205.275 L 115.35 192.95 L 102.3 197.3" />
+      <ns0:path d="M 135.94 202.375 L 121.15 182.8 L 106.65 174.1" />
+    </ns0:g>
+  </ns0:g>
+
+  <ns0:g fill="#000000" stroke="none">
+    
+    <ns0:circle cx="104" cy="92" r="2.6" />
+    
+    <ns0:ellipse cx="140" cy="188.6" rx="10.15" ry="11.6" />
+    <ns0:circle cx="140" cy="206.725" r="6.525" />
+  </ns0:g>
+</ns0:svg>
