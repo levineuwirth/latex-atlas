@@ -366,6 +366,42 @@ the distinction; `crawler-assets/LICENSE-SOURCE` preserves the source license
 verbatim. Frozen originals and their hashes are unchanged. Prior grants are
 not revoked, and third-party material/public-domain works are not relicensed.
 
+## First release candidate
+
+The author accepted preparation of the first public release, with a
+concrete review before visibility/publication changes. README now opens
+with the AtlasGrand cover, Euler plates, a four-command first-talk recipe,
+and the Ubuntu dependency recipe verified in CI. Detailed Beamer/CLI
+documentation moved to `docs/presentations.md`; earlier article/verse work
+moved to `docs/lab.md`. `gallery.sh` updates that relocated lab gallery and
+retains its identical output apart from relative link prefixes.
+
+`VERSION` is 0.1.0 and `atlas --version` reports it. New talks carry a
+`LICENSE-ATLAS` file containing the starter's complete MIT notice, explicitly
+separate from the author's original presentation content.
+
+`tools/release.py` builds an explicitly selected bundle: both Beamer themes,
+the CLI, starter and reusable helpers, Atlas/Grand/Euler sources, and fresh
+Grand/Euler/starter-handout PDFs. It uses `release/` for bundle-specific
+documentation and notices. Crawler assets, legacy article/verse material,
+font binaries, local outputs, and Git history are excluded. The tar.gz has
+normalized file modes/timestamps and a per-file SHA-256 manifest recording
+the source commit and compiler. A clean working tree is required unless
+`--allow-dirty` is explicitly used for a development run.
+
+The builder extracts the archive outside the checkout, creates a talk in
+a path containing spaces, checks all four variants, renders its preview,
+and verifies from TeX's recorder files that the themes came from the
+extracted bundle. It preserves diagnostics and writes `release-check.json`
+only on success. CI runs this same path and uploads `release-candidate`.
+The development archive passed these checks at roughly 1.7 MB; fast tests
+also cover the allowlist, repeatable packaging, and checksum failures.
+
+`docs/releases.md` records the build/review/publish recipe. Release notes
+are in `release/NOTES.md`. Publication and changing repository visibility
+are deliberately separate from package generation and require the final
+review agreed with the author.
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its

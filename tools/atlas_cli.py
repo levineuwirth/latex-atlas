@@ -64,6 +64,12 @@ def new_talk(destination):
     (destination / 'assets/.gitkeep').touch()
     (destination / 'talk.tex').write_text(source)
     (destination / '.gitignore').write_text('build/\n')
+    # Keep the full MIT notice with a copied template, without licensing
+    # the author's new presentation text on their behalf.
+    mit = (ROOT / 'LICENSE').read_text().split('MIT License\n', 1)[1]
+    (destination / 'LICENSE-ATLAS').write_text(
+        'This notice covers the copied Atlas starter code, not your own presentation content.\n\n'
+        'MIT License\n' + mit)
     print(f'Created {destination / "talk.tex"}\nEdit the metadata and six marked sections.')
 
 
@@ -250,6 +256,8 @@ def check(source, args):
 
 def parser():
     command = argparse.ArgumentParser(description=__doc__)
+    command.add_argument('--version', action='version',
+                         version='Atlas ' + (ROOT / 'VERSION').read_text().strip())
     commands = command.add_subparsers(dest='command', required=True)
     new = commands.add_parser('new', help='Create a talk directory from the six-pattern starter')
     new.add_argument('destination', type=Path, help='A directory that does not yet exist')

@@ -27,6 +27,7 @@ class WorkflowTests(unittest.TestCase):
             atlas.new_talk(destination)
             self.assertTrue((destination / 'assets').is_dir())
             self.assertIn('atlas build talk.tex', (destination / 'talk.tex').read_text())
+            self.assertIn('Permission is hereby granted', (destination / 'LICENSE-ATLAS').read_text())
             (destination / 'talk.tex').write_text('My edits')
             with self.assertRaisesRegex(atlas.AtlasError, 'already exists'):
                 atlas.new_talk(destination)

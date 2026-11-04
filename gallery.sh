@@ -1,7 +1,7 @@
 #!/bin/sh
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 the repository contributors
-# Rewrite the lab gallery in README.md, between the "<!-- lab:begin -->" and
+# Rewrite the lab gallery in docs/lab.md, between the "<!-- lab:begin -->" and
 # "<!-- lab:end -->" markers, from the controls found in examples/*.tex and
 # the PNGs preview.sh renders. Four plates per row: the full treatment, then
 # one cell per control with that control at its modern default, then plain.
@@ -13,13 +13,13 @@ tmp=$(mktemp) || exit 1
     [ -e "$file" ] || continue
     name=$(basename "${file%.*}")
     title=$(echo "$name" | sed 's/-/ /g')
-    cells="full|preview/$name.png|examples/$name.tex"
+    cells="full|../preview/$name.png|../examples/$name.tex"
     for ctl in $(grep -o '\\atlascontrol{[a-z0-9-]*}' "$file" | sed 's/.*{\(.*\)}/\1/' | awk '!seen[$0]++'); do
       cells="$cells
-without $ctl|preview/ablate/$name--no-$ctl.png|"
+without $ctl|../preview/ablate/$name--no-$ctl.png|"
     done
     cells="$cells
-plain|preview/ablate/$name--plain.png|"
+plain|../preview/ablate/$name--plain.png|"
     echo
     echo "### $title"
     echo
@@ -53,6 +53,6 @@ awk -v gen="$tmp" '
   /<!-- lab:begin -->/ { while ((getline line < gen) > 0) print line; skip = 1; next }
   /<!-- lab:end -->/   { skip = 0; next }
   !skip { print }
-' README.md > "$tmp.readme" && mv "$tmp.readme" README.md
+' docs/lab.md > "$tmp.readme" && mv "$tmp.readme" docs/lab.md
 rm -f "$tmp"
-echo "README.md lab gallery regenerated"
+echo "docs/lab.md lab gallery regenerated"

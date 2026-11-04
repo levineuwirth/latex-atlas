@@ -1,0 +1,22 @@
+Atlas release bundle
+
+Copyright (c) 2026 the repository contributors.
+
+The software, technical documentation, starter template, and reusable
+diagram/layout helpers are MIT; see LICENSE. The authored sample
+presentations and their PDFs are CC BY-SA 4.0; see LICENSE-CONTENT,
+presentations/LICENSE, and samples/LICENSE. MIT components remain MIT
+when included in a demonstration. Attributed quotations and external
+dependencies retain their own terms.
+
+This is a selected subset of latex-atlas. The Crawler essay, imported
+graphs, emblems, petition, seal, and their derived assets are not included.
+Neither are the earlier article/verse experiments. References to those
+works in the repository's full LICENSE-CONTENT explain exclusions, not
+additional files or rights granted by this bundle.
+
+TeX, Beamer, TikZ/PGF, pgfornament, fontspec, unicode-math, microtype,
+tcolorbox, Poppler, and installed fonts retain their own licenses. Their
+source and font binaries are not distributed here. The sample PDFs may
+contain permitted output or embedded font subsets; the content license
+does not relicense the underlying software or font data.

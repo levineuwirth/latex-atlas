@@ -62,11 +62,21 @@ jobs:
           luaotfload-tool --update
       - name: Build, check, and preview real decks
         run: python3 tools/ci_smoke.py
+      - name: Build and test the extracted release bundle
+        run: python3 tools/release.py
       - name: Save PDFs, previews, and diagnostic logs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: presentation-checks
           path: build/ci/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Save release candidate and verification logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-candidate
+          path: build/release/
           if-no-files-found: warn
           retention-days: 7
