@@ -49,7 +49,15 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             latexmk poppler-utils texlive-luatex texlive-latex-extra \
             texlive-fonts-recommended texlive-fonts-extra \
-            texlive-plain-generic fonts-ebgaramond fonts-texgyre fonts-texgyre-math
+            texlive-plain-generic fonts-texgyre fonts-texgyre-math
+      - name: Verify TeX Live font files
+        # Ubuntu's separate fonts-ebgaramond package has an older family with
+        # the same name; use the complete family supplied by TeX Live instead.
+        run: |
+          kpsewhich EBGaramond-Regular.otf
+          kpsewhich EBGaramond-Bold.otf
+          kpsewhich Garamond-Math.otf
+          luaotfload-tool --update
       - name: Build, check, and preview real decks
         run: python3 tools/ci_smoke.py
       - name: Save PDFs, previews, and diagnostic logs

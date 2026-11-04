@@ -333,7 +333,10 @@ and selected/multipage previews. Expected page counts live in the script.
 Ubuntu 24.04 installs TeX Live and fonts from its package repositories.
 The first hosted run exposed a missing Pagella Math font: with apt's
 recommended packages disabled, install `fonts-texgyre` and
-`fonts-texgyre-math` explicitly alongside EB Garamond.
+`fonts-texgyre-math` explicitly. Use the EB Garamond family in
+`texlive-fonts-extra`, not Ubuntu's older `fonts-ebgaramond` package: the
+latter shadows the TeX family and causes feature and microtype warnings.
+The workflow verifies the TeX font files and refreshes LuaTeX's font index.
 Build products and failure logs are uploaded as `presentation-checks` for
 seven days; local outputs live in ignored `build/ci/`.
 
