@@ -10,3 +10,6 @@ __pycache__/
 *.synctex.gz
 *.toc
 examples/*.pdf
+
+# Personal talks are never committed: give each its own folder in talks/.
+/talks/
