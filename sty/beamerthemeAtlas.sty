@@ -16,7 +16,16 @@
 
 \newif\ifatlasbeamer@plain
 \DeclareOptionBeamer{plain}{\atlasbeamer@plaintrue}
+% notes=script: one note page per slide, every slide, notes only (a printed
+% or on-screen rehearsal script; pair it with the handout class option).
+% notes=presenter: each page is the slide with its notes to the right, for
+% a presenter console such as pdfpc (pdfpc --notes=right talk.pdf).
+% Tools that wrap a deck (the atlas CLI) set \AtlasNotesMode before the
+% class instead: key=value options do not survive \PassOptionsToPackage.
+\def\atlasbeamer@notes{}
+\DeclareOptionBeamer{notes}{\def\atlasbeamer@notes{#1}}
 \ProcessOptionsBeamer
+\ifdefined\AtlasNotesMode\edef\atlasbeamer@notes{\AtlasNotesMode}\fi
 
 \mode<presentation>
 
@@ -159,6 +168,169 @@
     \hfill\usebeamerfont{page number in head/foot}%
     \insertframenumber\,/\,\inserttotalframenumber
   \end{beamercolorbox}
+}
+
+% ---------------------------------------------------------------------------
+% Speaker notes. Notes are ordinary \note{...}; the theme only lays them out.
+% Every note page shows the folio the audience sees, the frame title, and the
+% notes in the largest of four sizes that fits. Notes longer than the
+% smallest size still overflow and are reported as an overfull \vbox, so
+% `atlas check` catches them before the talk.
+%
+% script     A page per frame, including frames without notes, with the
+%            slide at the right. Beamer never ships slides in this mode, so
+%            overlays positioned on the page cannot draw a faithful
+%            thumbnail; set \AtlasNotesSlides to the deck's handout PDF (one
+%            page per frame) and its pages are used instead. The atlas CLI
+%            does this. Without it, Beamer's own thumbnail is the fallback.
+% presenter  Slide on the left, notes on the right, double width. The
+%            slide is already in view, so the notes take the whole page.
+\newif\ifatlasbeamer@everynote
+\newif\ifatlasbeamer@notethumb
+% Beamer draws no canvas on note pages, but in script mode it still builds
+% (then discards) each slide, and a canvas drawn as a remembered-position
+% overlay escapes onto the next note page. Themes wrap their canvas in
+% \atlasbeamer@canvas; script mode draws none, so every note page is white.
+\newif\ifatlasbeamer@nocanvas
+\newcommand{\atlasbeamer@canvas}[1]{\ifatlasbeamer@nocanvas\else#1\fi}
+\newif\ifatlasbeamer@noteempty
+\newcount\atlasbeamer@slideindex
+\def\atlasbeamer@noteslide{0}
+\def\atlasbeamer@notefolio{0}
+\def\atlasbeamer@noteoverlay{1}
+\def\atlasbeamer@notetitle{}
+% Themes restyle the folio label; Grand uses Roman numerals, as on its slides.
+\newcommand{\atlasbeamer@notefoliofmt}[1]{\textsc{slide}\enspace#1}
+\def\atlasbeamer@notesscript{script}
+\def\atlasbeamer@notespresenter{presenter}
+\ifx\atlasbeamer@notes\@empty\else
+  % Record each slide's own folio, title, and position as it ends: the note
+  % page is typeset at the start of the following slide.
+  \let\atlasbeamer@framenotesend\beamer@framenotesend
+  \def\beamer@framenotesend{%
+    \global\advance\atlasbeamer@slideindex\@ne
+    \xdef\atlasbeamer@noteslide{\the\atlasbeamer@slideindex}%
+    \xdef\atlasbeamer@notefolio{\the\c@framenumber}%
+    \xdef\atlasbeamer@noteoverlay{\the\beamer@slideinframe}%
+    \global\let\atlasbeamer@notetitle\beamer@shortframetitle
+    \global\atlasbeamer@noteemptyfalse
+    \ifx\beamer@notes\@empty\ifx\beamer@noteitems\@empty
+      \global\atlasbeamer@noteemptytrue\fi\fi
+    \atlasbeamer@framenotesend
+    \ifatlasbeamer@everynote\ifatlasbeamer@noteempty\beamer@setupnote\fi\fi}
+  \ifx\atlasbeamer@notes\atlasbeamer@notesscript
+    \setbeameroption{show only notes}%
+    % Labels live on slides, which this mode builds and discards, so they
+    % are never written. Borrow the resolved labels of the handout's .aux
+    % (\AtlasNotesAux, set by the CLI) and ignore everything else in it.
+    \AtBeginDocument{\ifdefined\AtlasNotesAux
+      \begingroup\makeatletter
+        \let\@writefile\@gobbletwo\let\pgfsyspdfmark\@gobblethree
+        \InputIfFileExists{\AtlasNotesAux}{}{}%
+      \endgroup\fi}%
+    \atlasbeamer@everynotetrue
+    \atlasbeamer@nocanvastrue
+    \atlasbeamer@notethumbtrue
+  \else\ifx\atlasbeamer@notes\atlasbeamer@notespresenter
+    \setbeameroption{show notes on second screen=right}%
+  \else
+    \PackageError{beamerthemeAtlas}{Unknown notes mode `\atlasbeamer@notes'}
+      {Use notes=script or notes=presenter.}%
+  \fi\fi
+\fi
+
+\newbox\atlasbeamer@notehead
+\newbox\atlasbeamer@notebody
+\newdimen\atlasbeamer@notewd
+\newdimen\atlasbeamer@noteht
+\def\atlasbeamer@setnote#1{%
+  \setbox\atlasbeamer@notebody=\vbox{\hsize\atlasbeamer@notewd
+    \linewidth=\hsize\textwidth=\hsize
+    \raggedright\parskip=.45em #1%
+    \ifatlasbeamer@noteempty
+      {\itshape\color{AtlasInk!55}No notes for this slide.\par}%
+    \else\insertnote\par\fi}}
+\def\atlasbeamer@notefits{%
+  \ifdim\dimexpr\ht\atlasbeamer@notebody+\dp\atlasbeamer@notebody\relax
+    >\atlasbeamer@noteht\relax\expandafter\@secondoftwo
+  \else\expandafter\@firstoftwo\fi}
+% Measure silently, then typeset the selected size with normal diagnostics.
+% Otherwise an overfull line in a discarded larger size fails `atlas check`.
+% Keep non-box warnings (missing glyphs, references, draft markers) visible.
+% Try four sizes, largest first: #1 is the first, the rest follow in order.
+\def\atlasbeamer@fitnote#1#2#3#4{%
+  \begingroup
+    \hbadness=10000\vbadness=10000\hfuzz=\maxdimen\vfuzz=\maxdimen
+    \def\atlasbeamer@notesize{#1}\atlasbeamer@setnote#1%
+    \atlasbeamer@notefits{}{\def\atlasbeamer@notesize{#2}\atlasbeamer@setnote#2%
+      \atlasbeamer@notefits{}{\def\atlasbeamer@notesize{#3}\atlasbeamer@setnote#3%
+        \atlasbeamer@notefits{}{\def\atlasbeamer@notesize{#4}}}}%
+    \expandafter\endgroup\expandafter\atlasbeamer@setnote\atlasbeamer@notesize}
+\def\atlasbeamer@thumbnail{%
+  {\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{.3pt}%
+   \color{AtlasInk!35}\fbox{%
+     \ifdefined\AtlasNotesSlides
+       \includegraphics[page=\atlasbeamer@noteslide,width=.34\paperwidth]{\AtlasNotesSlides}%
+     \else\insertslideintonotes{.34}\fi}}}
+\defbeamertemplate*{note page}{Atlas}{%
+  \color{AtlasInk}%
+  \ifatlasbeamer@notethumb
+    \atlasbeamer@notewd=\dimexpr\textwidth-.34\paperwidth-6mm\relax
+  \else\atlasbeamer@notewd=\textwidth\fi
+  \setbox\atlasbeamer@notehead=\vbox{\hsize\atlasbeamer@notewd\raggedright
+    \linewidth=\hsize\textwidth=\hsize
+    % Heading overlays describe the saved slide; they must not request more
+    % slides while Beamer is already processing the following overlay.
+    \beamer@saveanother
+    \beamer@slideinframe=\atlasbeamer@noteoverlay\relax
+    {\small\color{AtlasRubric}%
+      \ifnum\atlasbeamer@notefolio>0
+        \atlasbeamer@notefoliofmt{\atlasbeamer@notefolio}\quad\fi
+      \insertsectionhead\par}%
+    \ifx\atlasbeamer@notetitle\@empty\else
+      \vskip1mm{\Large\scshape\atlasbeamer@notetitle\par}\fi
+    \beamer@restoreanother}%
+  \atlasbeamer@noteht=\dimexpr\textheight-\ht\atlasbeamer@notehead
+    -\dp\atlasbeamer@notehead-14mm\relax
+  \ifatlasbeamer@notethumb
+    \atlasbeamer@fitnote\Large\large\normalsize\small
+  \else
+    \atlasbeamer@fitnote\LARGE\Large\large\normalsize
+  \fi
+  % Overflow beyond the smallest size is reported, never silently clipped.
+  \atlasbeamer@notefits{}{\PackageWarningNoLine{beamerthemeAtlas}{The note
+    for slide \atlasbeamer@noteslide\space is too long for its page}}%
+  \setbox\atlasbeamer@notebody=\vbox to\atlasbeamer@noteht{%
+    \unvbox\atlasbeamer@notebody\vfil}%
+  \vskip6mm
+  \hbox to\textwidth{%
+    \vtop{\vskip0pt\box\atlasbeamer@notehead\vskip4mm\box\atlasbeamer@notebody}%
+    \ifatlasbeamer@notethumb
+      \hfill\vtop{\vskip0pt\hbox{\atlasbeamer@thumbnail}}%
+    \fi}%
+}
+
+% Draft marker: visible on the slide and in the log. Beamer collects a frame
+% before executing it, so its warning line is usually the frame's end.
+% `atlas check` also locates each marker in the recorded TeX source files.
+\newcommand{\AtlasTodo}[1]{%
+  \PackageWarning{beamerthemeAtlas}{Unfinished (\string\AtlasTodo)}%
+  \par\smallskip
+  {\setlength{\fboxsep}{1.5mm}%
+   \fcolorbox{AtlasRubric}{AtlasRubric!6!AtlasPaper}{%
+     \parbox{.9\linewidth}{\raggedright\small\color{AtlasRubric}%
+       \textsc{Unfinished:}\enspace\itshape #1}}}%
+  \par\smallskip
+}
+
+% A recoloured emblem: <stem>-<palette>.pdf, or <stem>-plain.pdf under the
+% plain palette, e.g. \AtlasEmblem{assets/mark}{gold}{30mm}.
+\newcommand{\AtlasEmblem}[3]{%
+  \begingroup
+  \def\atlasbeamer@palette{#2}%
+  \ifatlasbeamer@plain\def\atlasbeamer@palette{plain}\fi
+  \includegraphics[height=#3]{#1-\atlasbeamer@palette.pdf}%
+  \endgroup
 }
 
 \mode<all>

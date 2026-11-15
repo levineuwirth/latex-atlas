@@ -402,6 +402,85 @@ are in `release/NOTES.md`. Publication and changing repository visibility
 are deliberately separate from package generation and require the final
 review agreed with the author.
 
+## Speaker notes and the slide kit — 2026-11-15
+
+The first personal talks built on Atlas (kept in the ignored `talks/`
+directory by the author's standing instruction) showed two gaps, and the
+author asked for both to be closed ahead of a more consequential
+professional talk. Both are presentation-layer additions; no existing deck
+changes. All five specimens and the plain starter were rebuilt and compared
+page by page with pre-change baselines: pixel-identical at 60 and 150 dpi.
+
+**Speaker notes.** `atlas build|preview|check --notes script|presenter`;
+the theme option is `notes=` on either theme. Variants are named
+`ornate-script`, `plain-presenter`, and so on.
+- *script*: Beamer's notes-only mode, plus a page for frames without notes,
+  with the handout class option (one page per frame). Each page carries the
+  slide folio in the theme's own form (Roman under Grand), section, title,
+  notes, and a thumbnail.
+- *presenter*: `show notes on second screen=right`, for pdfpc
+  `--notes=right`. No thumbnail (the slide is the left half); notes run full
+  width from `\LARGE` down.
+- Notes take the largest of four sizes that fits; overflow raises a warning
+  naming the slide plus an overfull box, so `check` fails rather than clips.
+
+What testing found, and why the code is shaped this way:
+- The CLI cannot pass `notes=script` with `\PassOptionsToPackage`: the
+  key=value form does not survive. The driver sets `\AtlasNotesMode`.
+- Beamer never ships slides in notes-only mode, so `remember picture`
+  overlays have no recorded positions: full-page figure slides thumbnailed
+  wrongly. The CLI builds the handout first and the theme includes its pages
+  (`\AtlasNotesSlides`); the build stops if script and handout page counts
+  (read from the TeX logs) differ. The theme's fallback is Beamer's own
+  thumbnail, documented as limited.
+- The same discarded slides drew the Grand canvas as an overlay that escaped
+  onto the next note page (Night frames turned their notes unreadable).
+  Canvases are wrapped in `\atlasbeamer@canvas`; script mode draws none.
+  An earlier consume-once flag broke the presenter view and was replaced.
+- Notes-only mode disables the `.aux`, and labels live on discarded slides,
+  so `\ref` was undefined. The theme reads only `\newlabel`s from the
+  handout's `.aux` (`\AtlasNotesAux`), ignoring its other contents.
+
+**The slide kit**, in AtlasGrand: `\AtlasGrandQuiet`, `\AtlasGrandWhite`,
+`\AtlasGrandStatement`, `\AtlasGrandStat`, `\AtlasGrandAside`,
+`\AtlasGrandExhibit`, `\AtlasGrandPhoto`; in the base theme, `\AtlasTodo`
+and `\AtlasEmblem`. All are used inside ordinary frames, so `\note` and
+overlays are untouched. The starter's `\TalkQuiet`/`\TalkWhite` and its
+figure frame, and the Crawler helpers `\CQuiet`, `\CWhite`, `\CNumber`,
+`\CAside`, `\CEmblem`, are now aliases or uses of the kit (identical output).
+`\AtlasTodo` and a missing `\AtlasGrandPhoto` file warn, so `check` reports
+unfinished decks. Exhibit content is boxed before the overlay picture, so a
+nested `tikzpicture` keeps its size. On Night pages the Exhibit label and
+caption move inside the gilt border; photographs there fit 130 × 54 mm.
+
+Validation: 19 Python tests (six new for notes); `tools/ci_smoke.py` now
+also checks the external starter's script (6 pages) and presenter view
+(7, double width) and the Crawler script (34), and passed locally in full;
+`tools/release.py --allow-dirty` verified the bundle; a scratch deck
+exercised every kit command, missing files, an over-long note, a note
+`\ref`, and portrait/landscape photographs, with each page inspected.
+Not done: `build-beamer.sh` has no notes flag (the CLI is the path), and
+the release notes and `VERSION` are unchanged pending the author's call.
+
+Review follow-up fixes:
+- Script note boxes now set `\linewidth` and `\textwidth` along with `\hsize`,
+  so ordinary lists and `\note[item]` wrap beside the thumbnail.
+- Font-size measurements suppress box diagnostics only during discarded
+  trials; the selected size is typeset with normal diagnostics. Genuine
+  horizontal and vertical overflow still fails the check.
+- Statement support text is capped at the current line width for 4:3 frames.
+- Note headings retain the slide's overlay number and preserve Beamer's
+  request for further slides, avoiding both incorrect titles and extra pages.
+- The CLI scans recorded `.tex` inputs for individual TODO locations (file,
+  line, column), skipping comments and literal examples. This is source lint:
+  markers in macro definitions and conditional branches also count. Runtime
+  warnings remain available for dynamically generated markers.
+- Regression checks cover both list forms, a fitting note with an unbreakable
+  phrase, actual overflow, matching presenter titles on both overlays, a 4:3
+  statement, and identical TODOs in an included source file.
+Validation after the fixes: all 22 Python tests and the full CI smoke check
+pass; the repaired script list page was also inspected visually.
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its

@@ -5,8 +5,11 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{beamerthemeAtlasGrand}[2026/11/04 v0.1 The grand Atlas]
 \DeclareOptionBeamer{plain}{\PassOptionsToPackage{plain}{beamerthemeAtlas}}
+\DeclareOptionBeamer{notes}{\PassOptionsToPackage{notes=#1}{beamerthemeAtlas}}
 \ProcessOptionsBeamer
 \usetheme{Atlas}
+% Note pages name the folio as the slide footer does.
+\renewcommand{\atlasbeamer@notefoliofmt}[1]{\textsc{folio}\enspace\@Roman{#1}}
 \RequirePackage{tikz}
 \usetikzlibrary{calc,patterns,decorations.pathmorphing,arrows.meta,shapes.geometric}
 \RequirePackage{pgfornament}
@@ -49,7 +52,7 @@
 
 % Deterministic paper and astronomical linework: nothing changes with the
 % overlay number. Clipping keeps every mark inside the physical slide.
-\setbeamertemplate{background canvas}{%
+\setbeamertemplate{background canvas}{\atlasbeamer@canvas{%
   \begin{tikzpicture}[remember picture,overlay]
     \clip (current page.south west) rectangle (current page.north east);
     \ifatlasgrand@night
@@ -102,7 +105,7 @@
     \node[anchor=south east,inner sep=0pt] at
       ([xshift=-5.1mm,yshift=5.1mm]current page.south east)
       {\pgfornament[width=8mm,color=\atlasgrand@border,symmetry=c]{61}};
-  \end{tikzpicture}%
+  \end{tikzpicture}}%
 }
 
 \setbeamersize{text margin left=14mm,text margin right=14mm}
@@ -224,6 +227,94 @@
     \bigskip
     \AtlasGrandAstrolabe[25mm]
   \end{frame}
+  \endgroup
+}
+
+% ---------------------------------------------------------------------------
+% The slide kit: patterns proven in real talks, for use inside ordinary
+% frames. Page switches scope like \AtlasGrandNight: {\AtlasGrandQuiet
+% \begin{frame}[plain] ... \end{frame}}. Notes and overlays stay ordinary.
+
+% Plain paper without border or footer: pauses, statements, quotations.
+\newcommand{\AtlasGrandQuiet}{%
+  \setbeamertemplate{background canvas}{\atlasbeamer@canvas{\color{AtlasPaper}\vrule width\paperwidth height\paperheight}}%
+  \setbeamertemplate{footline}{}%
+}
+% White, for figures whose own colours must not sit on tinted paper.
+\newcommand{\AtlasGrandWhite}{%
+  \setbeamertemplate{background canvas}{\atlasbeamer@canvas{\color{white}\vrule width\paperwidth height\paperheight}}%
+  \setbeamertemplate{footline}{}%
+}
+
+% A figure worth saying aloud: \AtlasGrandStat{367,972}{requests in three days}.
+\newcommand{\AtlasGrandStat}[2]{%
+  {\color{AtlasRubric}\fontsize{34}{38}\selectfont #1\par}\smallskip
+  {\large #2\par}%
+}
+% A small italic qualification beneath a claim.
+\newcommand{\AtlasGrandAside}[1]{\par{\small\itshape\raggedright #1\par}}
+
+% One sentence, given the whole slide. Use on a quiet or night page:
+% \AtlasGrandStatement{Kicker}{The sentence.}{A smaller supporting line.}
+\newcommand{\AtlasGrandStatement}[3]{%
+  \centering\AtlasGrandKicker{#1}\bigskip
+  {\fontsize{26}{31}\selectfont\itshape #2\par}%
+  \bigskip\bigskip
+  \begingroup
+    \@tempdima=118mm\relax
+    \ifdim\@tempdima>\linewidth\@tempdima=\linewidth\fi
+    \begin{minipage}{\@tempdima}\centering\large #3\par\end{minipage}\par
+  \endgroup
+}
+
+% A full-page exhibit: label at top left, content centred, caption below.
+% For figures use a white page; for photographs, night or quiet. The content
+% is boxed before the overlay picture, so it may itself be a tikzpicture.
+\newsavebox{\atlasgrand@exhibit}
+\newcommand{\AtlasGrandExhibit}[3]{%
+  \begingroup
+  \ifatlasgrand@night
+    \def\atlasgrand@label{AtlasGoldLight}\def\atlasgrand@text{AtlasIvory}%
+  \else
+    \def\atlasgrand@label{AtlasInk}\def\atlasgrand@text{AtlasInk}%
+  \fi
+  \sbox{\atlasgrand@exhibit}{\color{\atlasgrand@text}#2}%
+  \begin{tikzpicture}[remember picture,overlay]
+    % Night pages keep the gilt border, so the label is centred beneath it
+    % and the caption sits above it; quiet and white pages have no border.
+    \ifatlasgrand@night
+      \node[anchor=north,text=\atlasgrand@label,font=\small] at
+        ([yshift=-8.5mm]current page.north) {\textls[130]{\textsc{#1}}};
+      \node[anchor=south,text=\atlasgrand@text,text width=120mm,align=center,
+        font=\small\itshape] at ([yshift=8.5mm]current page.south) {#3};
+    \else
+      \node[anchor=north west,text=\atlasgrand@label,font=\large\scshape] at
+        ([xshift=8mm,yshift=-5mm]current page.north west) {#1};
+      \node[anchor=south,text=\atlasgrand@text,text width=143mm,align=center,
+        font=\small] at ([yshift=5mm]current page.south) {#3};
+    \fi
+    \node at ([yshift=-1mm]current page.center) {\usebox{\atlasgrand@exhibit}};
+  \end{tikzpicture}%
+  \endgroup
+}
+
+% A photograph within a gilt double rule, scaled to fit, never distorted:
+% \AtlasGrandPhoto{assets/site.jpg}{130mm}{54mm} fits a night
+% Exhibit; up to 140mm x 62mm on quiet or white pages. A missing file
+% draws a labelled placeholder and a warning, so slots can precede photos.
+% LuaLaTeX ignores EXIF rotation and embeds full resolution; prepare phone
+% photos first: magick IMG.HEIC -auto-orient -resize '2400x2400>' photo.jpg
+\newcommand{\AtlasGrandPhoto}[3]{%
+  \begingroup
+  \ifatlasgrand@night\color{AtlasGoldLight}\else\color{AtlasGold}\fi
+  \setlength{\fboxrule}{.4pt}\setlength{\fboxsep}{1pt}%
+  \fbox{\setlength{\fboxsep}{1.2mm}\fbox{%
+    \IfFileExists{#1}%
+      {\includegraphics[width=#2,height=#3,keepaspectratio]{#1}}%
+      {\PackageWarning{beamerthemeAtlasGrand}{Photograph not found:
+         \detokenize{#1}}%
+       \parbox[c][#3][c]{#2}{\centering\small
+         \textsc{photograph}\\\texttt{\detokenize{#1}}}}}}%
   \endgroup
 }
 

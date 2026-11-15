@@ -28,7 +28,8 @@ directory on your `PATH`; the symlink still locates the original theme files.
 Builds resolve figure and `\input` paths relative to the deck directory.
 `latexmk` reruns LuaLaTeX as needed to settle references and recorded positions,
 and reuses current outputs on subsequent builds. `--plain` and `--handout`
-are independent options. For `my-talk/talk.tex`, outputs are:
+are independent options; `--notes` adds [speaker notes](#speaker-notes).
+For `my-talk/talk.tex`, outputs are:
 
 ```text
 my-talk/
@@ -74,6 +75,38 @@ the build succeeds and no findings remain; findings and operational errors
 return nonzero. `--all-variants` checks all four combinations. These bounds
 are a review aid: they cannot detect every clipped graphic, overlapping
 element, or visual imbalance. Inspect the previews too.
+
+### Speaker notes
+
+Write notes as ordinary Beamer `\note{...}` inside a frame. `--notes` builds
+them in either of two forms, beside the other variants:
+
+```sh
+./atlas build talk.tex --notes script      # build/talk/ornate-script/talk.pdf
+./atlas build talk.tex --notes presenter   # build/talk/ornate-presenter/talk.pdf
+pdfpc --notes=right build/talk/ornate-presenter/talk.pdf
+```
+
+- **script** is for rehearsal and for print: one page per frame, in order,
+  including frames without notes ("No notes for this slide"). Each page
+  shows the folio the audience sees, the frame title, the notes, and the
+  frame itself, taken from the handout, which `atlas` builds first. The
+  script and handout must have the same number of pages, or the build stops.
+- **presenter** is for giving the talk: every slide, with its notes beside it
+  on a double-width page. A presenter console such as
+  [pdfpc](https://pdfpc.github.io/) shows the left half to the room and the
+  right half to you. The notes use the whole half page, in larger type.
+
+Notes are set in the largest of four sizes that fits. A note too long even
+at the smallest size is reported by `atlas check --notes ...`, naming the
+slide, rather than clipped. References in notes resolve as on the slides.
+`--notes` combines with `--plain`; a script already collapses overlays, so it
+does not take `--handout`. Check notes separately from `--all-variants`.
+
+Without the CLI, `\usetheme[notes=script]{AtlasGrand}` (or `presenter`) does
+the same; add the `handout` class option for a script. Its thumbnails are
+then Beamer's own, which cannot place slide content positioned with TikZ
+`remember picture` overlays; the CLI's handout pages can.
 
 Run the CLI regression checks with:
 
@@ -134,7 +167,9 @@ content slide reveals two items. Edit the metadata at the top, then the
 six marked sections. Replace `\TalkFigure` and `\TalkDetail` with your own
 PDF/image inclusions; the comments give size limits and examples. Keep the
 axes and legends needed to interpret a detail. Quiet-page and dark-palette
-changes are scoped to their frames. Speaker notes use ordinary `\note{...}`.
+changes are scoped to their frames; the full figure and quiet quotation use
+the [slide kit](#the-grand-edition). Speaker notes use ordinary `\note{...}`;
+see [Speaker notes](#speaker-notes) to build a script or presenter view.
 
 For a copied file outside the repository, compile with LuaLaTeX three times,
 with the repository's `sty/` directory on the TeX search path:
@@ -267,6 +302,53 @@ ordinary frames, theorems, proofs, lists, and blocks. The grand helpers are:
 | `\AtlasGrandKicker{Text}` | A small gold heading |
 | `\AtlasGrandRubric{Text}` | Spaced small capitals in rubric |
 | `\AtlasGrandAstrolabe[55mm]` | The vector instrument, designed for dark frames |
+
+The slide kit collects patterns that real talks kept rebuilding. Use them
+inside ordinary frames, so notes and overlays work as usual:
+
+| Command | Purpose |
+|---|---|
+| `\AtlasGrandQuiet`, `\AtlasGrandWhite` | Page switches like `\AtlasGrandNight`: plain paper or white, no border or footer |
+| `\AtlasGrandStatement{Kicker}{Sentence}{Support}` | One sentence given the whole slide; use on a quiet or night page |
+| `\AtlasGrandStat{367,972}{requests in three days}` | A large figure with its label |
+| `\AtlasGrandAside{Text}` | A small italic qualification |
+| `\AtlasGrandExhibit{Label}{Content}{Caption}` | A full-page figure or photograph with label and caption |
+| `\AtlasGrandPhoto{file}{width}{height}` | A photograph in a gilt double rule, scaled to fit without distortion |
+| `\AtlasTodo{Text}` | A visible unfinished-passage marker (both themes) |
+| `\AtlasEmblem{stem}{palette}{height}` | Includes `stem-palette.pdf`, or `stem-plain.pdf` under `[plain]` (both themes) |
+
+```latex
+{\AtlasGrandQuiet
+\begin{frame}[plain]
+  \AtlasGrandStatement{The finding}{My latest work could wait.}
+    {Almost everything requested was over a week old.}
+  \note{The qualification belongs here, not on the slide.}
+\end{frame}}
+
+{\AtlasGrandNight
+\begin{frame}[plain]
+  \AtlasGrandExhibit{The site}{\AtlasGrandPhoto{assets/site.jpg}{130mm}{54mm}}
+    {A caption, or leave it empty.}
+\end{frame}}
+```
+
+Each photograph slide is one frame, so adding another later is a copy of
+those four lines. On night pages, the Exhibit keeps clear of the gilt
+border: photographs up to about 130 × 54 mm, or two at 64 × 54 mm side by
+side. Quiet and white pages allow 140 × 62 mm. A missing photograph draws a
+labelled placeholder, so slots can be laid out first. LuaLaTeX ignores a
+phone photo's EXIF rotation and embeds it at full resolution; prepare each
+one first, for example:
+
+```sh
+magick IMG_1234.HEIC -auto-orient -resize '2400x2400>' -quality 85 assets/site.jpg
+```
+
+`atlas check` reports each remaining `\AtlasTodo` with its source file, line,
+and column, and each missing photograph, so a deck with unfinished slides
+cannot pass. It scans the `.tex` inputs recorded by the build, including
+markers in macro definitions and conditional branches; comments and verbatim
+examples are ignored. TeX warnings also catch markers generated dynamically.
 
 For a custom dark slide, scope the palette around its frame:
 

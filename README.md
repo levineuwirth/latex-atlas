@@ -39,12 +39,18 @@ With the dependencies below installed:
 
 The PDF is `../my-talk/build/talk/ornate/talk.pdf`. Preview PNGs and a vector
 contact sheet appear in `talk-preview/` beside it. `--plain` selects monochrome;
-`--handout` collapses overlays. Each combination has its own build directory.
+`--handout` collapses overlays. `--notes script` makes a rehearsal script of
+your `\note{...}` text, one page per frame; `--notes presenter` makes a
+slides-and-notes PDF for a presenter console such as pdfpc. Each combination
+has its own build directory.
 Run `./atlas --help` or a subcommand's `--help` for options.
 
 The [MIT starter](presentations/starter.tex) provides six copyable patterns:
 opening, ordinary content, full figure, enlarged detail, quiet quotation,
 and closing. It is one editable `.tex` file, with its example chart included.
+The AtlasGrand slide kit adds statement, figure, photograph, and
+unfinished-passage commands for ordinary frames; see the
+[presentation guide](docs/presentations.md#the-grand-edition).
 Atlas does not automatically turn an essay into a presentation.
 The generated `LICENSE-ATLAS` carries the starter's MIT notice without
 assigning a license to your own presentation text.

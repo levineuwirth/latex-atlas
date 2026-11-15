@@ -2,29 +2,13 @@
 % Copyright (c) 2026 the repository contributors
 % Local composition tools; the essay's plots are preserved PDF assets.
 \newcommand{\CAssets}{presentations/crawler-assets}
-\newcommand{\CQuiet}{%
-  \setbeamertemplate{background canvas}{\color{AtlasPaper}\vrule width\paperwidth height\paperheight}%
-  \setbeamertemplate{footline}{}%
-}
-\newcommand{\CWhite}{%
-  \setbeamertemplate{background canvas}{\color{white}\vrule width\paperwidth height\paperheight}%
-  \setbeamertemplate{footline}{}%
-}
-\makeatletter
-\newcommand{\CEmblem}[3]{% name, palette, height
-  \begingroup
-  \def\cpalette{#2}%
-  \ifatlasbeamer@plain\def\cpalette{plain}\fi
-  \includegraphics[height=#3]{\CAssets/#1-\cpalette.pdf}%
-  \endgroup
-}
-\makeatother
+% These began here and graduated into the AtlasGrand slide kit.
+\newcommand{\CQuiet}{\AtlasGrandQuiet}
+\newcommand{\CWhite}{\AtlasGrandWhite}
+\newcommand{\CEmblem}[3]{\AtlasEmblem{\CAssets/#1}{#2}{#3}}% name, palette, height
 \newcommand{\CLabel}[1]{\AtlasGrandKicker{#1}}
-\newcommand{\CNumber}[2]{%
-  {\color{AtlasRubric}\fontsize{34}{38}\selectfont #1\par}\smallskip
-  {\large #2\par}%
-}
-\newcommand{\CAside}[1]{\par{\small\itshape\raggedright #1\par}}
+\newcommand{\CNumber}[2]{\AtlasGrandStat{#1}{#2}}
+\newcommand{\CAside}[1]{\AtlasGrandAside{#1}}
 \newcommand{\CEvidence}[3]{%
   \begingroup\CWhite
   \begin{frame}[plain]

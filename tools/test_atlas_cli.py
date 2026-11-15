@@ -65,6 +65,37 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(len(atlas.log_findings(log)), 4)
         self.assertEqual(atlas.log_findings('Output written on talk.pdf (7 pages).'), [])
 
+    def test_todo_locations_skip_comments_literals_and_longer_commands(self):
+        source = (r'% \AtlasTodo{comment}' '\n'
+                  r'\verb|\AtlasTodo{example}| \string\AtlasTodo' '\n'
+                  r'\begin{verbatim}' '\n' r'\AtlasTodo{example}' '\n'
+                  r'\end{verbatim}' '\n'
+                  r'\AtlasTodoExtra{not a marker}' '\n'
+                  r'\% \AtlasTodo{first} \AtlasTodo{second}' '\n'
+                  r'\\% \AtlasTodo{comment after a line break}' '\n')
+        self.assertEqual(list(atlas.todo_positions(source)), [(7, 4), (7, 22)])
+
+    def test_todo_examples_in_literal_commands_are_not_draft_markers(self):
+        source = (r'\string \AtlasTodo \verb*+\AtlasTodo{example}+' '\n'
+                  r'\lstinline[language=tex]|\AtlasTodo{example}|' '\n'
+                  r'\detokenize{\AtlasTodo{nested {example}} \{ \}}' '\n'
+                  r'\AtlasTodo{real}')
+        self.assertEqual(list(atlas.todo_positions(source)), [(4, 1)])
+
+    def test_todo_recorder_finds_included_sources_once_with_exact_locations(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            body = root / 'included body.tex'
+            body.write_text('\\begin{frame}{Draft}\n\\AtlasTodo{same}\n'
+                            '\\AtlasTodo{same}\n\\end{frame}\n')
+            (root / 'unread.tex').write_text(r'\AtlasTodo{not included}')
+            pdf = root / 'talk.pdf'
+            pdf.with_suffix('.fls').write_text(
+                f'PWD {root}\nINPUT included body.tex\nINPUT {body}\n')
+            self.assertEqual(atlas.todo_findings(pdf), [
+                f'{body}:2:1: Unfinished (\\AtlasTodo)',
+                f'{body}:3:1: Unfinished (\\AtlasTodo)'])
+
     def test_missing_dependency_is_actionable(self):
         with patch.object(atlas.shutil, 'which', return_value=None):
             with self.assertRaisesRegex(atlas.AtlasError, 'Missing programs: latexmk'):
@@ -103,6 +134,76 @@ class WorkflowTests(unittest.TestCase):
             self.assertIn(r'\PassOptionsToClass{handout}{beamer}', driver)
             self.assertIn(r'\PassOptionsToPackage{plain}', driver)
             self.assertIn(str(source), driver)
+
+    def fake_builds(self, temp, pages=None):
+        """Patch the compiler; each build writes a PDF and a log with a page count."""
+        source = Path(temp) / 'Talk with spaces.tex'
+        source.write_text('source')
+        calls = []
+
+        def fake_run(command, cwd, log, env):
+            calls.append(command)
+            variant = log.parent.name
+            (log.parent / 'talk.pdf').touch()
+            count = (pages or {}).get(variant, 6)
+            (log.parent / 'talk.log').write_text(f'Output written on talk.pdf ({count} pages, 1 bytes).')
+
+        patches = [patch.object(atlas, 'require'),
+                   patch.object(atlas.subprocess, 'run', return_value=subprocess.CompletedProcess(
+                       [], 0, stdout='/tex/package.sty\n')),
+                   patch.object(atlas, 'run_logged', side_effect=fake_run)]
+        return source, calls, patches
+
+    def test_presenter_notes_are_a_separate_variant(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            source, calls, patches = self.fake_builds(temp)
+            with patches[0], patches[1], patches[2]:
+                pdf = atlas.build(source, notes='presenter')
+            self.assertEqual(pdf.parent.name, 'ornate-presenter')
+            driver = (pdf.parent / 'atlas-driver.tex').read_text()
+            self.assertIn(r'\def\AtlasNotesMode{presenter}', driver)
+            self.assertNotIn('handout', driver)
+            self.assertEqual(len(calls), 1)
+
+    def test_script_notes_build_the_handout_for_their_slides(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            source, calls, patches = self.fake_builds(temp)
+            with patches[0], patches[1], patches[2]:
+                pdf = atlas.build(source, plain=True, notes='script')
+            self.assertEqual(pdf.parent.name, 'plain-script')
+            self.assertEqual(len(calls), 2, 'the handout is built first')
+            self.assertTrue(str(calls[0][-1]).endswith('plain-handout/atlas-driver.tex'))
+            driver = (pdf.parent / 'atlas-driver.tex').read_text()
+            handout = pdf.parent.parent / 'plain-handout'
+            self.assertIn(r'\PassOptionsToClass{handout}{beamer}', driver)
+            self.assertIn(r'\def\AtlasNotesMode{script}', driver)
+            self.assertIn(str(handout / 'talk.pdf'), driver)
+            self.assertIn(str(handout / 'talk.aux'), driver)
+
+    def test_script_must_match_the_handout_page_for_page(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            source, _, patches = self.fake_builds(temp, {'ornate-script': 5})
+            with patches[0], patches[1], patches[2]:
+                with self.assertRaisesRegex(atlas.AtlasError, '5 pages but the handout has 6'):
+                    atlas.build(source, notes='script')
+
+    def test_notes_option_conflicts_are_errors(self):
+        with self.assertRaisesRegex(atlas.AtlasError, 'omit --handout'):
+            atlas.build(Path('talk.tex'), handout=True, notes='script')
+        with self.assertRaisesRegex(atlas.AtlasError, 'Unknown notes mode'):
+            atlas.build(Path('talk.tex'), notes='both')
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(atlas.main(['check', 'talk.tex', '--all-variants', '--notes', 'script']), 1)
+            self.assertEqual(atlas.main(['preview', 'talk.pdf', '--notes', 'presenter']), 1)
+
+    def test_page_count_comes_from_the_log(self):
+        with tempfile.TemporaryDirectory() as temp:
+            pdf = Path(temp) / 'talk.pdf'
+            pdf.with_suffix('.log').write_text('Output written on /a long/\npath/talk.pdf (34 pages, 9 bytes).')
+            self.assertEqual(atlas.log_page_count(pdf), 34)
+            pdf.with_suffix('.log').write_text('No pages of output.')
+            with self.assertRaises(atlas.AtlasError):
+                atlas.log_page_count(pdf)
 
     def test_pdf_mode_rejects_ineffective_build_flags(self):
         with contextlib.redirect_stderr(io.StringIO()):

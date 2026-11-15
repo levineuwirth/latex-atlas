@@ -14,16 +14,6 @@
 \institute{Your institution}
 \date{\today}
 
-% Local layout choices. Group their use in {...} to restore the theme.
-\newcommand{\TalkQuiet}{%
-  \setbeamertemplate{background canvas}{\color{AtlasPaper}\vrule width\paperwidth height\paperheight}%
-  \setbeamertemplate{footline}{}%
-}
-\newcommand{\TalkWhite}{%
-  \setbeamertemplate{background canvas}{\color{white}\vrule width\paperwidth height\paperheight}%
-  \setbeamertemplate{footline}{}%
-}
-
 % The example chart is illustrative, not a research result. Both views
 % use the SAME drawing; the detail only changes the clipping rectangle.
 % Delete this macro when replacing the two figure commands below.
@@ -91,15 +81,11 @@
 
 % 3. FULL FIGURE — a neutral field preserves source colors and annotations.
 % Plain frames still count as frames unless noframenumbering is specified.
-{\TalkWhite
+% For a photograph: a night or quiet page, \AtlasGrandPhoto{file}{140mm}{62mm}.
+{\AtlasGrandWhite
 \begin{frame}[plain]
-  \begin{tikzpicture}[remember picture,overlay]
-    \node[anchor=north west,text=AtlasInk,font=\large\scshape] at
-      ([xshift=8mm,yshift=-5mm]current page.north west) {The full comparison};
-    \node at ([yshift=-1mm]current page.center) {\TalkFigure};
-    \node[anchor=south,text=AtlasInk,text width=143mm,align=center,font=\small] at
-      ([yshift=5mm]current page.south) {Illustrative data\quad /\quad Four groups, one common scale.};
-  \end{tikzpicture}
+  \AtlasGrandExhibit{The full comparison}{\TalkFigure}
+    {Illustrative data\quad /\quad Four groups, one common scale.}
 \end{frame}}
 
 % 4. ENLARGED DETAIL — use a useful crop, then state its interpretation.
@@ -120,7 +106,7 @@
 
 % 5. QUIET QUOTATION — EB Garamond Italic, 27pt with 31pt leading.
 % Add the actual attribution below when quoting someone else's words.
-{\TalkQuiet
+{\AtlasGrandQuiet
 \begin{frame}[plain]
   \centering
   {\fontsize{27}{31}\selectfont\itshape
