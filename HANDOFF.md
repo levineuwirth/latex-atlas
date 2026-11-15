@@ -481,6 +481,21 @@ Review follow-up fixes:
 Validation after the fixes: all 22 Python tests and the full CI smoke check
 pass; the repaired script list page was also inspected visually.
 
+## Atlas 0.2.0 — 2026-11-15
+
+The author asked to commit the speaker-notes and slide-kit work (with the
+review fixes) and cut 0.2.0 from it. `VERSION` is 0.2.0; both Beamer themes
+declare v0.2 dated 2026/11/15. `release/NOTES.md` (the bundle's
+`CHANGELOG.md`) now leads with 0.2.0 and keeps 0.1.0 below it; a GitHub
+release description is its newest section. The bundle README gained a short
+"Speaker notes and slide patterns" section, since `docs/` is not shipped.
+
+Before the bump, the three bundled samples (Grand, Euler, starter handout)
+were rebuilt from 0.1.0 (`a1dcb06`) and from this tree and compared page by
+page: pixel-identical. `tools/release.py` was run from the clean release
+commit. The `v0.2.0` tag is local only; nothing has been pushed, and the
+GitHub release remains the author's step (see `docs/releases.md`).
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its

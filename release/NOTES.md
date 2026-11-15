@@ -1,6 +1,34 @@
 <!-- SPDX-License-Identifier: MIT -->
 <!-- Copyright (c) 2026 the repository contributors -->
 
+# Atlas 0.2.0
+
+Atlas 0.2.0 prepares a talk for the room: speaker notes, a set of slide
+patterns proven in real talks, and checks that an unfinished deck cannot pass.
+
+- **Speaker notes.** Write ordinary `\note{...}`; build with
+  `--notes script` or `--notes presenter` (with `build`, `preview`, or
+  `check`). A script has one page per frame, with frames lacking notes
+  marked, the audience's folio, the frame title, and a picture of the slide
+  as shown. A presenter build puts the slide beside its notes for a console
+  such as `pdfpc --notes=right`. Notes shrink through four sizes to fit; a
+  note too long for its page fails `check` and names the slide.
+- **The AtlasGrand slide kit.** `\AtlasGrandQuiet` and `\AtlasGrandWhite`
+  pages; `\AtlasGrandStatement`, `\AtlasGrandStat`, and `\AtlasGrandAside`
+  for text; `\AtlasGrandExhibit` for a full-page figure or photograph with
+  label and caption; and `\AtlasGrandPhoto`, a gilt-framed photograph that
+  scales without distortion and leaves a labelled slot until the file exists.
+- **Draft markers.** `\AtlasTodo{...}` (both themes) marks an unfinished
+  passage on the slide. `check` reports each remaining marker by file, line,
+  and column, and each missing photograph, so a draft cannot pass.
+- **Recoloured emblems.** `\AtlasEmblem` selects an emblem's palette
+  version and its monochrome version under `--plain`.
+
+The starter now uses the kit in place of its own page helpers. Existing
+decks render unchanged; the bundled samples are pixel-identical to 0.1.0.
+`--notes script` cannot be combined with `--handout` (a script already has
+one page per frame), and `check --all-variants` does not include notes.
+
 # Atlas 0.1.0
 
 The first Atlas release combines two LuaLaTeX Beamer themes with a small

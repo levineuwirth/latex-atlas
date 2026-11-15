@@ -2,7 +2,7 @@
 <!-- Copyright (c) 2026 the repository contributors -->
 <!-- This file becomes README.md at the root of the release bundle. -->
 
-# Atlas 0.1.0
+# Atlas 0.2.0
 
 Beamer presentations with Garamond, engraved diagrams, and room for an argument.
 
@@ -53,6 +53,26 @@ not assign a license to your own presentation text.
 
 `check` reports compilation warnings and suspicious text bounds. Review
 the previews for visual collisions and clipped graphics too.
+
+## Speaker notes and slide patterns
+
+Write ordinary `\note{...}` in frames. `--notes script` builds a rehearsal
+script, one page per frame with the slide pictured beside its notes;
+`--notes presenter` builds the slide and notes side by side for a presenter
+console such as `pdfpc --notes=right`. Both work with `build`, `preview`,
+and `check`:
+
+```sh
+./atlas build ../my-talk/talk.tex --notes script
+./atlas check ../my-talk/talk.tex --notes presenter
+```
+
+AtlasGrand also provides ready slide patterns: `\AtlasGrandQuiet` and
+`\AtlasGrandWhite` pages, `\AtlasGrandStatement`, `\AtlasGrandStat`,
+`\AtlasGrandAside`, `\AtlasGrandExhibit` for full-page figures, and
+`\AtlasGrandPhoto` for framed photographs. Mark unfinished passages with
+`\AtlasTodo{...}`; `check` fails until every marker is gone. The comments
+in `sty/beamerthemeAtlasGrand.sty` and the starter show each in use.
 
 ## Read the samples
 

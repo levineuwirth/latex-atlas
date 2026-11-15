@@ -3,7 +3,7 @@
 
 # Releases
 
-[Back to Atlas](../README.md) · [0.1.0 release notes](../release/NOTES.md)
+[Back to Atlas](../README.md) · [Release notes](../release/NOTES.md)
 
 The release archive is a selected, self-contained copy of the CLI, both
 Beamer themes, starter, reusable helpers, and Atlas/Grand/Euler sources.
@@ -21,7 +21,7 @@ python3 tools/release.py
 ```
 
 The version comes from `VERSION`. The command compiles and checks the
-sample PDFs, creates `build/release/latex-atlas-0.1.0.tar.gz`, extracts it
+sample PDFs, creates `build/release/latex-atlas-0.2.0.tar.gz`, extracts it
 outside the checkout, and exercises the shipped CLI there. It creates a
 new talk, builds all four variants, generates a preview, and verifies
 that the TeX dependencies came from the extracted themes. The final
@@ -42,8 +42,8 @@ candidate as a workflow artifact. To verify a downloaded release:
 
 ```sh
 sha256sum -c SHA256SUMS
-tar -xzf latex-atlas-0.1.0.tar.gz
-cd latex-atlas-0.1.0
+tar -xzf latex-atlas-0.2.0.tar.gz
+cd latex-atlas-0.2.0
 ./atlas --version
 ```
 
@@ -53,8 +53,8 @@ Download the three sample PDFs beside the archive if checking the complete
 ## Publishing
 
 Prepare and review the candidate before changing repository visibility.
-Create a draft GitHub release for `v0.1.0` at the manifest's exact commit,
-attach the archive, `SHA256SUMS`, and sample PDFs, and use
-`release/NOTES.md` as the description. Review the draft, CI result, and
-downloaded bundle before publishing. Repository visibility and release
+Create a draft GitHub release for `v0.2.0` at the manifest's exact commit,
+attach the archive, `SHA256SUMS`, and sample PDFs, and use the newest
+section of `release/NOTES.md` as the description. Review the draft, CI
+result, and downloaded bundle before publishing. Repository visibility and release
 publication are separate actions; the builder performs neither.
