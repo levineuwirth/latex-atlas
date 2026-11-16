@@ -22,6 +22,9 @@ TeX packages and fonts listed below; missing fonts can use the theme's fallbacks
 
 `new` refuses to overwrite an existing directory. The generated talk stays
 independent of the specimen assets, but uses the themes from this checkout.
+A bare name typed at the root of the checkout, `./atlas new keynote`, makes
+`talks/keynote/`: the repository ignores `talks/`, so personal talks stay out
+of its history.
 Invoke `atlas` by its absolute path from elsewhere, or symlink it into a
 directory on your `PATH`; the symlink still locates the original theme files.
 
@@ -29,27 +32,37 @@ Builds resolve figure and `\input` paths relative to the deck directory.
 `latexmk` reruns LuaLaTeX as needed to settle references and recorded positions,
 and reuses current outputs on subsequent builds. `--plain` and `--handout`
 are independent options; `--notes` adds [speaker notes](#speaker-notes).
-For `my-talk/talk.tex`, outputs are:
+For `my-talk/keynote.tex`, outputs are:
 
 ```text
 my-talk/
-  talk.tex
-  LICENSE-ATLAS
+  keynote.tex
   assets/
-  build/talk/
-    ornate/talk.pdf
+  build/keynote/
+    keynote.pdf               a copy to send, named after the deck
+    keynote-handout.pdf       likewise for each variant built
+    ornate/talk.pdf           each variant's own build directory
     ornate-handout/talk.pdf
     plain/talk.pdf
     plain-handout/talk.pdf
 ```
 
-Each variant keeps its own auxiliary files and `build.stdout.txt`. Use
-`--output-dir DIR` to change the build root, or `--workdir DIR` for decks
-whose relative paths assume another working directory. For example:
+Each variant keeps its own auxiliary files and `build.stdout.txt` under a
+fixed name, `talk.pdf`, for tools; the named copy beside them is refreshed by
+every successful build. Use `--output-dir DIR` to change the build root.
 
-```sh
-./atlas build presentations/atlas-grand.tex --workdir .
+A deck whose paths assume another working directory, say the repository
+root, declares it in a comment near its top, relative to the deck:
+
+```tex
+%!TEX program = lualatex
+% atlas: workdir=../..
 ```
+
+`--workdir DIR` on the command line overrides it. The specimens in
+`presentations/` declare `workdir=..`, so `./atlas build
+presentations/atlas-grand.tex` needs no options. The same comment can set
+`min-text=` for [text sizes](#text-sizes); quote values containing spaces.
 
 The existing `build-beamer.sh` commands remain available with their original
 output locations.
@@ -69,12 +82,66 @@ Text selections must match exactly one page; use page numbers for repeated
 overlay titles. The preview manifest records the source and selected pages.
 
 `check` forces a rebuild, reports LaTeX warnings, overfull/underfull boxes,
-missing glyphs, and extracted text within one point of or beyond a page edge.
+missing glyphs, remaining `\AtlasTodo` markers, extracted text within one
+point of or beyond a page edge, and [text too small to read](#text-sizes).
 It writes `check.json` beside each checked PDF. Exit status is zero only when
 the build succeeds and no findings remain; findings and operational errors
 return nonzero. `--all-variants` checks all four combinations. These bounds
 are a review aid: they cannot detect every clipped graphic, overlapping
 element, or visual imbalance. Inspect the previews too.
+
+### Text sizes
+
+A figure that reads well on a laptop can be unreadable from the back of a
+room once it is scaled into a column. `check` measures every run of text as
+it is drawn, after `\resizebox`, TikZ scaling, and inside included PDF
+figures, and reports any page with text below 6 pt. Sizes are projected:
+measured against a 16:9 Beamer page, 90 mm high, so a 4:3 page is judged at
+the same height on screen. Beamer's `\tiny` is 6 pt; the Atlas footer is 8.
+
+```text
+Page 16: 68 text runs below 6 pt as projected (smallest 3.0 pt): '00:00–19:00', '130', '14 Oct'
+```
+
+Raise or lower the floor with `--min-text PT`, or for one deck with
+`% atlas: min-text=PT`; the command line wins. Some small text is not meant
+to be read: a document shown as an object, an engraved scale. Declare it in
+the frame, with the reason, and `check` lists that page as declared instead
+of failing:
+
+```tex
+\begin{frame}{The petition}
+  \AtlasFinePrint{the first page is shown as a facsimile}
+  ...
+```
+
+The declaration covers the whole page. The Grand astrolabe declares its own
+degree scale. Lettering inside raster images is not text and is not
+measured. Scripts are measured on their handout pages, which match theirs
+one for one; presenter builds are not measured, since their slides are the
+ordinary build's.
+
+### Emblems and photographs
+
+Two commands prepare assets the way the themes expect them.
+
+```sh
+./atlas emblem mark.svg --out-dir talks/keynote/assets
+./atlas photo ~/Pictures/IMG_4127.HEIC ~/Pictures/IMG_4130.jpg --out-dir talks/keynote/assets/photos
+```
+
+`emblem` turns a one-colour SVG into `mark-gold.pdf`, `mark-ink.pdf`, and
+`mark-plain.pdf`, the files `\AtlasEmblem{assets/mark}{gold}{30mm}` selects.
+It recolours `currentColor`; for artwork drawn in a fixed colour, name it
+with `--replace '#000000'`. `--name` sets the output stem. It needs
+`rsvg-convert` (librsvg).
+
+`photo` writes each image as an upright JPEG no larger than 2400 pixels
+(`--size`), with location and camera metadata removed and its colour
+profile kept. LuaLaTeX ignores a phone's rotation flag and embeds the file
+as given, metadata included, in every PDF you send. Originals are never
+replaced, nor existing outputs without `--force`. It needs ImageMagick; HEIC
+input needs ImageMagick built with HEIF support.
 
 ### Speaker notes
 

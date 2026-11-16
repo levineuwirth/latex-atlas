@@ -15,6 +15,7 @@ No Git checkout or access to the original repository is needed to use it.
 
 Python 3.9+, LuaLaTeX, latexmk, and Poppler are required. The Python tool
 uses only the standard library. Contact sheets also use pdfLaTeX and pdfpages.
+`atlas emblem` and `atlas photo` optionally use librsvg and ImageMagick.
 The tested installation on Ubuntu 24.04 is:
 
 ```sh
@@ -22,7 +23,8 @@ sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
   python3 latexmk poppler-utils texlive-luatex texlive-latex-extra \
   texlive-fonts-recommended texlive-fonts-extra texlive-plain-generic \
-  fonts-texgyre fonts-texgyre-math
+  fonts-texgyre fonts-texgyre-math \
+  imagemagick librsvg2-bin
 luaotfload-tool --update
 ```
 
@@ -43,16 +45,19 @@ From this extracted directory:
 ./atlas check ../my-talk/talk.tex --all-variants
 ```
 
-The PDF is `../my-talk/build/talk/ornate/talk.pdf`; its preview directory is
-`talk-preview/` beside it. Add `--plain` for monochrome, or `--handout` to
+The PDF is `../my-talk/build/talk/talk.pdf`, named after the deck; its
+preview directory is `build/talk/ornate/talk-preview/`. Add `--plain` for monochrome, or `--handout` to
 collapse overlays. Run `./atlas --help` and `./atlas --version` for help and
 the version. You can also invoke this `atlas` by absolute path or symlink
 it onto `PATH` while keeping the bundle directory intact.
 The new talk's `LICENSE-ATLAS` preserves the starter's MIT notice; it does
 not assign a license to your own presentation text.
 
-`check` reports compilation warnings and suspicious text bounds. Review
-the previews for visual collisions and clipped graphics too.
+`check` reports compilation warnings, suspicious text bounds, and text too
+small to read when projected (below 6 pt on a 16:9 page; `--min-text` changes
+it). Review the previews for visual collisions and clipped graphics too.
+`./atlas emblem` recolours an SVG emblem for `\AtlasEmblem`, and `./atlas
+photo` turns phone photographs into upright, metadata-free JPEGs.
 
 ## Speaker notes and slide patterns
 
@@ -84,8 +89,8 @@ The PDF presentations include speaker-paced overlays; advance pages to
 reveal the next step. Their `.tex` sources are in `presentations/`.
 
 ```sh
-./atlas build presentations/atlas-grand.tex --workdir .
-./atlas build presentations/atlas-euler.tex --workdir .
+./atlas build presentations/atlas-grand.tex
+./atlas build presentations/atlas-euler.tex
 ```
 
 ## Licenses and provenance

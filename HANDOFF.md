@@ -496,6 +496,55 @@ page: pixel-identical. `tools/release.py` was run from the clean release
 commit. The `v0.2.0` tag is local only; nothing has been pushed, and the
 GitHub release remains the author's step (see `docs/releases.md`).
 
+## Text sizes, imports, and CLI conveniences — 2026-11-15
+
+After 0.2.0 the author took the remaining directions from the their-word
+talks, before a forthcoming professional talk: projected text sizes in
+`check`, `atlas emblem`/`atlas photo`, and three CLI frictions.
+
+**Text sizes.** `check` measures each text run with `pdftohtml -xml -zoom 3`
+(Poppler caps the zoom at 3; sizes are integers, so ±⅓ pt). These are true
+transformed font sizes, after `\resizebox`, TikZ scaling, and inside
+included PDF figures. `pdftotext -bbox` heights were rejected: they are
+font size × the font's ascent+descent (1.3 for EB Garamond), so they vary
+by font. Sizes are normalized to a 255.1 pt (90 mm, 16:9) page height;
+the default floor is 6 pt (`\tiny`; the footer is 8). A survey before
+choosing it: Euler's smallest labels are 6.3 pt; the their-word boundary
+diagram 4.3–5.7; the Crawler essay charts 3–5; Grand's astrolabe 2.3; the
+petition facsimile 1.7.
+
+`\AtlasFinePrint{reason}` (base theme) declares a page's small text
+deliberate. It writes `Atlas fine print on page \ReadonlyShipoutCounter`
+to the log at shipout. TeX positions (`\savepos`) were rejected for
+region-level waivers: TikZ places nodes with `cm` transforms that savepos
+does not see, and that is where most of this text lives. The shipout
+counter is exact for slides and handouts (tested after `\setcounter{page}`)
+but not under pgfpages, which ships each logical page too, so presenter
+builds skip the size check with a message; scripts are measured on their
+handout. The astrolabe macro declares itself; Grand's frontispiece and the
+Crawler petition frame declare theirs. The Crawler essay charts are left
+flagged on purpose: CI asserts exactly those six pages (16, 20, 25, 26, 29,
+30; script 15, 18, 22, 23, 26, 27), which is the check's real-figure test.
+`check` on the Crawler deck therefore exits 1.
+
+**Imports.** `atlas emblem` substitutes `currentColor` (or `--replace`
+colours) with the three `\AtlasEmblem` palettes and converts with
+`rsvg-convert`; it reproduced the hand-made VerInf PDFs pixel for pixel.
+`atlas photo` runs ImageMagick (`magick`, else IM6 `convert`): first frame,
+`-auto-orient`, bounded resize, alpha onto white, `+profile '!icc,*'`.
+LuaLaTeX embeds JPEG files whole, EXIF included (the their-word PDF carries
+three EXIF blocks; its photos happened to have no GPS). CI builds a JPEG
+with a hand-written EXIF block (rotation 6, GPS) and checks the output is
+upright and EXIF-free. CI now installs `imagemagick librsvg2-bin`.
+
+**CLI.** `% atlas: workdir=.. min-text=5` near a deck's top (40 lines,
+shlex-quoted, paths relative to the deck; unknown keys are errors); command
+line options win. The specimens and the their-word decks declare workdir.
+Every build also copies `talk.pdf` to `build/<deck>/<deck>[-variant].pdf`;
+the variant directories keep fixed names for tools, preview, and script
+thumbnails, and arbitrary deck names never become a TeX jobname. A
+bare `atlas new NAME` at the checkout root makes `talks/NAME`.
+
 ## Historical handoff — September 2026 (superseded)
 
 Written 2026-09-15 at the end of the session that gave build.sh its

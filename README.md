@@ -37,12 +37,14 @@ With the dependencies below installed:
 ./atlas check ../my-talk/talk.tex --all-variants
 ```
 
-The PDF is `../my-talk/build/talk/ornate/talk.pdf`. Preview PNGs and a vector
-contact sheet appear in `talk-preview/` beside it. `--plain` selects monochrome;
+The PDF is `../my-talk/build/talk/talk.pdf`, named after the deck. Preview
+PNGs and a vector contact sheet appear in `build/talk/ornate/talk-preview/`. `--plain` selects monochrome;
 `--handout` collapses overlays. `--notes script` makes a rehearsal script of
 your `\note{...}` text, one page per frame; `--notes presenter` makes a
 slides-and-notes PDF for a presenter console such as pdfpc. Each combination
-has its own build directory.
+has its own build directory. `check` also fails on text too small to read
+when projected, and on unfinished `\AtlasTodo` passages. `./atlas emblem`
+and `./atlas photo` prepare emblems and phone photographs for slides.
 Run `./atlas --help` or a subcommand's `--help` for options.
 
 The [MIT starter](presentations/starter.tex) provides six copyable patterns:
@@ -59,14 +61,17 @@ assigning a license to your own presentation text.
 
 The tested environment is **Ubuntu 24.04**, with Python **3.9 or later**.
 The Python tools use only the standard library. Building needs LuaLaTeX and
-`latexmk`; previews need Poppler, pdfLaTeX, and `pdfpages`.
+`latexmk`; previews and checks need Poppler, pdfLaTeX, and `pdfpages`.
+`atlas emblem` needs librsvg and `atlas photo` ImageMagick; both are optional
+and in the recipe's last line.
 
 ```sh
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
   python3 latexmk poppler-utils texlive-luatex texlive-latex-extra \
   texlive-fonts-recommended texlive-fonts-extra texlive-plain-generic \
-  fonts-texgyre fonts-texgyre-math
+  fonts-texgyre fonts-texgyre-math \
+  imagemagick librsvg2-bin
 luaotfload-tool --update
 ```
 
@@ -89,8 +94,8 @@ absolute path or symlink it onto your `PATH`.
 | [The Form of Two](presentations/atlas-euler.tex) | A complete visual argument through Euler's polyhedral formula |
 
 ```sh
-./atlas build presentations/atlas-grand.tex --workdir .
-./atlas build presentations/atlas-euler.tex --workdir .
+./atlas build presentations/atlas-grand.tex
+./atlas build presentations/atlas-euler.tex
 ```
 
 The release bundle includes the Grand and Euler presentation PDFs, plus a

@@ -323,6 +323,14 @@
   \par\smallskip
 }
 
+% Text on this page is deliberately below room size: a facsimile shown as an
+% object, an engraved scale. `atlas check` then reports the page's small text
+% as declared rather than failing; everything else on the page is checked.
+% The reason is required and appears in the report:
+% \AtlasFinePrint{a court filing shown as an exhibit}.
+\newcommand{\AtlasFinePrint}[1]{%
+  \write-1{Atlas fine print on page \the\ReadonlyShipoutCounter\space(\unexpanded{#1})}}
+
 % A recoloured emblem: <stem>-<palette>.pdf, or <stem>-plain.pdf under the
 % plain palette, e.g. \AtlasEmblem{assets/mark}{gold}{30mm}.
 \newcommand{\AtlasEmblem}[3]{%

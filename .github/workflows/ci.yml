@@ -45,13 +45,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Install TeX, fonts, and PDF tools
+      - name: Install TeX, fonts, PDF tools, and image converters
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             latexmk poppler-utils texlive-luatex texlive-latex-extra \
             texlive-fonts-recommended texlive-fonts-extra \
-            texlive-plain-generic fonts-texgyre fonts-texgyre-math
+            texlive-plain-generic fonts-texgyre fonts-texgyre-math \
+            imagemagick librsvg2-bin
       - name: Verify TeX Live font files
         # Ubuntu's separate fonts-ebgaramond package has an older family with
         # the same name; use the complete family supplied by TeX Live instead.

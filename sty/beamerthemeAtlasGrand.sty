@@ -184,7 +184,7 @@
 
 % A compass/armillary frontispiece. All elements remain vector paths.
 \newcommand{\AtlasGrandAstrolabe}[1][55mm]{%
-  \resizebox{#1}{!}{%
+  \resizebox{#1}{!}{\AtlasFinePrint{the astrolabe's degree scale is engraving}%
   \begin{tikzpicture}[draw=AtlasGoldLight,text=AtlasGoldLight,line width=.45pt]
     \path[use as bounding box] (-3.35,-3.35) rectangle (3.35,3.35);
     \foreach \r in {2.42,2.54,2.77,2.88,3.05}\draw (0,0) circle (\r);

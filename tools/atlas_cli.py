@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -47,6 +48,11 @@ def run_logged(command, cwd, log, env=None):
 
 
 def new_talk(destination):
+    # A bare name typed in the Atlas checkout itself means a personal talk:
+    # those live in talks/, which the repository ignores.
+    if (not destination.is_absolute() and len(destination.parts) == 1
+            and destination.name not in ('.', '..') and Path.cwd().resolve() == ROOT):
+        destination = ROOT / 'talks' / destination
     destination = destination.expanduser().absolute()
     tex_path(destination)
     # Never merge into an existing directory, including an empty one.
@@ -74,6 +80,54 @@ def new_talk(destination):
 
 
 NOTES = ('script', 'presenter')
+SETTINGS = {'workdir', 'min-text'}
+
+
+def deck_settings(source):
+    """Read `% atlas: key=value ...` comments from the top of a deck.
+
+    Paths are relative to the deck. Command-line options take precedence.
+    """
+    settings = {}
+    with source.open(errors='replace') as stream:
+        for number, line in enumerate(stream, 1):
+            if number > 40:
+                break
+            match = re.match(r'\s*%\s*atlas:(.*)', line)
+            if not match:
+                continue
+            try:
+                items = shlex.split(match[1])
+            except ValueError as error:
+                raise AtlasError(f'{source}:{number}: cannot read atlas settings: {error}')
+            for item in items:
+                key, equals, value = item.partition('=')
+                if not equals or key not in SETTINGS or not value:
+                    raise AtlasError(f'{source}:{number}: unknown atlas setting {item!r}; '
+                                     'use ' + ', '.join(f'{name}=...' for name in sorted(SETTINGS)))
+                settings[key] = value
+    if 'workdir' in settings:
+        settings['workdir'] = source.parent / settings['workdir']
+    if 'min-text' in settings:
+        settings['min-text'] = text_size(settings['min-text'], f'{source}: min-text')
+    return settings
+
+
+def text_size(value, label='--min-text'):
+    try:
+        size = float(value)
+    except ValueError:
+        size = 0
+    if not 0 < size < 100:
+        raise AtlasError(f'{label} must be a size in points, for example 6')
+    return size
+
+
+def named_pdf(pdf):
+    """The shareable copy: build/<deck>/<deck>[-variant].pdf beside the variants."""
+    variant = pdf.parent.name.removeprefix('ornate').lstrip('-')
+    deck = pdf.parent.parent.name
+    return pdf.parent.parent / (deck + ('-' + variant if variant else '') + '.pdf')
 
 
 def build(source, plain=False, handout=False, output_dir=None, workdir=None, force=False,
@@ -103,7 +157,7 @@ def build(source, plain=False, handout=False, output_dir=None, workdir=None, for
     base = output_dir.expanduser().resolve() if output_dir else source.parent / 'build'
     out = base / source.stem / variant
     tex_path(out)
-    cwd = workdir.expanduser().resolve() if workdir else source.parent
+    cwd = (workdir or deck_settings(source).get('workdir') or source.parent).expanduser().resolve()
     if not cwd.is_dir():
         raise AtlasError(f'Working directory does not exist: {cwd}')
     # A script shows each frame as the audience saw it: its pages come from
@@ -141,7 +195,9 @@ def build(source, plain=False, handout=False, output_dir=None, workdir=None, for
     if slides and log_page_count(pdf) != log_page_count(slides):
         raise AtlasError(f'The script has {log_page_count(pdf)} pages but the handout has '
                          f'{log_page_count(slides)}; each note page must match one frame.')
-    print(f'Built {pdf}', flush=True)
+    # The variant directory keeps fixed names for tools; this copy is for people.
+    shutil.copyfile(pdf, named_pdf(pdf))
+    print(f'Built {named_pdf(pdf)}', flush=True)
     return pdf
 
 
@@ -328,8 +384,65 @@ def boundary_findings(pages, margin=1.0):
     return findings
 
 
+# Text sizes are judged as projected: relative to a 16:9 Beamer page, which
+# is 90 mm (255.1 pt) high. Beamer's \tiny at 11 pt is 6 pt.
+BEAMER_HEIGHT = 255.118
+MIN_TEXT = 6.0
+
+
+def fine_print_pages(log_text):
+    r"""Pages declared by \AtlasFinePrint{reason}, mapped to their reasons."""
+    pages = {}
+    # TeX wraps the log at 79 columns, so a reason can span lines.
+    for match in re.finditer(r'Atlas fine print on page (\d+) \(((?:[^)]|\n)*?)\)', log_text):
+        pages.setdefault(int(match[1]), match[2].replace('\n', ''))
+    return pages
+
+
+def text_sizes(pdf):
+    """Yield (page, projected size in pt, text) for each run of text."""
+    require('pdftohtml')
+    result = subprocess.run(['pdftohtml', '-xml', '-i', '-q', '-stdout', '-zoom', '3', str(pdf)],
+                            capture_output=True, text=True)
+    if result.returncode:
+        raise AtlasError(f'Cannot measure text sizes in {pdf}: {result.stderr.strip()}')
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', result.stdout)
+    try:
+        root = ET.fromstring(re.sub(r'<!DOCTYPE[^>]*>', '', text))
+    except ET.ParseError as error:
+        raise AtlasError(f'Cannot parse PDF text sizes: {error}') from error
+    fonts = {}
+    for page in root.iter('page'):
+        for spec in page.iter('fontspec'):
+            fonts[spec.get('id')] = float(spec.get('size'))
+        # Both sizes are in the same zoomed units, so the ratio needs no zoom.
+        scale = BEAMER_HEIGHT / float(page.get('height'))
+        for run in page.iter('text'):
+            words = ' '.join(''.join(run.itertext()).split())
+            if words:
+                yield int(page.get('number')), fonts[run.get('font')] * scale, words
+
+
+def text_size_findings(pdf, minimum, fine_print):
+    small = {}
+    for number, size, words in text_sizes(pdf):
+        # pdftohtml reports sizes to a third of a point at this zoom.
+        if size < minimum - 0.17:
+            small.setdefault(number, []).append((size, words))
+    findings, waived = [], []
+    for number, runs in sorted(small.items()):
+        runs.sort()
+        if number in fine_print:
+            waived.append(f'Page {number}: fine print by declaration ({fine_print[number]})')
+            continue
+        examples = ', '.join(repr(words[:40]) for _, words in runs[:3])
+        findings.append(f'Page {number}: {len(runs)} text run{"s" * (len(runs) > 1)} below '
+                        f'{minimum:g} pt as projected (smallest {runs[0][0]:.1f} pt): {examples}')
+    return findings, waived
+
+
 def check(source, args):
-    require('pdftotext')
+    require('pdftotext', 'pdftohtml')
     variants = [(False, False), (False, True), (True, False), (True, True)] if args.all_variants else [(args.plain, args.handout)]
     notes = getattr(args, 'notes', None)
     failed = False
@@ -341,9 +454,26 @@ def check(source, args):
             findings = log_findings(pdf.with_suffix('.log').read_text(errors='replace'))
             findings += todo_findings(pdf)
             findings += boundary_findings(pages)
+            # Measure the slides as the room sees them. A script's pages are
+            # the handout's, one per frame; a presenter page also holds notes,
+            # and pgfpages hides which page a declaration was shipped on.
+            slides = {None: pdf, 'script': pdf.parent.parent /
+                      pdf.parent.name.replace('-script', '-handout') / 'talk.pdf'}.get(notes)
+            waived = []
+            if slides:
+                minimum = (getattr(args, 'min_text', None) or deck_settings(source.expanduser().resolve())
+                           .get('min-text') or MIN_TEXT)
+                fine_print = fine_print_pages(slides.with_suffix('.log').read_text(errors='replace'))
+                sizes, waived = text_size_findings(slides, minimum, fine_print)
+                findings += sizes
+            else:
+                print('Text sizes are checked on slide builds; run check without --notes presenter.')
             report = pdf.parent / 'check.json'
             report.write_text(json.dumps({'pdf': str(pdf), 'pages': len(pages),
-                                          'findings': findings}, indent=2) + '\n')
+                                          'findings': findings, 'fine_print': waived},
+                                         indent=2) + '\n')
+            if waived:
+                print('\n'.join('  ' + note for note in waived))
             if findings:
                 failed = True
                 print('\n'.join('  ' + finding for finding in findings))
@@ -354,8 +484,72 @@ def check(source, args):
             print(f'FAIL ({"plain" if plain else "ornate"}'
                   f'{", handout" if handout else ""}{", notes " + notes if notes else ""}): '
                   f'{error}', file=sys.stderr)
-    print('Page-boundary checks cover extracted text; inspect previews for clipped graphics and overlaps.')
+    print('Bounds and sizes cover extracted text; inspect previews for clipped graphics, '
+          'overlaps, and lettering inside images.')
     return 1 if failed else 0
+
+
+# \AtlasEmblem{stem}{palette}{height} reads <stem>-<palette>.pdf; plain under --plain.
+EMBLEM_PALETTES = {'gold': '#D9B879', 'ink': '#29221B', 'plain': '#000000'}
+
+
+def emblem(svg, out_dir=None, name=None, colors=()):
+    r"""Recolour a one-colour SVG emblem into the PDFs \AtlasEmblem selects."""
+    svg = svg.expanduser().resolve()
+    if not svg.is_file() or svg.suffix.lower() != '.svg':
+        raise AtlasError(f'Expected an existing .svg emblem: {svg}')
+    require('rsvg-convert')
+    out = (out_dir.expanduser().resolve() if out_dir else svg.parent)
+    stem = name or svg.stem
+    if '/' in stem or not stem:
+        raise AtlasError(f'Emblem name must be a file stem, not {stem!r}')
+    text = svg.read_text()
+    # Recolour only what the artwork marks as recolourable, or the named colours.
+    targets = ['currentColor'] + list(colors)
+    pattern = re.compile('|'.join(re.escape(color) for color in targets), re.I)
+    if not pattern.search(text):
+        raise AtlasError(f'{svg.name} has no currentColor to recolour. Name the colour to '
+                         'replace, for example --replace "#000000".')
+    out.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='atlas-emblem-') as directory:
+        for palette, color in EMBLEM_PALETTES.items():
+            staged = Path(directory) / f'{palette}.svg'
+            staged.write_text(pattern.sub(color, text))
+            target = out / f'{stem}-{palette}.pdf'
+            run_logged(['rsvg-convert', '-f', 'pdf', '-o', str(target), str(staged)],
+                       Path(directory), Path(directory) / 'rsvg.log')
+            print(f'Wrote {target}')
+    print(f'Use \\AtlasEmblem{{{out / stem}}}{{gold}}{{30mm}} (gold or ink; plain is automatic).')
+
+
+def photo(sources, out_dir=None, size=2400, force=False):
+    """Prepare photographs for slides: upright, bounded, and without metadata."""
+    program = shutil.which('magick') or shutil.which('convert')
+    if not program:
+        raise AtlasError('Missing programs: magick. Install ImageMagick to prepare photographs.')
+    out = (out_dir or Path.cwd()).expanduser().resolve()
+    targets = [out / (source.stem + '.jpg') for source in sources]
+    for source, target in zip(sources, targets):
+        if not source.is_file():
+            raise AtlasError(f'Photograph does not exist: {source}')
+        if target == source.expanduser().resolve():
+            raise AtlasError(f'Refusing to replace the original {source}; choose --out-dir.')
+        if target.exists() and not force:
+            raise AtlasError(f'{target} already exists; use --force to replace it.')
+    if len(set(targets)) != len(targets):
+        raise AtlasError('Two photographs would have the same output name; rename one.')
+    out.mkdir(parents=True, exist_ok=True)
+    for source, target in zip(sources, targets):
+        # LuaLaTeX ignores EXIF rotation and embeds the file as given, location
+        # metadata included. Rotate the pixels, then keep only the colour profile.
+        with tempfile.TemporaryDirectory(prefix='.atlas-photo-', dir=out) as directory:
+            staged = Path(directory) / 'photo.jpg'
+            run_logged([program, str(source.expanduser().resolve()) + '[0]', '-auto-orient',
+                        '-resize', f'{size}x{size}>', '-background', 'white', '-alpha', 'remove',
+                        '-alpha', 'off', '+profile', '!icc,*', '-quality', '88', str(staged)],
+                       Path(directory), Path(directory) / 'magick.log')
+            staged.replace(target)
+        print(f'Wrote {target} (upright, at most {size} px, metadata removed)')
 
 
 def parser():
@@ -364,7 +558,19 @@ def parser():
                          version='Atlas ' + (ROOT / 'VERSION').read_text().strip())
     commands = command.add_subparsers(dest='command', required=True)
     new = commands.add_parser('new', help='Create a talk directory from the six-pattern starter')
-    new.add_argument('destination', type=Path, help='A directory that does not yet exist')
+    new.add_argument('destination', type=Path,
+                     help='A directory that does not yet exist; a bare name in the Atlas checkout means talks/NAME')
+    mark = commands.add_parser('emblem', help='Recolour an SVG emblem into the PDFs \\AtlasEmblem uses')
+    mark.add_argument('svg', type=Path, help='An emblem drawn in currentColor (or see --replace)')
+    mark.add_argument('--out-dir', type=Path, help='Where to write NAME-{gold,ink,plain}.pdf (default: beside the SVG)')
+    mark.add_argument('--name', help='Output stem (default: the SVG name)')
+    mark.add_argument('--replace', action='append', default=[], metavar='COLOR',
+                      help='Also recolour this exact colour, e.g. "#000000"; repeat for more')
+    image = commands.add_parser('photo', help='Prepare photographs: upright, resized, metadata removed')
+    image.add_argument('sources', type=Path, nargs='+', help='JPEG, PNG, HEIC, or other ImageMagick input')
+    image.add_argument('--out-dir', type=Path, help='Where to write NAME.jpg (default: current directory)')
+    image.add_argument('--size', type=int, default=2400, help='Longest side in pixels (default: 2400)')
+    image.add_argument('--force', action='store_true', help='Replace existing outputs')
     for name, help_text in [('build', 'Compile a deck with LuaLaTeX via latexmk'),
                             ('preview', 'Render a deck or PDF and make a vector contact sheet'),
                             ('check', 'Rebuild, then report log warnings and suspicious text bounds')]:
@@ -382,6 +588,8 @@ def parser():
             sub.add_argument('--match', action='append', help='Select a unique text phrase; repeat for more slides')
         if name == 'check':
             sub.add_argument('--all-variants', action='store_true', help='Check ornate/plain × presentation/handout')
+            sub.add_argument('--min-text', type=float, metavar='PT',
+                             help=f'Smallest projected text size, on a 16:9 Beamer page (default: {MIN_TEXT:g})')
     return command
 
 
@@ -390,7 +598,15 @@ def main(argv=None):
     try:
         if args.command == 'new':
             new_talk(args.destination)
+        elif args.command == 'emblem':
+            emblem(args.svg, args.out_dir, args.name, args.replace)
+        elif args.command == 'photo':
+            if not 200 <= args.size <= 10000:
+                raise AtlasError('--size must be between 200 and 10000 pixels.')
+            photo(args.sources, args.out_dir, args.size, args.force)
         elif args.command == 'check':
+            if args.min_text is not None:
+                text_size(args.min_text)
             if args.all_variants and (args.plain or args.handout or args.notes):
                 raise AtlasError('--all-variants covers --plain and --handout; check --notes separately.')
             return check(args.source, args)

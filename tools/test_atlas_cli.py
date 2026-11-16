@@ -3,6 +3,7 @@
 """Fast CLI regression checks; real TeX/Poppler smoke tests are documented separately."""
 import contextlib
 import io
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -204,6 +205,131 @@ class WorkflowTests(unittest.TestCase):
             pdf.with_suffix('.log').write_text('No pages of output.')
             with self.assertRaises(atlas.AtlasError):
                 atlas.log_page_count(pdf)
+
+    def test_deck_settings_are_read_from_the_top_comment(self):
+        with tempfile.TemporaryDirectory() as temp:
+            deck = Path(temp) / 'talks' / 'one' / 'talk.tex'
+            deck.parent.mkdir(parents=True)
+            deck.write_text('%!TEX program = lualatex\n'
+                            "% atlas: workdir='../..' min-text=5.5\n\\documentclass{beamer}\n")
+            settings = atlas.deck_settings(deck)
+            self.assertEqual(settings['workdir'], deck.parent / '../..')
+            self.assertEqual(settings['min-text'], 5.5)
+            deck.write_text('\\documentclass{beamer}\n')
+            self.assertEqual(atlas.deck_settings(deck), {})
+            for bad in ['% atlas: workdir', '% atlas: colour=red', '% atlas: min-text=tiny',
+                        "% atlas: workdir='open"]:
+                deck.write_text(bad + '\n')
+                with self.subTest(bad=bad), self.assertRaises(atlas.AtlasError):
+                    atlas.deck_settings(deck)
+
+    def test_deck_workdir_applies_unless_the_command_line_overrides_it(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            source, calls, patches = self.fake_builds(temp)
+            source.write_text('% atlas: workdir=..\n')
+            cwds = []
+            with patches[0], patches[1], patch.object(
+                    atlas, 'run_logged', side_effect=lambda command, cwd, log, env: (
+                        cwds.append(cwd), (log.parent / 'talk.pdf').touch())):
+                atlas.build(source)
+                atlas.build(source, workdir=Path(temp))
+            self.assertEqual(cwds, [Path(temp).parent.resolve(), Path(temp).resolve()])
+
+    def test_each_variant_gets_a_shareable_name(self):
+        for variant, name in [('ornate', 'deck.pdf'), ('ornate-handout', 'deck-handout.pdf'),
+                              ('plain-handout', 'deck-plain-handout.pdf'),
+                              ('ornate-presenter', 'deck-presenter.pdf')]:
+            pdf = Path('/b/deck') / variant / 'talk.pdf'
+            self.assertEqual(atlas.named_pdf(pdf), Path('/b/deck') / name)
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            source, _, patches = self.fake_builds(temp)
+            with patches[0], patches[1], patches[2]:
+                pdf = atlas.build(source, plain=True)
+            self.assertTrue((pdf.parent.parent / 'Talk with spaces-plain.pdf').is_file())
+
+    def test_a_bare_name_in_the_checkout_becomes_a_personal_talk(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            root = Path(temp).resolve()
+            (root / 'presentations').mkdir()
+            (root / 'presentations/starter.tex').write_text('starter')
+            (root / 'LICENSE').write_text('MIT License\nterms')
+            previous = Path.cwd()
+            os.chdir(root)
+            try:
+                with patch.object(atlas, 'ROOT', root):
+                    atlas.new_talk(Path('keynote'))
+                    atlas.new_talk(Path('elsewhere/keynote'))
+            finally:
+                os.chdir(previous)
+            self.assertTrue((root / 'talks/keynote/talk.tex').is_file())
+            self.assertTrue((root / 'elsewhere/keynote/talk.tex').is_file())
+
+    def test_fine_print_declarations_survive_log_wrapping(self):
+        log = ('Atlas fine print on page 2 (a court filing shown as an exhibit, wrapped by Te\n'
+               'X at seventy-nine columns)\nAtlas fine print on page 12 (seal)\n')
+        self.assertEqual(atlas.fine_print_pages(log), {
+            2: 'a court filing shown as an exhibit, wrapped by TeX at seventy-nine columns',
+            12: 'seal'})
+
+    def test_small_text_is_reported_once_per_page_unless_declared(self):
+        runs = [(1, 11.0, 'Body'), (1, 4.0, 'axis'), (1, 3.0, 'tick'), (2, 5.9, 'rounded'),
+                (3, 2.3, 'engraving'), (4, 5.0, 'legend')]
+        with patch.object(atlas, 'text_sizes', return_value=runs):
+            findings, waived = atlas.text_size_findings(Path('talk.pdf'), 6, {3: 'ornament'})
+        self.assertEqual(len(findings), 2)
+        self.assertIn('Page 1: 2 text runs below 6 pt', findings[0])
+        self.assertIn("smallest 3.0 pt): 'tick', 'axis'", findings[0])
+        self.assertIn('Page 4: 1 text run below', findings[1])
+        self.assertEqual(waived, ['Page 3: fine print by declaration (ornament)'])
+
+    def test_emblem_recolours_only_marked_colours(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            svg = Path(temp) / 'mark.svg'
+            svg.write_text('<svg><path fill="currentColor" stroke="#123456"/></svg>')
+            written = {}
+
+            def fake_rsvg(command, cwd, log, env=None):
+                written[Path(command[4]).name] = Path(command[5]).read_text()
+            with patch.object(atlas, 'require'), patch.object(atlas, 'run_logged', side_effect=fake_rsvg):
+                atlas.emblem(svg, name='seal')
+                self.assertEqual(sorted(written), ['seal-gold.pdf', 'seal-ink.pdf', 'seal-plain.pdf'])
+                self.assertIn('fill="#D9B879" stroke="#123456"', written['seal-gold.pdf'])
+                svg.write_text('<svg><path fill="#000000"/></svg>')
+                with self.assertRaisesRegex(atlas.AtlasError, '--replace'):
+                    atlas.emblem(svg)
+                atlas.emblem(svg, colors=['#000000'])
+                self.assertIn('fill="#29221B"', written['mark-ink.pdf'])
+
+    def test_photo_never_replaces_originals_or_existing_outputs(self):
+        with tempfile.TemporaryDirectory() as temp, contextlib.redirect_stdout(io.StringIO()):
+            root = Path(temp)
+            original = root / 'site.jpg'
+            original.write_bytes(b'jpeg')
+            with patch.object(atlas.shutil, 'which', return_value='/usr/bin/magick'), \
+                 patch.object(atlas, 'run_logged') as run:
+                with self.assertRaisesRegex(atlas.AtlasError, 'original'):
+                    atlas.photo([original], root)
+                (root / 'out').mkdir()
+                (root / 'out/site.jpg').write_bytes(b'old')
+                with self.assertRaisesRegex(atlas.AtlasError, '--force'):
+                    atlas.photo([original], root / 'out')
+                (root / 'b').mkdir()
+                (root / 'b/site.png').write_bytes(b'png')
+                with self.assertRaisesRegex(atlas.AtlasError, 'same output name'):
+                    atlas.photo([original, root / 'b/site.png'], root / 'new')
+                run.assert_not_called()
+                run.side_effect = lambda command, cwd, log: Path(command[-1]).write_bytes(b'new')
+                atlas.photo([original], root / 'out', force=True)
+                command = run.call_args[0][0]
+                self.assertIn('-auto-orient', command)
+                self.assertIn('!icc,*', command)
+            self.assertEqual((root / 'out/site.jpg').read_bytes(), b'new')
+            self.assertEqual(original.read_bytes(), b'jpeg')
+
+    def test_text_size_options_are_validated(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(atlas.main(['check', 'talk.tex', '--min-text', '0']), 1)
+            self.assertEqual(atlas.main(['photo', 'a.jpg', '--size', '20']), 1)
 
     def test_pdf_mode_rejects_ineffective_build_flags(self):
         with contextlib.redirect_stderr(io.StringIO()):
