@@ -527,15 +527,37 @@ flagged on purpose: CI asserts exactly those six pages (16, 20, 25, 26, 29,
 30; script 15, 18, 22, 23, 26, 27), which is the check's real-figure test.
 `check` on the Crawler deck therefore exits 1.
 
+pdftohtml reports text that a clipping path hides (a figure cropped with
+`trim=…,clip`, a TikZ `\clip`), and the boxes it gives cannot be tested
+against clips. So for a page that would fail, `check` renders it twice
+with Ghostscript at about 150 dpi projected, once with `-dFILTERTEXT`, and
+keeps a run only if some pixel in its box changes (padded by the run's
+height on every side, because pdftohtml gives a rotated run a zero-width
+box at its anchor). Hidden text changes no pixel. If the whole page is
+identical either way, or `gs` is missing, every run is kept: unsure means
+reported. On the Crawler deck and both their-word decks the findings are
+identical with and without the filter, run for run, rotated astrolabe
+labels included. pdftohtml already omits render-mode-3 (OCR-style) text.
+
 **Imports.** `atlas emblem` substitutes `currentColor` (or `--replace`
 colours) with the three `\AtlasEmblem` palettes and converts with
 `rsvg-convert`; it reproduced the hand-made VerInf PDFs pixel for pixel.
 `atlas photo` runs ImageMagick (`magick`, else IM6 `convert`): first frame,
-`-auto-orient`, bounded resize, alpha onto white, `+profile '!icc,*'`.
+`-auto-orient`, bounded resize, alpha onto white, `+profile '!icc,*'`
+(removes EXIF, XMP, IPTC) and `+set comment` (a JPEG comment is not a
+profile, so `+profile` keeps it). Atlas then rewrites the file keeping only
+SOI, JFIF APP0, ICC APP2, Adobe APP14, and the non-APP segments up to the
+scan: an allow-list, so a metadata block ImageMagick does not know as a
+profile cannot slip through. Recolouring matches colour values only
+(`fill`/`stroke`/`*-color` attributes and CSS declarations); a plain text
+substitution once rewrote `.black{fill:black}` and `class="black"` into
+invalid CSS and left the gold emblem black while reporting success.
 LuaLaTeX embeds JPEG files whole, EXIF included (the their-word PDF carries
 three EXIF blocks; its photos happened to have no GPS). CI builds a JPEG
-with a hand-written EXIF block (rotation 6, GPS) and checks the output is
-upright and EXIF-free. CI now installs `imagemagick librsvg2-bin`.
+with a hand-written EXIF block (rotation 6, GPS), a comment, and XMP, and
+checks the output is upright with no metadata segment; its emblem is styled
+through a class named `black`. CI now installs `imagemagick librsvg2-bin
+ghostscript`.
 
 **CLI.** `% atlas: workdir=.. min-text=5` near a deck's top (40 lines,
 shlex-quoted, paths relative to the deck; unknown keys are errors); command

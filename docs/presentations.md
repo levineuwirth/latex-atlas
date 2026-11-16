@@ -116,7 +116,11 @@ of failing:
 ```
 
 The declaration covers the whole page. The Grand astrolabe declares its own
-degree scale. Lettering inside raster images is not text and is not
+degree scale. Text that leaves no ink is not counted: labels a clip removes,
+as when `\includegraphics[trim=…,clip]` crops a figure, or text hidden
+under an image. `check` finds these by rendering a failing page with and
+without its text, which needs Ghostscript (`gs`); without it, hidden text
+is reported too. Lettering inside raster images is not text and is not
 measured. Scripts are measured on their handout pages, which match theirs
 one for one; presenter builds are not measured, since their slides are the
 ordinary build's.
@@ -133,12 +137,15 @@ Two commands prepare assets the way the themes expect them.
 `emblem` turns a one-colour SVG into `mark-gold.pdf`, `mark-ink.pdf`, and
 `mark-plain.pdf`, the files `\AtlasEmblem{assets/mark}{gold}{30mm}` selects.
 It recolours `currentColor`; for artwork drawn in a fixed colour, name it
-with `--replace '#000000'`. `--name` sets the output stem. It needs
+with `--replace '#000000'` (or `--replace black`, as the file writes it).
+Only colour values change, in `fill`, `stroke`, and the other colour
+attributes and CSS properties; class names, ids, and text that happen to
+read `black` are left alone. `--name` sets the output stem. It needs
 `rsvg-convert` (librsvg).
 
 `photo` writes each image as an upright JPEG no larger than 2400 pixels
-(`--size`), with location and camera metadata removed and its colour
-profile kept. LuaLaTeX ignores a phone's rotation flag and embeds the file
+(`--size`), with location and camera metadata and comments removed and its
+colour profile kept. LuaLaTeX ignores a phone's rotation flag and embeds the file
 as given, metadata included, in every PDF you send. Originals are never
 replaced, nor existing outputs without `--force`. It needs ImageMagick; HEIC
 input needs ImageMagick built with HEIF support.

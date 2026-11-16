@@ -62,8 +62,9 @@ assigning a license to your own presentation text.
 The tested environment is **Ubuntu 24.04**, with Python **3.9 or later**.
 The Python tools use only the standard library. Building needs LuaLaTeX and
 `latexmk`; previews and checks need Poppler, pdfLaTeX, and `pdfpages`.
-`atlas emblem` needs librsvg and `atlas photo` ImageMagick; both are optional
-and in the recipe's last line.
+`atlas emblem` needs librsvg and `atlas photo` ImageMagick. Ghostscript lets
+`check` ignore small text that a clip hides. All three are optional and in the
+recipe's last line.
 
 ```sh
 sudo apt-get update
@@ -71,7 +72,7 @@ sudo apt-get install -y --no-install-recommends \
   python3 latexmk poppler-utils texlive-luatex texlive-latex-extra \
   texlive-fonts-recommended texlive-fonts-extra texlive-plain-generic \
   fonts-texgyre fonts-texgyre-math \
-  imagemagick librsvg2-bin
+  imagemagick librsvg2-bin ghostscript
 luaotfload-tool --update
 ```
 

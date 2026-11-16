@@ -400,7 +400,10 @@ def fine_print_pages(log_text):
 
 
 def text_sizes(pdf):
-    """Yield (page, projected size in pt, text) for each run of text."""
+    """Yield (page, projected size in pt, text, box) for each run of text.
+
+    The box is (left, top, width, height, page width, page height) in
+    pdftohtml's units; a rotated run is a zero-width box at its anchor."""
     require('pdftohtml')
     result = subprocess.run(['pdftohtml', '-xml', '-i', '-q', '-stdout', '-zoom', '3', str(pdf)],
                             capture_output=True, text=True)
@@ -417,25 +420,71 @@ def text_sizes(pdf):
             fonts[spec.get('id')] = float(spec.get('size'))
         # Both sizes are in the same zoomed units, so the ratio needs no zoom.
         scale = BEAMER_HEIGHT / float(page.get('height'))
+        size = tuple(float(page.get(key)) for key in ('width', 'height'))
         for run in page.iter('text'):
             words = ' '.join(''.join(run.itertext()).split())
             if words:
-                yield int(page.get('number')), fonts[run.get('font')] * scale, words
+                box = tuple(float(run.get(key)) for key in ('left', 'top', 'width', 'height'))
+                yield int(page.get('number')), fonts[run.get('font')] * scale, words, box + size
+
+
+def gray_page(pdf, number, resolution, *options):
+    """Render one page as (width, height, 8-bit grey pixels) with Ghostscript."""
+    result = subprocess.run(['gs', '-q', '-dSAFER', '-dBATCH', '-dNOPAUSE', '-sDEVICE=pgmraw',
+                             f'-r{resolution:.2f}', '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
+                             f'-dFirstPage={number}', f'-dLastPage={number}', *options,
+                             '-sOutputFile=-', str(pdf)], capture_output=True)
+    header = re.match(rb'P5(?:\s+|#[^\n]*\n)*(\d+)(?:\s+|#[^\n]*\n)*(\d+)'
+                      rb'(?:\s+|#[^\n]*\n)*255\s', result.stdout)
+    if result.returncode or not header:
+        raise AtlasError(f'Ghostscript cannot render page {number} of {pdf}: '
+                         f'{result.stderr.decode(errors="replace").strip()}')
+    return int(header[1]), int(header[2]), result.stdout[header.end():]
+
+
+def inked_runs(pdf, number, runs):
+    """Keep the runs that leave ink on the page, or all of them if unsure.
+
+    pdftohtml reports text a clipping path hides, such as labels cropped off an
+    included figure. Rendering the page with and without text shows which runs
+    change any pixel near their box; a hidden run changes none."""
+    if not shutil.which('gs'):
+        return runs
+    *_, page_width, page_height = runs[0][2]
+    # About 150 dpi on a projected Beamer page, whatever the page size.
+    resolution = 150 * BEAMER_HEIGHT / (page_height / 3)
+    width, height, inked = gray_page(pdf, number, resolution)
+    _, _, bare = gray_page(pdf, number, resolution, '-dFILTERTEXT')
+    if inked == bare or len(inked) != width * height:
+        return runs  # No text drew anything: this Ghostscript cannot filter text.
+    scale_x, scale_y = width / page_width, height / page_height
+    kept = []
+    for run in runs:
+        left, top, run_width, run_height = run[2][:4]
+        # Pad by the run's height, enough to reach a rotated run's first glyph.
+        x0, x1 = max(0, int((left - run_height) * scale_x)), min(width, int((left + run_width + run_height) * scale_x) + 1)
+        y0, y1 = max(0, int((top - run_height) * scale_y)), min(height, int((top + 2 * run_height) * scale_y) + 1)
+        if any(inked[y * width + x0:y * width + x1] != bare[y * width + x0:y * width + x1]
+               for y in range(y0, y1)):
+            kept.append(run)
+    return kept
 
 
 def text_size_findings(pdf, minimum, fine_print):
     small = {}
-    for number, size, words in text_sizes(pdf):
+    for number, size, words, box in text_sizes(pdf):
         # pdftohtml reports sizes to a third of a point at this zoom.
         if size < minimum - 0.17:
-            small.setdefault(number, []).append((size, words))
+            small.setdefault(number, []).append((size, words, box))
     findings, waived = [], []
     for number, runs in sorted(small.items()):
-        runs.sort()
         if number in fine_print:
             waived.append(f'Page {number}: fine print by declaration ({fine_print[number]})')
             continue
-        examples = ', '.join(repr(words[:40]) for _, words in runs[:3])
+        runs = sorted(inked_runs(pdf, number, runs))
+        if not runs:
+            continue
+        examples = ', '.join(repr(words[:40]) for _, words, _ in runs[:3])
         findings.append(f'Page {number}: {len(runs)} text run{"s" * (len(runs) > 1)} below '
                         f'{minimum:g} pt as projected (smallest {runs[0][0]:.1f} pt): {examples}')
     return findings, waived
@@ -493,6 +542,25 @@ def check(source, args):
 EMBLEM_PALETTES = {'gold': '#D9B879', 'ink': '#29221B', 'plain': '#000000'}
 
 
+# A colour property's value, as an attribute (fill="black") or as CSS in a
+# style attribute or <style> sheet (fill: black;). Selectors, class names,
+# ids, and text are never colour values, so they are never rewritten.
+COLOR_VALUE = re.compile(
+    r'(?<![\w.#-])(?P<property>fill|stroke|stop-color|flood-color|lighting-color|color)'
+    r'(?:(?P<attribute>\s*=\s*)(?P<quote>["\'])(?P<quoted>[^"\'<>]*)(?P=quote)'
+    r'|(?P<css>\s*:\s*)(?P<value>[^;{}"\'<>!]*[^;{}"\'<>!\s]))', re.I)
+
+
+def recolor(match, targets, color):
+    """Replace one colour value if it is a target; leave anything else as written."""
+    value = match['quoted'] if match['attribute'] is not None else match['value']
+    if value.strip().lower() not in targets:
+        return match[0]
+    if match['attribute'] is not None:
+        return f"{match['property']}{match['attribute']}{match['quote']}{color}{match['quote']}"
+    return f"{match['property']}{match['css']}{color}"
+
+
 def emblem(svg, out_dir=None, name=None, colors=()):
     r"""Recolour a one-colour SVG emblem into the PDFs \AtlasEmblem selects."""
     svg = svg.expanduser().resolve()
@@ -505,21 +573,47 @@ def emblem(svg, out_dir=None, name=None, colors=()):
         raise AtlasError(f'Emblem name must be a file stem, not {stem!r}')
     text = svg.read_text()
     # Recolour only what the artwork marks as recolourable, or the named colours.
-    targets = ['currentColor'] + list(colors)
-    pattern = re.compile('|'.join(re.escape(color) for color in targets), re.I)
-    if not pattern.search(text):
-        raise AtlasError(f'{svg.name} has no currentColor to recolour. Name the colour to '
-                         'replace, for example --replace "#000000".')
+    targets = {color.strip().lower() for color in ['currentColor', *colors]}
+    if not any(recolor(match, targets, '') != match[0] for match in COLOR_VALUE.finditer(text)):
+        raise AtlasError(f'{svg.name} has no fill or stroke in currentColor to recolour. Name '
+                         'the colour to replace, for example --replace "#000000".')
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='atlas-emblem-') as directory:
         for palette, color in EMBLEM_PALETTES.items():
             staged = Path(directory) / f'{palette}.svg'
-            staged.write_text(pattern.sub(color, text))
+            staged.write_text(COLOR_VALUE.sub(lambda match: recolor(match, targets, color), text))
             target = out / f'{stem}-{palette}.pdf'
             run_logged(['rsvg-convert', '-f', 'pdf', '-o', str(target), str(staged)],
                        Path(directory), Path(directory) / 'rsvg.log')
             print(f'Wrote {target}')
     print(f'Use \\AtlasEmblem{{{out / stem}}}{{gold}}{{30mm}} (gold or ink; plain is automatic).')
+
+
+# A JPEG keeps only the segments needed to decode and colour it: JFIF, ICC
+# profiles, and Adobe's colour transform. Comments and every other APPn
+# block (EXIF, XMP, IPTC, maker notes) go.
+JPEG_KEEP = {0xE0: b'JFIF\0', 0xE2: b'ICC_PROFILE\0', 0xEE: b'Adobe'}
+
+
+def jpeg_without_metadata(data):
+    """Return a baseline or progressive JPEG with only decoding segments."""
+    if data[:2] != b'\xff\xd8':
+        raise AtlasError('ImageMagick did not write a JPEG.')
+    kept, index = [data[:2]], 2
+    while True:
+        if index + 4 > len(data) or data[index] != 0xFF:
+            raise AtlasError('ImageMagick wrote a JPEG Atlas cannot read.')
+        marker = data[index + 1]
+        if marker == 0xDA:  # Start of scan: the rest is image data.
+            kept.append(data[index:])
+            return b''.join(kept)
+        length = int.from_bytes(data[index + 2:index + 4], 'big')
+        segment = data[index:index + 2 + length]
+        metadata = marker == 0xFE or (0xE0 <= marker <= 0xEF and not (
+            marker in JPEG_KEEP and segment[4:].startswith(JPEG_KEEP[marker])))
+        if not metadata:
+            kept.append(segment)
+        index += 2 + length
 
 
 def photo(sources, out_dir=None, size=2400, force=False):
@@ -541,13 +635,16 @@ def photo(sources, out_dir=None, size=2400, force=False):
     out.mkdir(parents=True, exist_ok=True)
     for source, target in zip(sources, targets):
         # LuaLaTeX ignores EXIF rotation and embeds the file as given, location
-        # metadata included. Rotate the pixels, then keep only the colour profile.
+        # metadata and comments included. Rotate the pixels, then keep only the
+        # colour profile; the segment filter enforces that whatever ImageMagick does.
         with tempfile.TemporaryDirectory(prefix='.atlas-photo-', dir=out) as directory:
             staged = Path(directory) / 'photo.jpg'
             run_logged([program, str(source.expanduser().resolve()) + '[0]', '-auto-orient',
                         '-resize', f'{size}x{size}>', '-background', 'white', '-alpha', 'remove',
-                        '-alpha', 'off', '+profile', '!icc,*', '-quality', '88', str(staged)],
+                        '-alpha', 'off', '+profile', '!icc,*', '+set', 'comment',
+                        '-quality', '88', str(staged)],
                        Path(directory), Path(directory) / 'magick.log')
+            staged.write_bytes(jpeg_without_metadata(staged.read_bytes()))
             staged.replace(target)
         print(f'Wrote {target} (upright, at most {size} px, metadata removed)')
 

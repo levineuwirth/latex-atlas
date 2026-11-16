@@ -157,10 +157,17 @@ def text_size_regressions(external, cwd):
 \begin{frame}{An exhibit}\AtlasFinePrint{a document shown as an object}
 \scalebox{.3}{A facsimile's small print.}
 \end{frame}
+\begin{frame}{A cropped figure}
+\begin{tikzpicture}
+\clip (0,0) rectangle (6,1.5); \node at (3,.75) {\Large A readable crop};
+\node[scale=.4] at (3,3) {CROPPED LABEL};
+\end{tikzpicture}
+\end{frame}
 \end{document}
 ''')
     stdout = failed_check(external / 'legibility.tex', cwd=cwd)
     report = OUT / 'external/legibility/ornate/check.json'
+    # Page 4's small label is on the page but outside the clip: it is not seen.
     assert size_pages(report) == [2], report.read_text()
     assert 'their cluster' in json.loads(report.read_text())['findings'][0]
     assert json.loads(report.read_text())['fine_print'] == [
@@ -176,10 +183,14 @@ def text_size_regressions(external, cwd):
 
 
 def emblem_and_photo(external, cwd):
+    # Drawn in black through a stylesheet whose class is also named black:
+    # only the colour value may change, or the selector stops matching.
     (external / 'mark.svg').write_text(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">'
-        '<circle cx="5" cy="5" r="4" fill="currentColor"/></svg>')
-    cli('emblem', external / 'mark.svg', '--out-dir', external / 'assets', cwd=cwd)
+        '<style>.black { fill: black; }</style>'
+        '<circle class="black" cx="5" cy="5" r="4"/></svg>')
+    cli('emblem', external / 'mark.svg', '--replace', 'black', '--out-dir', external / 'assets',
+        cwd=cwd)
     for palette, rgb in [('gold', b'\xd9\xb8\x79'), ('ink', b'\x29\x22\x1b'),
                          ('plain', b'\x00\x00\x00')]:
         # The disc's centre, rendered as a binary PPM, is exactly the palette colour.
@@ -201,8 +212,11 @@ def emblem_and_photo(external, cwd):
                                            for entry in entries) + struct.pack('<I', 0))
     gps = struct.pack('<H', 1) + struct.pack('<HHI', 1, 2, 2) + b'N\0\0\0' + struct.pack('<I', 0)
     exif = b'Exif\0\0' + b'II*\0' + struct.pack('<I', 8) + ifd + gps
-    (external / 'IMG 0001.jpg').write_bytes(jpeg[:2] + b'\xff\xe1' +
-                                            struct.pack('>H', len(exif) + 2) + exif + jpeg[2:])
+    metadata = [(0xE1, exif), (0xFE, b'41.8240 N, 71.4128 W; camera serial 0001'),
+                (0xE1, b'http://ns.adobe.com/xap/1.0/\0<x:xmpmeta xmlns:x="adobe:ns:meta/"/>')]
+    (external / 'IMG 0001.jpg').write_bytes(
+        jpeg[:2] + b''.join(bytes([0xFF, marker]) + struct.pack('>H', len(body) + 2) + body
+                            for marker, body in metadata) + jpeg[2:])
     cli('photo', external / 'IMG 0001.jpg', '--out-dir', external / 'assets', '--size', '250',
         cwd=cwd)
     prepared = external / 'assets/IMG 0001.jpg'
@@ -211,7 +225,14 @@ def emblem_and_photo(external, cwd):
                           ['identify', '-format', '%wx%h', str(prepared)],
                           check=True, capture_output=True, text=True).stdout
     assert size == '167x250', size
-    assert b'Exif' not in prepared.read_bytes()
+    # Before the image data, only decoding segments remain: no comment, EXIF, or XMP.
+    data, index, markers = prepared.read_bytes(), 2, []
+    while data[index + 1] != 0xDA:
+        markers.append(data[index + 1])
+        index += 2 + struct.unpack('>H', data[index + 2:index + 4])[0]
+    assert not [m for m in markers if m == 0xFE or 0xE1 <= m <= 0xEF and m not in (0xE2, 0xEE)], markers
+    assert b'41.8240' not in data and b'Exif' not in data and b'xmpmeta' not in data
+
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)

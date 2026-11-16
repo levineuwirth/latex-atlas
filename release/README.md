@@ -15,7 +15,8 @@ No Git checkout or access to the original repository is needed to use it.
 
 Python 3.9+, LuaLaTeX, latexmk, and Poppler are required. The Python tool
 uses only the standard library. Contact sheets also use pdfLaTeX and pdfpages.
-`atlas emblem` and `atlas photo` optionally use librsvg and ImageMagick.
+`atlas emblem` and `atlas photo` optionally use librsvg and ImageMagick;
+`check` optionally uses Ghostscript to ignore clipped-away text.
 The tested installation on Ubuntu 24.04 is:
 
 ```sh
@@ -24,7 +25,7 @@ sudo apt-get install -y --no-install-recommends \
   python3 latexmk poppler-utils texlive-luatex texlive-latex-extra \
   texlive-fonts-recommended texlive-fonts-extra texlive-plain-generic \
   fonts-texgyre fonts-texgyre-math \
-  imagemagick librsvg2-bin
+  imagemagick librsvg2-bin ghostscript
 luaotfload-tool --update
 ```
 
